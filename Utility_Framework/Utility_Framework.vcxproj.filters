@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core.definition">
+      <UniqueIdentifier>{45cff361-ee34-40e2-9569-c2ba7b8f04d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX11Common">
+      <UniqueIdentifier>{21614411-27dc-43d0-baf6-806027afc35d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WindowsApplication">
+      <UniqueIdentifier>{e45d8173-5cd0-4c14-93c8-f109ead57c31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WindowsApplication\CoreWindow">
+      <UniqueIdentifier>{eec97127-ce4f-42bb-b91d-0f8e870e58f4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClassProperty.h">
+      <Filter>Core.definition</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Definition.h">
+      <Filter>Core.definition</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeDefinition.h">
+      <Filter>Core.definition</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceResources.h">
+      <Filter>DirectX11Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXHelper.h">
+      <Filter>DirectX11Common</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSystem.h">
+      <Filter>DirectX11Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreWindow.h">
+      <Filter>WindowsApplication\CoreWindow</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DeviceResource.cpp">
+      <Filter>DirectX11Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreWindow.cpp">
+      <Filter>WindowsApplication\CoreWindow</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
