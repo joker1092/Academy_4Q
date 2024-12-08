@@ -29,6 +29,7 @@ class MyClass : public Noncopyable
 {
     // 복사 및 이동이 불가능한 클래스
 };
+```
 
 ### `Singleton<T>`
 
@@ -83,4 +84,5 @@ int main()
 
     return 0;
 }
+```
 
