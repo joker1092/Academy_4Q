@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Banchmark.hpp" />
     <ClInclude Include="ClassProperty.h" />
     <ClInclude Include="Core.Definition.h" />
     <ClInclude Include="CoreWindow.h" />

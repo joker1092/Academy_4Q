@@ -1,6 +1,10 @@
 #pragma once
 #include "Core.Definition.h"
 #include <ppltasks.h>
+#include <DirectXTex.h>
+
+#define SHADER_MACRO_DEFINITION(name) D3D_SHADER_MACRO name[] =
+constexpr D3D_SHADER_MACRO ShaderMacroTerminator = { nullptr, nullptr };
 
 namespace DirectX11
 {
@@ -70,7 +74,27 @@ namespace DirectX11
 		static const float dipsPerInch = 96.0f;
 		return floorf(dips * dpi / dipsPerInch + 0.5f);
 	}
+	//Map/Unmap을 사용하여 리소스를 스코프 영역에서 매핑/언매핑하는 클래스
+	class SharedMap final
+	{
+	public:
+		SharedMap(ID3D11DeviceContext* pDeviceContext, ID3D11Resource* pResource, D3D11_MAPPED_SUBRESOURCE* pMappedResource, uint32 subresource = 0, D3D11_MAP mapType = D3D11_MAP_WRITE_DISCARD, uint32 mapFlags = 0)
+			: m_pDeviceContext(pDeviceContext), m_pResource(pResource), m_Subresource(subresource)
+		{
+			m_pDeviceContext->Map(m_pResource, m_Subresource, mapType, mapFlags, pMappedResource);
+		}
+		~SharedMap()
+		{
+			m_pDeviceContext->Unmap(m_pResource, m_Subresource);
+		}
 
+	private:
+		ID3D11DeviceContext* m_pDeviceContext;
+		ID3D11Resource* m_pResource;
+		uint32 m_Subresource;
+	};
+
+	//디버그 레이어를 사용할 수 있는지 확인하는 함수
 #if defined(_DEBUG)
 	inline bool SdkLayersAvailable()
 	{
@@ -90,4 +114,22 @@ namespace DirectX11
 		return SUCCEEDED(hr);
 	}
 #endif
+}
+//TGA 파일을 읽어와서 텍스처를 생성하는 helper함수
+namespace DirectX
+{
+	HRESULT CreateTGATextureFormFile(ID3D11Device* pDevice, const wchar_t* pTexturePath, ID3D11ShaderResourceView** ppTexture)
+	{
+		HRESULT hResult = S_OK;
+		ScratchImage image;
+		TexMetadata metadata;
+
+		hResult = LoadFromTGAFile(pTexturePath, &metadata, image);
+		if (FAILED(hResult))
+		{
+			return hResult;
+		}
+
+		return CreateShaderResourceView(pDevice, image.GetImages(), image.GetImageCount(), metadata, ppTexture);
+	}
 }
