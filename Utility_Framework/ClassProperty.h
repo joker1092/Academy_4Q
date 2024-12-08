@@ -1,17 +1,6 @@
 #pragma once
-
-class Nonallocatable
-{
-protected:
-	Nonallocatable() = default;
-	~Nonallocatable() = default;
-
-protected:
-	void* operator new(size_t) = delete;
-	void* operator new[](size_t) = delete;
-	void operator delete(void*) = delete;
-	void operator delete[](void*) = delete;
-};
+#include <memory>
+#include <mutex>
 
 class Noncopyable
 {
@@ -27,18 +16,41 @@ protected:
 };
 
 template <typename T>
-class Singleton : public Noncopyable, public Nonallocatable
+class Singleton : public Noncopyable
 {
 protected:
 	Singleton() = default;
-	~Singleton() = default;
+	virtual ~Singleton() = default;
 
 public:
-	inline static T& GetInstance()
+	inline static const std::shared_ptr<T>& GetInstance()
 	{
-		static T instance;
-		return instance;
+		std::call_once(_initFlag, []()
+			{
+				T* prim = new T();
+
+				_instance = std::shared_ptr<T>(prim, Deleter());
+			});
+
+		return _instance;
+
 	}
 
+	struct Deleter
+	{
+		void operator()(T* instance)
+		{
+			delete instance;
+		}
+	};
+
 private:
+	static std::shared_ptr<T> s_instance;
+	static std::once_flag s_onceFlag;
 };
+
+template <typename T>
+std::shared_ptr<T> Singleton<T>::s_instance = std::shared_ptr<T>();
+
+template <typename T>
+std::once_flag Singleton<T>::s_onceFlag;

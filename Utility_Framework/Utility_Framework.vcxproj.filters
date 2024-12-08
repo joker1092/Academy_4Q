@@ -16,6 +16,33 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{059fcb1a-79fa-4d01-82ee-2821d77a9a57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core.Assert">
+      <UniqueIdentifier>{db8ea0c4-5a20-4af8-861d-271ee6c424fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdPartyLib">
+      <UniqueIdentifier>{6c19f7b2-f93d-4064-bd23-59d0241ea24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdPartyLib\fmt">
+      <UniqueIdentifier>{897a0b1a-b325-47a8-b386-5913709ebdc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdPartyLib\fmt\src">
+      <UniqueIdentifier>{827b4b8c-ac30-47d5-b699-da990724f947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdPartyLib\fmt\include">
+      <UniqueIdentifier>{22fa1b75-d67d-47fb-be8a-0d694b151c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Console">
+      <UniqueIdentifier>{cd58958c-be03-425c-ba98-25fff4128742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Mathf">
+      <UniqueIdentifier>{77365139-821f-44e0-b873-c56013b686fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Random">
+      <UniqueIdentifier>{8c9f5eac-4cca-420e-ac7f-6ad68780f9e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Thread">
+      <UniqueIdentifier>{bea73a02-d831-429d-a1b7-4a02b675965b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -42,6 +69,63 @@
     <ClInclude Include="Banchmark.hpp">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Core.Assert.hpp">
+      <Filter>Core.Assert</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\args.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\base.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\chrono.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\color.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\compile.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\core.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\format.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\format-inl.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\os.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\ostream.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\printf.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\ranges.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\std.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="fmt\include\fmt\xchar.h">
+      <Filter>thirdPartyLib\fmt\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Console.hpp">
+      <Filter>Core.Console</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Mathf.h">
+      <Filter>Core.Mathf</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Random.h">
+      <Filter>Core.Random</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Thread.h">
+      <Filter>Core.Thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResource.cpp">
@@ -49,6 +133,21 @@
     </ClCompile>
     <ClCompile Include="CoreWindow.cpp">
       <Filter>WindowsApplication\CoreWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt\src\fmt.cc">
+      <Filter>thirdPartyLib\fmt\src</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt\src\format.cc">
+      <Filter>thirdPartyLib\fmt\src</Filter>
+    </ClCompile>
+    <ClCompile Include="fmt\src\os.cc">
+      <Filter>thirdPartyLib\fmt\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.Mathf.cpp">
+      <Filter>Core.Mathf</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.Thread.cpp">
+      <Filter>Core.Thread</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
