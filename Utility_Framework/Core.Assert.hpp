@@ -55,6 +55,6 @@ namespace Core
 #define CORE_ASSERT(expression) \
     if (!(expression))           \
     {                            \
-        core::AssertionFailure(#expression); \
+        Core::AssertionFailure(#expression); \
     }
 #endif
