@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <Windows.h>
 
-namespace core
+namespace Core
 {
     // Assertion 실패 시 호출될 함수 포인터
     using AssertionFailureFunction = void (*)(const char* expression, void* context);
