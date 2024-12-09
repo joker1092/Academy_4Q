@@ -1,4 +1,4 @@
-# CoreWindow 클래스 문서
+# CoreWindow 클래스
 
 ## 개요
 
