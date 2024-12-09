@@ -18,4 +18,4 @@
 
 [ [Core.Thread.h](Core.Thread.md) ] ThreadPool 클래스는 작업을 큐에 추가하고 여러 스레드에서 병렬로 실행하는 싱글톤 패턴 기반의 스레드 풀 구현입니다. Task 클래스는 결과를 저장하고, 다른 작업을 체인 형태로 연결하는 then 메서드를 제공합니다.
 
-[ [Core.CoreWindow.h](Core.CoreWindow.md) ] CoreWindow 클래스는 윈도우 애플리케이션을 생성하고, 메시지 핸들러를 등록하여 윈도우 메시지를 처리하며, 메시지 루프를 실행하는 기능을 제공하는 클래스입니다.
+[ [CoreWindow.h](CoreWindow.md) ] CoreWindow 클래스는 윈도우 애플리케이션을 생성하고, 메시지 핸들러를 등록하여 윈도우 메시지를 처리하며, 메시지 루프를 실행하는 기능을 제공하는 클래스입니다.
