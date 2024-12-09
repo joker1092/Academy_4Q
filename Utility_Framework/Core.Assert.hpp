@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <Windows.h>
-
+//EASTL의 ASSERT를 모방
 namespace Core
 {
     // Assertion 실패 시 호출될 함수 포인터
