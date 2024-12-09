@@ -31,6 +31,12 @@
     <Filter Include="Core.Thread">
       <UniqueIdentifier>{bea73a02-d831-429d-a1b7-4a02b675965b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core.Memory">
+      <UniqueIdentifier>{2b89a087-a940-4951-bf45-1cca8ced71d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.LinkedList">
+      <UniqueIdentifier>{ac1a3691-9e70-4a2f-853d-512eca7f7692}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -71,6 +77,12 @@
     </ClInclude>
     <ClInclude Include="Core.Thread.h">
       <Filter>Core.Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Memory.hpp">
+      <Filter>Core.Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedListLib.hpp">
+      <Filter>Core.LinkedList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -25,11 +25,13 @@
     <ClInclude Include="Core.Console.hpp" />
     <ClInclude Include="Core.Definition.h" />
     <ClInclude Include="Core.Mathf.h" />
+    <ClInclude Include="Core.Memory.hpp" />
     <ClInclude Include="Core.Random.h" />
     <ClInclude Include="Core.Thread.h" />
     <ClInclude Include="CoreWindow.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DirectXHelper.h" />
+    <ClInclude Include="LinkedListLib.hpp" />
     <ClInclude Include="TimeSystem.h" />
     <ClInclude Include="TypeDefinition.h" />
   </ItemGroup>
