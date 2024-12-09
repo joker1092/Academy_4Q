@@ -107,7 +107,11 @@ const Mathf::Vector2 Mathf::Vector2::normalized() const
 	return Mathf::Vector2(XMVector2Normalize(v));
 }
 
-Mathf::Vector4::operator XMVECTOR() const { return XMLoadFloat4(&XMFLOAT4(x, y, z, w)); }
+Mathf::Vector4::operator XMVECTOR() const 
+{ 
+	XMFLOAT4 temp(x, y, z, w);
+	return XMLoadFloat4(&temp);
+}
 
 Mathf::Quaternion::Quaternion(float s, const Vector3& v)
 	:

@@ -65,4 +65,4 @@ private:
 	bool _isCursorHidden{ false };
 };
 
-inline static InputManager& InputManagement = InputManager::GetInstance();
+inline static auto InputManagement = InputManager::GetInstance();

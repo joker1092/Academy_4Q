@@ -25,14 +25,14 @@ protected:
 public:
 	inline static const std::shared_ptr<T>& GetInstance()
 	{
-		std::call_once(_initFlag, []()
+		std::call_once(s_onceFlag, []()
 			{
 				T* prim = new T();
 
-				_instance = std::shared_ptr<T>(prim, Deleter());
+				s_instance = std::shared_ptr<T>(prim, Deleter());
 			});
 
-		return _instance;
+		return s_instance;
 
 	}
 

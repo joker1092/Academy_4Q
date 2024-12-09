@@ -2,11 +2,12 @@
 #include <windows.h>
 #include <functional>
 #include <unordered_map>
+#include "ClassProperty.h"
 
 #pragma warning(disable: 28251)
 #define MAIN_ENTRY int WINAPI
 
-class CoreWindow
+class CoreWindow final
 {
 public:
     using MessageHandler = std::function<LRESULT(HWND, WPARAM, LPARAM)>;

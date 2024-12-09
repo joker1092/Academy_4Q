@@ -19,18 +19,6 @@
     <Filter Include="Core.Assert">
       <UniqueIdentifier>{db8ea0c4-5a20-4af8-861d-271ee6c424fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdPartyLib">
-      <UniqueIdentifier>{6c19f7b2-f93d-4064-bd23-59d0241ea24d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdPartyLib\fmt">
-      <UniqueIdentifier>{897a0b1a-b325-47a8-b386-5913709ebdc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdPartyLib\fmt\src">
-      <UniqueIdentifier>{827b4b8c-ac30-47d5-b699-da990724f947}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdPartyLib\fmt\include">
-      <UniqueIdentifier>{22fa1b75-d67d-47fb-be8a-0d694b151c27}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core.Console">
       <UniqueIdentifier>{cd58958c-be03-425c-ba98-25fff4128742}</UniqueIdentifier>
     </Filter>
@@ -72,48 +60,6 @@
     <ClInclude Include="Core.Assert.hpp">
       <Filter>Core.Assert</Filter>
     </ClInclude>
-    <ClInclude Include="fmt\include\fmt\args.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\base.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\chrono.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\color.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\compile.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\core.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\format.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\format-inl.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\os.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\ostream.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\printf.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\ranges.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\std.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
-    <ClInclude Include="fmt\include\fmt\xchar.h">
-      <Filter>thirdPartyLib\fmt\include</Filter>
-    </ClInclude>
     <ClInclude Include="Core.Console.hpp">
       <Filter>Core.Console</Filter>
     </ClInclude>
@@ -133,15 +79,6 @@
     </ClCompile>
     <ClCompile Include="CoreWindow.cpp">
       <Filter>WindowsApplication\CoreWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="fmt\src\fmt.cc">
-      <Filter>thirdPartyLib\fmt\src</Filter>
-    </ClCompile>
-    <ClCompile Include="fmt\src\format.cc">
-      <Filter>thirdPartyLib\fmt\src</Filter>
-    </ClCompile>
-    <ClCompile Include="fmt\src\os.cc">
-      <Filter>thirdPartyLib\fmt\src</Filter>
     </ClCompile>
     <ClCompile Include="Core.Mathf.cpp">
       <Filter>Core.Mathf</Filter>
