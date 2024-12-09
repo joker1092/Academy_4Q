@@ -3,6 +3,7 @@
 ## 개요
 
 이 라이브러리는 **LinkedList**와 **LinkProperty**를 사용하여 연결된 리스트 자료구조를 구현합니다. 객체를 연결하여 관리하며, 이 리스트는 **LinkProperty**를 상속받은 객체를 담을 수 있습니다.
+[https://github.com/29thnight/LinkedListLib]
 
 ## `LinkProperty` 구조체
 
