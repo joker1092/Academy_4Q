@@ -11,3 +11,5 @@
 [ [Banchmark.hpp](Utility_Framework/Doc/Banchmark.md) ] 특정 코드블록의 코드 실행시간을 특정하고, 콘솔에 출력해주는 헬퍼 클래스
 
 [ [Core.Assert.hpp](Utility_Framework/Doc/Core.Assert.md) ] Core.Assert는 조건이 실패하면 사용자 정의 오류 처리 함수(AssertionFailureFunction)를 호출하여, 오류 메시지 출력과 디버거 중단을 통해 디버깅을 돕고 프로그램을 종료하는 매크로입니다.
+
+[ [Core.Console.hpp](Utility_Framework/Doc/Core.Console.md) ] CoreConsole 클래스는 C#의 Console 클래스처럼 다양한 형식의 문자열을 출력하는 기능을 제공하며, Write 및 WriteLine 메서드를 통해 파일이나 표준 출력에 포매팅된 메시지를 출력할 수 있습니다.
