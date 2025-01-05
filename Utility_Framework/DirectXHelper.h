@@ -1,135 +1,195 @@
 #pragma once
 #include "Core.Definition.h"
 #include <ppltasks.h>
-#include <DirectXTex.h>
-
-#define SHADER_MACRO_DEFINITION(name) D3D_SHADER_MACRO name[] =
-constexpr D3D_SHADER_MACRO ShaderMacroTerminator = { nullptr, nullptr };
 
 namespace DirectX11
 {
-	class ComException : public std::exception
-	{
-	public:
-		ComException() = default;
-		const char* what() const override
-		{
-			static char s_str[64] = {};
-			sprintf_s(s_str, "Failure with HRESULT of %08X", result);
-			return s_str;
-		}
+    constexpr D3D_SHADER_MACRO ShaderMacroTerminator = { nullptr, nullptr };
 
-		static std::exception CreateException(HRESULT hr)
-		{
-			return ComException(hr);
-		}
+    class ComException : public std::exception
+    {
+    public:
+        ComException() = default;
+        const char* what() const override
+        {
+            static char s_str[64] = {};
+            sprintf_s(s_str, "Failure with HRESULT of %08X", result);
+            return s_str;
+        }
 
-	private:
-		ComException(HRESULT hr) : result(hr) {}
+        static std::exception CreateException(HRESULT hr)
+        {
+            return ComException(hr);
+        }
 
-	private:
-		HRESULT result;
-	};
+    private:
+        ComException(HRESULT hr) : result(hr) {}
 
-	inline void ThrowIfFailed(HRESULT hr)
-	{
-		if (FAILED(hr))
-		{
-			throw DirectX11::ComException::CreateException(hr);
-		}
-	}
+    private:
+        HRESULT result;
+    };
 
-	inline Concurrency::task<std::vector<byte>> ReadDataAsync(const file::path& fileName)
-	{
-		using namespace Concurrency;
+    inline void ThrowIfFailed(HRESULT hr)
+    {
+        if (FAILED(hr))
+        {
+            throw DirectX11::ComException::CreateException(hr);
+        }
+    }
 
-		auto folder = file::current_path();
-		auto path = folder / fileName;
+    inline Concurrency::task<std::vector<byte>> ReadDataAsync(const file::path& fileName)
+    {
+        using namespace Concurrency;
 
-		return create_task([path]() -> std::vector<byte> {
-			// std::ifstreamÀ» »ç¿ëÇØ ÆÄÀÏ ¿­±â
-			std::ifstream file(path, std::ios::binary | std::ios::ate);
-			if (!file.is_open())
-			{
-				throw std::runtime_error("Failed to open the file.");
-			}
+        auto folder = file::current_path();
+        auto path = folder / fileName;
 
-			// ÆÄÀÏ Å©±â¸¦ °¡Á®¿À±â
-			std::streamsize fileSize = file.tellg();
-			file.seekg(0, std::ios::beg);
+        return create_task([path]() -> std::vector<byte> {
 
-			// ¹öÆÛ ÇÒ´ç ¹× ÆÄÀÏ µ¥ÀÌÅÍ ÀÐ±â
-			std::vector<byte> buffer(static_cast<size_t>(fileSize));
-			if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize))
-			{
-				throw std::runtime_error("Failed to read the file.");
-			}
+            std::ifstream file(path, std::ios::binary | std::ios::ate);
+            if (!file.is_open())
+            {
+                throw std::runtime_error("Failed to open the file.");
+            }
 
-			return buffer;
-			});
-	}
+            std::streamsize fileSize = file.tellg();
+            if (fileSize <= 0) {
+                throw std::runtime_error("File is empty or size is invalid.");
+            }
+            file.seekg(0, std::ios::beg);
 
-	inline float ConvertDipsToPixels(float dips, float dpi)
-	{
-		static const float dipsPerInch = 96.0f;
-		return floorf(dips * dpi / dipsPerInch + 0.5f);
-	}
-	//Map/UnmapÀ» »ç¿ëÇÏ¿© ¸®¼Ò½º¸¦ ½ºÄÚÇÁ ¿µ¿ª¿¡¼­ ¸ÅÇÎ/¾ð¸ÅÇÎÇÏ´Â Å¬·¡½º
-	class SharedMap final
-	{
-	public:
-		SharedMap(ID3D11DeviceContext* pDeviceContext, ID3D11Resource* pResource, D3D11_MAPPED_SUBRESOURCE* pMappedResource, uint32 subresource = 0, D3D11_MAP mapType = D3D11_MAP_WRITE_DISCARD, uint32 mapFlags = 0)
-			: m_pDeviceContext(pDeviceContext), m_pResource(pResource), m_Subresource(subresource)
-		{
-			m_pDeviceContext->Map(m_pResource, m_Subresource, mapType, mapFlags, pMappedResource);
-		}
-		~SharedMap()
-		{
-			m_pDeviceContext->Unmap(m_pResource, m_Subresource);
-		}
+            std::vector<byte> buffer(static_cast<size_t>(fileSize));
+            if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize))
+            {
+                throw std::runtime_error("Failed to read the file.");
+            }
 
-	private:
-		ID3D11DeviceContext* m_pDeviceContext;
-		ID3D11Resource* m_pResource;
-		uint32 m_Subresource;
-	};
+            return buffer;
+            });
+    }
 
-	//µð¹ö±× ·¹ÀÌ¾î¸¦ »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    inline float ConvertDipsToPixels(float dips, float dpi)
+    {
+        static const float dipsPerInch = 96.0f;
+        return floorf(dips * dpi / dipsPerInch + 0.5f);
+    }
+
+    template <typename T>
+    inline void ReleaseResources(std::vector<T*>& resources, T*& pResourceView)
+    {
+        if (0 < resources.size())
+        {
+            for (auto& resource : resources)
+            {
+                if (resource)
+                {
+                    resource->Release();
+                    resource = nullptr;
+                }
+            }
+        }
+        else
+        {
+            if (pResourceView)
+            {
+                pResourceView->Release();
+                pResourceView = nullptr;
+            }
+        }
+    }
+
+    class SharedMap final
+    {
+    public:
+        SharedMap(ID3D11DeviceContext* pDeviceContext, ID3D11Resource* pResource, D3D11_MAPPED_SUBRESOURCE* pMappedResource, uint32 subresource = 0, D3D11_MAP mapType = D3D11_MAP_WRITE_DISCARD, uint32 mapFlags = 0)
+            : m_pDeviceContext(pDeviceContext), m_pResource(pResource), m_Subresource(subresource)
+        {
+            m_pDeviceContext->Map(m_pResource, m_Subresource, mapType, mapFlags, pMappedResource);
+        }
+        ~SharedMap()
+        {
+            m_pDeviceContext->Unmap(m_pResource, m_Subresource);
+        }
+
+    private:
+        ID3D11DeviceContext* m_pDeviceContext;
+        ID3D11Resource* m_pResource;
+        uint32 m_Subresource;
+    };
+
 #if defined(_DEBUG)
-	inline bool SdkLayersAvailable()
-	{
-		HRESULT hr = D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_NULL,
-			0,
-			D3D11_CREATE_DEVICE_DEBUG,
-			nullptr,
-			0,
-			D3D11_SDK_VERSION,
-			nullptr,
-			nullptr,
-			nullptr
-		);
+    inline bool SdkLayersAvailable()
+    {
+        HRESULT hr = D3D11CreateDevice(
+            nullptr,
+            D3D_DRIVER_TYPE_NULL,
+            0,
+            D3D11_CREATE_DEVICE_DEBUG,
+            nullptr,
+            0,
+            D3D11_SDK_VERSION,
+            nullptr,
+            nullptr,
+            nullptr
+        );
 
-		return SUCCEEDED(hr);
-	}
+        return SUCCEEDED(hr);
+    }
 #endif
 }
-//TGA ÆÄÀÏÀ» ÀÐ¾î¿Í¼­ ÅØ½ºÃ³¸¦ »ý¼ºÇÏ´Â helperÇÔ¼ö
+
 namespace DirectX
 {
-	HRESULT CreateTGATextureFormFile(ID3D11Device* pDevice, const wchar_t* pTexturePath, ID3D11ShaderResourceView** ppTexture)
-	{
-		HRESULT hResult = S_OK;
-		ScratchImage image;
-		TexMetadata metadata;
+    inline HRESULT CreateTGATextureFormFile(ID3D11Device* pDevice, const wchar_t* pTexturePath, ID3D11ShaderResourceView** ppTexture)
+    {
+        HRESULT hResult = S_OK;
+        ScratchImage image;
+        TexMetadata metadata;
 
-		hResult = LoadFromTGAFile(pTexturePath, &metadata, image);
-		if (FAILED(hResult))
-		{
-			return hResult;
-		}
+        hResult = LoadFromTGAFile(pTexturePath, &metadata, image);
+        if (FAILED(hResult))
+        {
+            return hResult;
+        }
 
-		return CreateShaderResourceView(pDevice, image.GetImages(), image.GetImageCount(), metadata, ppTexture);
-	}
+        return CreateShaderResourceView(pDevice, image.GetImages(), image.GetImageCount(), metadata, ppTexture);
+    }
+
+    inline HRESULT CreateTextureFromFile(ID3D11Device* pDevice, const file::path& fileName, ID3D11ShaderResourceView** ppTexture)
+    {
+        HRESULT hResult = S_OK;
+        auto extension = fileName.extension();
+
+        if (extension == L".tga")
+        {
+            hResult = CreateTGATextureFormFile(pDevice, fileName.c_str(), ppTexture);
+        }
+        else if (extension == L".dds")
+        {
+            hResult = CreateDDSTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTexture);
+        }
+        else
+        {
+            hResult = CreateWICTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTexture);
+        }
+
+        return hResult;
+    }
+
+    template <typename T>
+    concept DXObjects = requires(T t)
+    {
+        t->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
+    };
+    // ë””ë²„ê¹…ì„ ì§€ì›í•˜ë ¤ë©´ ê°œì²´ì— ì´ë¦„ì„ í• ë‹¹í•˜ì„¸ìš”.
+#if defined(_DEBUG)
+    inline void SetName(DXObjects auto pObject, const std::string_view& name)
+    {
+        pObject->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
+    }
+#else
+    inline void SetName(DXObjects auto, const std::string_view&)
+    {
+    }
+#endif
 }

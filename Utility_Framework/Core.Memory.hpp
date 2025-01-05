@@ -1,48 +1,42 @@
 #pragma once
 #include "TypeDefinition.h"
-#include "LinkedListLib.hpp"
+#include "MemoryPool.h"
+#include <concepts>
 #include <vector>
 #include <list>
 
+template<typename T>
+concept Pointer =
+std::is_pointer_v<T> ||
+std::is_null_pointer_v<T> ||
+std::derived_from<T, IUnknown>
+
 namespace Memory
 {
-	//¸Ş¸ğ¸® ÇÒ´ç ¹× º¹»ç
+	//ë©”ëª¨ë¦¬ í• ë‹¹ ë° ë³µì‚¬
 	inline void AllocateAndCopy(void* pDst, const void* pSrc, uint32 size)
 	{
 		pDst = malloc(size);
 		memcpy(pDst, pSrc, size);
 	}
-	//¸Ş¸ğ¸® ÇØÁ¦ : IUnknownÀ» »ó¼Ó¹ŞÀº Å¬·¡½ºÀÇ °æ¿ì Release() È£Ãâ -> void*ÀÇ °æ¿ì free() È£Ãâ -> ±× ¿Ü delete È£Ãâ
-	template<typename T>
-	inline void SafeDelete(T*& ptr)
-	{
-		if constexpr (std::is_base_of_v<IUnknown, T>)
-		{
-			if (ptr)
-			{
-				ptr->Release();
-				ptr = nullptr;
-			}
-		}
-		else if constexpr (std::is_same_v<T, void>)
-		{
-			if (ptr)
-			{
-				free(ptr);
-				ptr = nullptr;
-			}
-		}
-		else
-		{
-			if (ptr)
-			{
-				delete ptr;
-				ptr = nullptr;
-			}
-		}
-	}
+  //ë©”ëª¨ë¦¬ í•´ì œ : IUnknownì„ ìƒì†ë°›ì€ í´ë˜ìŠ¤ì˜ ê²½ìš° Release() í˜¸ì¶œ -> ê·¸ ì™¸ delete í˜¸ì¶œ
+    void SafeDelete(Pointer auto& ptr)
+    {
+        if constexpr (std::is_pointer_v<decltype(ptr)>)
+        {
+            if constexpr (std::derived_from<decltype(ptr), IUnknown>)
+            {
+                ptr->Release();
+            }
+            else
+            {
+                delete ptr;
+                ptr = nullptr;
+            }
+        }
+    }
 }
-//Áö¿¬ »èÁ¦ÀÚ : ¿¬¼Ó ÄÁÅ×ÀÌ³Ê¿¡ ÀúÀåµÈ ¿ä¼Ò(Æ÷ÀÎÅÍ)µéÀ» ½ºÄÚÇÁ°¡ ¹ş¾î³ª¸é »èÁ¦ÇÏ´Â Å¬·¡½º -> function °´Ã¼¸¦ »ç¿ëÇÏ¿© »èÁ¦ Á¶°ÇÀ» ÁöÁ¤ÇÒ ¼ö ÀÖÀ½
+//ì§€ì—° ì‚­ì œì : ì—°ì† ì»¨í…Œì´ë„ˆì— ì €ì¥ëœ ìš”ì†Œ(í¬ì¸í„°)ë“¤ì„ ìŠ¤ì½”í”„ê°€ ë²—ì–´ë‚˜ë©´ ì‚­ì œí•˜ëŠ” í´ë˜ìŠ¤ -> function ê°ì²´ë¥¼ ì‚¬ìš©í•˜ì—¬ ì‚­ì œ ì¡°ê±´ì„ ì§€ì •í•  ìˆ˜ ìˆìŒ
 template<typename T, typename Container>
 class DeferredDeleter final
 {
@@ -73,7 +67,7 @@ private:
 	Container* _container{};
 	Func m_deleteElementFunc{};
 };
-//ÅÛÇÃ¸´ Ãß·Ğ °¡ÀÌµå
+//í…œí”Œë¦¿ ì¶”ë¡  ê°€ì´ë“œ
 template<typename T, typename Allocator>
 DeferredDeleter(std::vector<T*, Allocator>*, auto) -> DeferredDeleter<T, std::vector<T*, Allocator>>;
 

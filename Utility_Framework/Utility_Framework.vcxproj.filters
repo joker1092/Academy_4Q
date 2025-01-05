@@ -37,6 +37,12 @@
     <Filter Include="Core.LinkedList">
       <UniqueIdentifier>{ac1a3691-9e70-4a2f-853d-512eca7f7692}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core.Memory\MemoryPool">
+      <UniqueIdentifier>{114114a8-7d3c-419c-a79f-4a099cebcd00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Memory\SpinLock">
+      <UniqueIdentifier>{4584675b-2578-4d75-a537-a62df1b1dc49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -84,6 +90,21 @@
     <ClInclude Include="LinkedListLib.hpp">
       <Filter>Core.LinkedList</Filter>
     </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Core.Memory\MemoryPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Minimal.h">
+      <Filter>Core.definition</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>Core.Memory\SpinLock</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpHandler.h">
+      <Filter>WindowsApplication\CoreWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXDescHelper.h">
+      <Filter>DirectX11Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResource.cpp">
@@ -92,11 +113,13 @@
     <ClCompile Include="CoreWindow.cpp">
       <Filter>WindowsApplication\CoreWindow</Filter>
     </ClCompile>
-    <ClCompile Include="Core.Mathf.cpp">
-      <Filter>Core.Mathf</Filter>
-    </ClCompile>
     <ClCompile Include="Core.Thread.cpp">
       <Filter>Core.Thread</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MemoryPool.inl">
+      <Filter>Core.Memory\MemoryPool</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -2,12 +2,18 @@
 #include <windows.h>
 #include <functional>
 #include <unordered_map>
-#include "ClassProperty.h"
+#include "DumpHandler.h"
+
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #pragma warning(disable: 28251)
 #define MAIN_ENTRY int WINAPI
 
-class CoreWindow final
+class CoreWindow
 {
 public:
     using MessageHandler = std::function<LRESULT(HWND, WPARAM, LPARAM)>;
@@ -17,6 +23,7 @@ public:
     {
         RegisterWindowClass();
         CreateAppWindow(title);
+        SetUnhandledExceptionFilter(ErrorDumpHandeler);
         s_instance = this;
     }
 
@@ -29,7 +36,7 @@ public:
         UnregisterClass(L"CoreWindowApp", m_hInstance);
     }
 
-    // ¸Ş½ÃÁö ÇÚµé·¯ µî·Ï
+    // ë©”ì‹œì§€ í•¸ë“¤ëŸ¬ ë“±ë¡
     template <typename Instance>
     void RegisterHandler(UINT message, Instance* instance, LRESULT(Instance::* handler)(HWND, WPARAM, LPARAM))
     {
@@ -46,7 +53,7 @@ public:
         return *this;
     }
 
-    // ¸Ş½ÃÁö ·çÇÁ ½ÇÇà
+    // ë©”ì‹œì§€ ë£¨í”„ ì‹¤í–‰
     template <typename MessageLoop>
     void Then(MessageLoop fn_messageLoop)
     {
@@ -71,7 +78,24 @@ public:
         }
     }
 
-    // À©µµ¿ì ÇÚµé ¹İÈ¯
+    static LONG WINAPI ErrorDumpHandeler(EXCEPTION_POINTERS* pExceptionPointers)
+    {
+        int msgResult = MessageBox(NULL, L"Should Create Dump ?", L"Exception", MB_YESNO | MB_ICONQUESTION);
+
+        if (msgResult == IDYES)
+        {
+            CreateDump(pExceptionPointers, DUMP_TYPE_FULL);
+        }
+
+        return msgResult;
+    }
+
+    static void SetDumpType(DUMP_TYPE dumpType)
+    {
+        g_dumpType = dumpType;
+    }
+
+    // ìœˆë„ìš° í•¸ë“¤ ë°˜í™˜
     HWND GetHandle() const { return m_hWnd; }
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
@@ -83,14 +107,15 @@ public:
 
 private:
     static CoreWindow* s_instance;
+    static DUMP_TYPE g_dumpType;
     HINSTANCE m_hInstance = nullptr;
     HWND m_hWnd = nullptr;
     int m_width = 800;
     int m_height = 600;
     std::unordered_map<UINT, MessageHandler> m_handlers;
 
-    // À©µµ¿ì Å¬·¡½º µî·Ï
-    void RegisterWindowClass()
+    // ìœˆë„ìš° í´ë˜ìŠ¤ ë“±ë¡
+    void RegisterWindowClass() const
     {
         WNDCLASS wc = {};
         wc.lpfnWndProc = CoreWindow::WndProc;
@@ -100,7 +125,7 @@ private:
         RegisterClass(&wc);
     }
 
-    // À©µµ¿ì »ı¼º
+    // ìœˆë„ìš° ìƒì„±
     void CreateAppWindow(const wchar_t* title)
     {
         RECT rect{};
@@ -129,14 +154,19 @@ private:
         }
     }
 
-    // À©µµ¿ì ÇÁ·Î½ÃÀú
+    // ìœˆë„ìš° í”„ë¡œì‹œì €
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         CoreWindow* self = nullptr;
 
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        {
+            return true;
+        }
+
         if (message == WM_NCCREATE)
         {
-            // À©µµ¿ì »ı¼º ½Ã ÃÊ±âÈ­
+            // ìœˆë„ìš° ìƒì„± ì‹œ ì´ˆê¸°í™”
             CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
             self = static_cast<CoreWindow*>(cs->lpCreateParams);
             SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
@@ -154,7 +184,7 @@ private:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
 
-    // ¸Ş½ÃÁö Ã³¸®
+    // ë©”ì‹œì§€ ì²˜ë¦¬
     LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         auto it = m_handlers.find(message);

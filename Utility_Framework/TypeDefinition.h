@@ -2,15 +2,31 @@
 #include <Unknwnbase.h>
 #include <combaseapi.h>
 #include <iostream>
+#include <DirectXMath.h>
 
-typedef unsigned int uint32;
 typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
-typedef unsigned long long uint64;
-typedef long long int64;
 typedef DECIMAL decimal;
 typedef FILE* File;
+
+using int3 = DirectX::XMINT3;
+using float2 = DirectX::XMFLOAT2;
+using float3 = DirectX::XMFLOAT3;
+using float4 = DirectX::XMFLOAT4;
+
+using uint8  = uint8_t;
+using int8   = int8_t;
+using uint16 = uint16_t;
+using int16  = int16_t;
+using uint32 = uint32_t;
+using int32  = int32_t;
+using uint64 = uint64_t;
+using int64  = int64_t;
+using guid = uint64_t;
+using flag = uint32;
+using mask = uint32;
+using constant = uint32;
 
 enum class MouseKey : int
 {
