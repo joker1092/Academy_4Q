@@ -36,7 +36,6 @@ public:
         UnregisterClass(L"CoreWindowApp", m_hInstance);
     }
 
-    // 메시지 핸들러 등록
     template <typename Instance>
     void RegisterHandler(UINT message, Instance* instance, LRESULT(Instance::* handler)(HWND, WPARAM, LPARAM))
     {
@@ -53,7 +52,6 @@ public:
         return *this;
     }
 
-    // 메시지 루프 실행
     template <typename MessageLoop>
     void Then(MessageLoop fn_messageLoop)
     {
@@ -95,7 +93,6 @@ public:
         g_dumpType = dumpType;
     }
 
-    // 윈도우 핸들 반환
     HWND GetHandle() const { return m_hWnd; }
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
@@ -114,7 +111,6 @@ private:
     int m_height = 600;
     std::unordered_map<UINT, MessageHandler> m_handlers;
 
-    // 윈도우 클래스 등록
     void RegisterWindowClass() const
     {
         WNDCLASS wc = {};
@@ -125,7 +121,6 @@ private:
         RegisterClass(&wc);
     }
 
-    // 윈도우 생성
     void CreateAppWindow(const wchar_t* title)
     {
         RECT rect{};
@@ -154,7 +149,6 @@ private:
         }
     }
 
-    // 윈도우 프로시저
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         CoreWindow* self = nullptr;
@@ -184,7 +178,6 @@ private:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
 
-    // 메시지 처리
     LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         auto it = m_handlers.find(message);

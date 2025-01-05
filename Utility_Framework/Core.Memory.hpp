@@ -9,7 +9,7 @@ template<typename T>
 concept Pointer =
 std::is_pointer_v<T> ||
 std::is_null_pointer_v<T> ||
-std::derived_from<T, IUnknown>
+std::derived_from<T, IUnknown>;
 
 namespace Memory
 {
