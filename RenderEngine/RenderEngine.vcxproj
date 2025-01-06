@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="SceneRenderer.cpp" />
@@ -30,12 +31,14 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferType.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DataSystem.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshBasedPSO.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="IPipelineStateObject.h" />
+    <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="SceneRenderer.h" />

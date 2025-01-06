@@ -22,3 +22,7 @@ public:
 			XMMatrixTranslationFromVector(position);
 	}
 };
+
+class AnimModel : public Model
+{
+};

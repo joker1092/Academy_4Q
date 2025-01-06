@@ -25,6 +25,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{37349f4a-643e-4acc-a8e3-38b6b567eef4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Manager&amp;System">
+      <UniqueIdentifier>{0d451d80-798a-4694-b7aa-3dd05159ce0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h">
@@ -81,6 +84,12 @@
     <ClInclude Include="Shader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="DataSystem.h">
+      <Filter>Manager&amp;System</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderTarget.cpp">
@@ -100,6 +109,9 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>Loader</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

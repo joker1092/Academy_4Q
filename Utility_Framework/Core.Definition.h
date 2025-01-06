@@ -43,3 +43,13 @@ namespace file = std::filesystem;
 #include "TypeDefinition.h"
 #include "DirectXHelper.h"
 #include "LinkedListLib.hpp"
+
+#ifndef _in
+#define _in
+#define _out
+#define _in_out
+#define _in_opt
+#define _out_opt
+#define _inout_opt
+#endif // !_in
+
