@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Academy_4Q", "Academy_4Q.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utility_Framework", "Utility_Framework\Utility_Framework.vcxproj", "{9CEC19F4-03B4-4563-8D42-6E4BFB0059BB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderEngine", "..\RenderEngine\RenderEngine.vcxproj", "{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderEngine", "..\joker1092\Academy_4Q\RenderEngine\RenderEngine.vcxproj", "{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
