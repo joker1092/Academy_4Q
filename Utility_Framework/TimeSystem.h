@@ -21,12 +21,12 @@ namespace DirectX11
 		{
 			if (!QueryPerformanceFrequency(&m_qpcFrequency))
 			{
-				throw std::exception("QueryPerformanceFrequency");
+				throw std::exception("Failed_QueryPerformanceFrequency");
 			}
 
 			if (!QueryPerformanceCounter(&m_qpcLastTime))
 			{
-				throw std::exception("QueryPerformanceCounter");
+				throw std::exception("Failed_QueryPerformanceCounter");
 			}
 
 			// Initialize max delta to 1/10 of a second.
@@ -68,7 +68,7 @@ namespace DirectX11
 		{
 			if (!QueryPerformanceCounter(&m_qpcLastTime))
 			{
-				throw std::exception("QueryPerformanceCounter");
+				throw std::exception("Failed_QueryPerformanceCounter");
 			}
 			m_leftOverTicks = 0;
 			m_framesPerSecond = 0;
@@ -85,7 +85,7 @@ namespace DirectX11
 
 			if (!QueryPerformanceCounter(&currentTime))
 			{
-				throw std::exception("QueryPerformanceCounter");
+				throw std::exception("Failed_QueryPerformanceCounter");
 			}
 
 			uint64 timeDelta = currentTime.QuadPart - m_qpcLastTime.QuadPart;

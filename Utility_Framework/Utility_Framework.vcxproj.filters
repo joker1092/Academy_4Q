@@ -13,6 +13,36 @@
     <Filter Include="WindowsApplication\CoreWindow">
       <UniqueIdentifier>{eec97127-ce4f-42bb-b91d-0f8e870e58f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{059fcb1a-79fa-4d01-82ee-2821d77a9a57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Assert">
+      <UniqueIdentifier>{db8ea0c4-5a20-4af8-861d-271ee6c424fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Console">
+      <UniqueIdentifier>{cd58958c-be03-425c-ba98-25fff4128742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Mathf">
+      <UniqueIdentifier>{77365139-821f-44e0-b873-c56013b686fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Random">
+      <UniqueIdentifier>{8c9f5eac-4cca-420e-ac7f-6ad68780f9e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Thread">
+      <UniqueIdentifier>{bea73a02-d831-429d-a1b7-4a02b675965b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Memory">
+      <UniqueIdentifier>{2b89a087-a940-4951-bf45-1cca8ced71d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.LinkedList">
+      <UniqueIdentifier>{ac1a3691-9e70-4a2f-853d-512eca7f7692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Memory\MemoryPool">
+      <UniqueIdentifier>{114114a8-7d3c-419c-a79f-4a099cebcd00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core.Memory\SpinLock">
+      <UniqueIdentifier>{4584675b-2578-4d75-a537-a62df1b1dc49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -36,6 +66,45 @@
     <ClInclude Include="CoreWindow.h">
       <Filter>WindowsApplication\CoreWindow</Filter>
     </ClInclude>
+    <ClInclude Include="Banchmark.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Assert.hpp">
+      <Filter>Core.Assert</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Console.hpp">
+      <Filter>Core.Console</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Mathf.h">
+      <Filter>Core.Mathf</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Random.h">
+      <Filter>Core.Random</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Thread.h">
+      <Filter>Core.Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Memory.hpp">
+      <Filter>Core.Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedListLib.hpp">
+      <Filter>Core.LinkedList</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Core.Memory\MemoryPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.Minimal.h">
+      <Filter>Core.definition</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>Core.Memory\SpinLock</Filter>
+    </ClInclude>
+    <ClInclude Include="DumpHandler.h">
+      <Filter>WindowsApplication\CoreWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXDescHelper.h">
+      <Filter>DirectX11Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResource.cpp">
@@ -44,5 +113,13 @@
     <ClCompile Include="CoreWindow.cpp">
       <Filter>WindowsApplication\CoreWindow</Filter>
     </ClCompile>
+    <ClCompile Include="Core.Thread.cpp">
+      <Filter>Core.Thread</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MemoryPool.inl">
+      <Filter>Core.Memory\MemoryPool</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -22,7 +22,7 @@ void Core::App::Initialize(HINSTANCE hInstance, const wchar_t* title, int width,
 	CoreWindow coreWindow(hInstance, L"HeroP Editor", 1280, 720);
 	SetWindow(coreWindow);
 	m_deviceResources = std::make_shared<DirectX11::DeviceResources>();
-	InputManagement.Initialize(coreWindow.GetHandle());
+	InputManagement->Initialize(coreWindow.GetHandle());
 	Load();
 	Run();
 }
@@ -44,13 +44,13 @@ void Core::App::Load()
 void Core::App::Run()
 {
 	CoreWindow::GetForCurrentInstance()->InitializeTask([&]
-		{
-			// 초기화 작업
-		})
-		.Then([&]
-			{
-				// 메시지 루프
-			});
+	{
+		// 초기화 작업
+	})
+	.Then([&]
+	{
+		// 메시지 루프
+	});
 }
 
 LRESULT Core::App::Shutdown(HWND hWnd, WPARAM wParam, LPARAM lParam)
@@ -62,6 +62,6 @@ LRESULT Core::App::Shutdown(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 LRESULT Core::App::ProcessRawInput(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
-	InputManagement.ProcessRawInput(lParam);
+	InputManagement->ProcessRawInput(lParam);
 	return 0;
 }

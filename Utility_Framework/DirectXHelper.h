@@ -176,19 +176,19 @@ namespace DirectX
         return hResult;
     }
 
-#if defined(_DEBUG)
-    template<UINT TDebugNameLength>
-    inline void SetDebugObjectName(
-        _In_ ID3D11DeviceChild* deviceResource,
-        _In_z_ const char(&debugName)[TDebugNameLength])
+    template <typename T>
+    concept DXObjects = requires(T t)
     {
-        deviceResource->SetPrivateData(WKPDID_D3DDebugObjectName, TDebugNameLength - 1, debugName);
+        t->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
+    };
+    // 디버깅을 지원하려면 개체에 이름을 할당하세요.
+#if defined(_DEBUG)
+    inline void SetName(DXObjects auto pObject, const std::string_view& name)
+    {
+        pObject->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
     }
 #else
-    template<UINT TDebugNameLength>
-    inline void SetDebugObjectName(
-        _In_ ID3D11DeviceChild*,
-        _In_z_ const char(&)[TDebugNameLength])
+    inline void SetName(DXObjects auto, const std::string_view&)
     {
     }
 #endif

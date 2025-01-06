@@ -19,17 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Banchmark.hpp" />
     <ClInclude Include="ClassProperty.h" />
+    <ClInclude Include="Core.Assert.hpp" />
+    <ClInclude Include="Core.Console.hpp" />
     <ClInclude Include="Core.Definition.h" />
+    <ClInclude Include="Core.Mathf.h" />
+    <ClInclude Include="Core.Memory.hpp" />
+    <ClInclude Include="Core.Minimal.h" />
+    <ClInclude Include="Core.Random.h" />
+    <ClInclude Include="Core.Thread.h" />
     <ClInclude Include="CoreWindow.h" />
     <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="DirectXDescHelper.h" />
     <ClInclude Include="DirectXHelper.h" />
+    <ClInclude Include="DumpHandler.h" />
+    <ClInclude Include="LinkedListLib.hpp" />
+    <ClInclude Include="MemoryPool.h" />
+    <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TimeSystem.h" />
     <ClInclude Include="TypeDefinition.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core.Thread.cpp" />
     <ClCompile Include="CoreWindow.cpp" />
     <ClCompile Include="DeviceResource.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MemoryPool.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -127,6 +144,8 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

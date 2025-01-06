@@ -22,9 +22,9 @@ void DirectX11::Dx11Main::Update()
 {
 	//렌더러의 업데이트 코드를 여기에 추가합니다.
 	m_timeSystem.Tick([&]
-		{
-			//렌더러의 업데이트 코드를 여기에 추가합니다.
-		});
+	{
+		//렌더러의 업데이트 코드를 여기에 추가합니다.
+	});
 }
 
 bool DirectX11::Dx11Main::Render()

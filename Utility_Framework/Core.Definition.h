@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <wincodec.h>
 #include <wrl/client.h>
+using namespace Microsoft::WRL;
 //STL
 #include <array>
 #include <algorithm>
@@ -35,6 +36,7 @@ namespace file = std::filesystem;
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <cstdint>
 //Custom
 #include "ClassProperty.h"
 #include "TypeDefinition.h"
