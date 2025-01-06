@@ -7,7 +7,7 @@ interface ITextureData
     virtual ~ITextureData() = default;
 };
 
-class Texture2D : public ITextureData
+struct Texture2D : public ITextureData
 {
     Texture2D() : m_Width(0), m_Height(0), m_format(DXGI_FORMAT_UNKNOWN) {}
     Texture2D(ID3D11Texture2D* texture, ID3D11ShaderResourceView* srv) : m_Texture(texture), m_SRV(srv)
@@ -33,7 +33,7 @@ class Texture2D : public ITextureData
         m_Texture(texture), m_Width(desc.Width), m_Height(desc.Height), m_format(desc.Format)
     {
     }
-    ~Texture2D() = default;
+    ~Texture2D() override = default;
 
     ID3D11Texture2D* GetTexture() const { return m_Texture.Get(); }
     ID3D11Texture2D* const* GetTextureAddressOf() const { return m_Texture.GetAddressOf(); }

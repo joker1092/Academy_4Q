@@ -15,6 +15,9 @@ namespace Mathf
     using Matrix = SimpleMath::Matrix;
     using Quaternion = SimpleMath::Quaternion;
 
+	static xVector xVectorZero = XMVectorZero();
+	static xVector xVectorOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+
     template<class T> inline T lerp(T low, T high, float t)
     {
         return low + static_cast<T>((high - low) * t);

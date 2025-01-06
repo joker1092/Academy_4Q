@@ -19,11 +19,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="SceneRenderer.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
+    <ClCompile Include="소스.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferType.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshBasedPSO.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="IPipelineStateObject.h" />
+    <ClInclude Include="Primitives.h" />
+    <ClInclude Include="SceneRenderer.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="StateDevice.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureLoader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -121,7 +139,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Utility_Framework\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Utility_Framework\;$(SolutionDir)RenderEngine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -139,6 +157,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Utility_Framework\;$(SolutionDir)RenderEngine\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

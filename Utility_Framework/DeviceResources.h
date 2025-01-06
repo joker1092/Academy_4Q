@@ -35,6 +35,7 @@ namespace DirectX11
 		Size GetOutputSize() const { return m_outputSize; }
 		Size GetLogicalSize() const { return m_logicalSize; }
 		float GetDpi() const { return m_dpi; }
+		float GetAspectRatio() const { return m_logicalSize.width / m_logicalSize.height; }
 
 		ID3D11Device3* GetD3DDevice() const { return m_d3dDevice.Get(); }
 		ID3D11DeviceContext3* GetD3DDeviceContext() const { return m_d3dContext.Get(); }
@@ -54,6 +55,8 @@ namespace DirectX11
         void BeginEvent(const std::wstring_view& name);
         void EndEvent();
         void SetMarker(const std::wstring_view& name);
+
+		CoreWindow* GetWindow() const { return m_window; }
 
 	private:
 		void CreateDeviceIndependentResources();

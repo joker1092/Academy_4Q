@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <print>
 
-//Console í´ëž˜ìŠ¤ -> ì‚¬ìš©ë²•ì€ C#ì˜ Console í´ëž˜ìŠ¤ì™€ ìœ ì‚¬
+//Console Å¬·¡½º -> »ç¿ë¹ýÀº C#ÀÇ Console Å¬·¡½º¿Í À¯»ç
 class CoreConsole
 {
 public:

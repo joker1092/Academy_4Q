@@ -4,19 +4,19 @@
 
 namespace DisplayMetrics
 {
-	// ê³ í•´ìƒë„ ë””ìŠ¤í”Œë ˆì´ëŠ” ë Œë”ë§í•˜ëŠ” ë° ë§Žì€ GPU ë° ë°°í„°ë¦¬ ì „ì›ì´ í•„ìš”í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
-	// ì˜ˆë¥¼ ë“¤ì–´ ê³ í•´ìƒë„ íœ´ëŒ€í°ì˜ ê²Œìž„ì—ì„œ ê³ í™”ì§ˆë¡œ ì´ˆë‹¹ 60í”„ë ˆìž„ì„ ë Œë”ë§í•˜ë ¤ëŠ”
-	// ê²½ìš° ì§§ì€ ë°°í„°ë¦¬ ìˆ˜ëª…ìœ¼ë¡œ ì¸í•´ ë¬¸ì œê°€ ë°œìƒí•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
-	// ëª¨ë“  í”Œëž«í¼ ë° í¼ íŒ©í„°ì—ì„œ ê³ í™”ì§ˆë¡œ ë Œë”ë§í•˜ëŠ” ê²°ì •ì€
-	// ì‹ ì¤‘í•˜ê²Œ ë‚´ë ¤ì•¼ í•©ë‹ˆë‹¤.
+	// °íÇØ»óµµ µð½ºÇÃ·¹ÀÌ´Â ·»´õ¸µÇÏ´Â µ¥ ¸¹Àº GPU ¹× ¹èÅÍ¸® Àü¿øÀÌ ÇÊ¿äÇÒ ¼ö ÀÖ½À´Ï´Ù.
+	// ¿¹¸¦ µé¾î °íÇØ»óµµ ÈÞ´ëÆùÀÇ °ÔÀÓ¿¡¼­ °íÈ­Áú·Î ÃÊ´ç 60ÇÁ·¹ÀÓÀ» ·»´õ¸µÇÏ·Á´Â
+	// °æ¿ì ÂªÀº ¹èÅÍ¸® ¼ö¸íÀ¸·Î ÀÎÇØ ¹®Á¦°¡ ¹ß»ýÇÒ ¼ö ÀÖ½À´Ï´Ù.
+	// ¸ðµç ÇÃ·§Æû ¹× Æû ÆÑÅÍ¿¡¼­ °íÈ­Áú·Î ·»´õ¸µÇÏ´Â °áÁ¤Àº
+	// ½ÅÁßÇÏ°Ô ³»·Á¾ß ÇÕ´Ï´Ù.
 	static const bool SupportHighResolutions = false;
 
-	// â€œê³ í•´ìƒë„â€ ë””ìŠ¤í”Œë ˆì´ë¥¼ ì •ì˜í•˜ëŠ” ê¸°ë³¸ ìž„ê³„ê°’ìž…ë‹ˆë‹¤. ìž„ê³„ê°’ì„ ì´ˆê³¼í•˜ê±°ë‚˜
-	// SupportHighResolutionsê°€ falseì¸ ê²½ìš° í¬ê¸°ê°€ 50%ë¡œ
-	//ì¤„ì–´ë“­ë‹ˆë‹¤.
-	static const float DpiThreshold = 192.0f;		// í‘œì¤€ ë°ìŠ¤í¬í†± ë””ìŠ¤í”Œë ˆì´ì˜ 200%ìž…ë‹ˆë‹¤.
-	static const float WidthThreshold = 1920.0f;	// ë„ˆë¹„ê°€ 1080pìž…ë‹ˆë‹¤.
-	static const float HeightThreshold = 1080.0f;	// ë†’ì´ê°€ 1080pìž…ë‹ˆë‹¤.
+	// ¡°°íÇØ»óµµ¡± µð½ºÇÃ·¹ÀÌ¸¦ Á¤ÀÇÇÏ´Â ±âº» ÀÓ°è°ªÀÔ´Ï´Ù. ÀÓ°è°ªÀ» ÃÊ°úÇÏ°Å³ª
+	// SupportHighResolutions°¡ falseÀÎ °æ¿ì Å©±â°¡ 50%·Î
+	//ÁÙ¾îµì´Ï´Ù.
+	static const float DpiThreshold = 192.0f;		// Ç¥ÁØ µ¥½ºÅ©Åé µð½ºÇÃ·¹ÀÌÀÇ 200%ÀÔ´Ï´Ù.
+	static const float WidthThreshold = 1920.0f;	// ³Êºñ°¡ 1080pÀÔ´Ï´Ù.
+	static const float HeightThreshold = 1080.0f;	// ³ôÀÌ°¡ 1080pÀÔ´Ï´Ù.
 };
 
 DirectX11::DeviceResources::DeviceResources() :
@@ -65,9 +65,9 @@ void DirectX11::DeviceResources::SetDpi(float dpi)
 
 void DirectX11::DeviceResources::ValidateDevice()
 {
-	// ê¸°ë³¸ ì–´ëŒ‘í„°ê°€ ë””ë°”ì´ìŠ¤ê°€ ë§Œë“¤ì–´ì§„ ì´í›„ì— ë³€ê²½ë˜ê±°ë‚˜ ë””ë°”ì´ìŠ¤ê°€ ì œê±°ëœ ê²½ìš°
-	// D3D ë””ë°”ì´ìŠ¤ëŠ” ë” ì´ìƒ ìœ íš¨í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
-	// ë¨¼ì €, ë””ë°”ì´ìŠ¤ë¥¼ ë§Œë“¤ì—ˆì„ ë•Œì˜ ê¸°ë³¸ ì–´ëŒ‘í„°ì— ëŒ€í•œ ì •ë³´ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
+	// ±âº» ¾î´ðÅÍ°¡ µð¹ÙÀÌ½º°¡ ¸¸µé¾îÁø ÀÌÈÄ¿¡ º¯°æµÇ°Å³ª µð¹ÙÀÌ½º°¡ Á¦°ÅµÈ °æ¿ì
+	// D3D µð¹ÙÀÌ½º´Â ´õ ÀÌ»ó À¯È¿ÇÏÁö ¾Ê½À´Ï´Ù.
+	// ¸ÕÀú, µð¹ÙÀÌ½º¸¦ ¸¸µé¾úÀ» ¶§ÀÇ ±âº» ¾î´ðÅÍ¿¡ ´ëÇÑ Á¤º¸¸¦ °¡Á®¿É´Ï´Ù.
 
 	ComPtr<IDXGIDevice3> dxgiDevice;
 	DirectX11::ThrowIfFailed(m_d3dDevice.As(&dxgiDevice));
@@ -84,7 +84,7 @@ void DirectX11::DeviceResources::ValidateDevice()
 	DXGI_ADAPTER_DESC1 previousDesc;
 	DirectX11::ThrowIfFailed(previousDefaultAdapter->GetDesc1(&previousDesc));
 
-	// ë‹¤ìŒìœ¼ë¡œ, í˜„ìž¬ ê¸°ë³¸ ì–´ëŒ‘í„°ì— ëŒ€í•œ ì •ë³´ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
+	// ´ÙÀ½À¸·Î, ÇöÀç ±âº» ¾î´ðÅÍ¿¡ ´ëÇÑ Á¤º¸¸¦ °¡Á®¿É´Ï´Ù.
 	ComPtr<IDXGIFactory4> currentFactory;
 	DirectX11::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&currentFactory)));
 
@@ -94,20 +94,20 @@ void DirectX11::DeviceResources::ValidateDevice()
 	DXGI_ADAPTER_DESC1 currentDesc;
 	DirectX11::ThrowIfFailed(currentDefaultAdapter->GetDesc1(&currentDesc));
 
-	// ì–´ëŒ‘í„° LUIDê°€ ì¼ì¹˜í•˜ì§€ ì•Šê±°ë‚˜ ë””ë°”ì´ìŠ¤ê°€ ì œê±°ë˜ì—ˆë‹¤ê³  ë³´ê³ í•˜ëŠ” ê²½ìš°
-	// ìƒˆ D3D ë””ë°”ì´ìŠ¤ë¥¼ ë§Œë“¤ì–´ì•¼ í•©ë‹ˆë‹¤.
+	// ¾î´ðÅÍ LUID°¡ ÀÏÄ¡ÇÏÁö ¾Ê°Å³ª µð¹ÙÀÌ½º°¡ Á¦°ÅµÇ¾ú´Ù°í º¸°íÇÏ´Â °æ¿ì
+	// »õ D3D µð¹ÙÀÌ½º¸¦ ¸¸µé¾î¾ß ÇÕ´Ï´Ù.
 
 	if (previousDesc.AdapterLuid.LowPart != currentDesc.AdapterLuid.LowPart ||
 		previousDesc.AdapterLuid.HighPart != currentDesc.AdapterLuid.HighPart ||
 		FAILED(m_d3dDevice->GetDeviceRemovedReason()))
 	{
-		// ì´ì „ ë””ë°”ì´ìŠ¤ì™€ ê´€ë ¨ëœ ë¦¬ì†ŒìŠ¤ì— ëŒ€í•œ ì°¸ì¡°ë¥¼ í•´ì œí•©ë‹ˆë‹¤.
+		// ÀÌÀü µð¹ÙÀÌ½º¿Í °ü·ÃµÈ ¸®¼Ò½º¿¡ ´ëÇÑ ÂüÁ¶¸¦ ÇØÁ¦ÇÕ´Ï´Ù.
 		dxgiDevice = nullptr;
 		deviceAdapter = nullptr;
 		deviceFactory = nullptr;
 		previousDefaultAdapter = nullptr;
 
-		// ìƒˆ ë””ë°”ì´ìŠ¤ ë° ìŠ¤ì™‘ ì²´ì¸ì„ ë§Œë“­ë‹ˆë‹¤.
+		// »õ µð¹ÙÀÌ½º ¹× ½º¿Ò Ã¼ÀÎÀ» ¸¸µì´Ï´Ù.
 		HandleDeviceLost();
 	}
 }
@@ -146,22 +146,22 @@ void DirectX11::DeviceResources::Trim()
 
 void DirectX11::DeviceResources::Present()
 {
-	// ì²« ë²ˆì§¸ ì¸ìˆ˜ëŠ” DXGIì— VSyncê¹Œì§€ ì°¨ë‹¨í•˜ë„ë¡ ì§€ì‹œí•˜ì—¬ ì• í”Œë¦¬ì¼€ì´ì…˜ì´
-	// ë‹¤ìŒ VSyncê¹Œì§€ ëŒ€ê¸°í•˜ë„ë¡ í•©ë‹ˆë‹¤. ì´ë¥¼ í†µí•´ í™”ë©´ì— í‘œì‹œë˜ì§€ ì•ŠëŠ” í”„ë ˆìž„ì„
-	// ë Œë”ë§í•˜ëŠ” ì£¼ê¸°ë¥¼ ë‚­ë¹„í•˜ì§€ ì•Šì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
+	// Ã¹ ¹øÂ° ÀÎ¼ö´Â DXGI¿¡ VSync±îÁö Â÷´ÜÇÏµµ·Ï Áö½ÃÇÏ¿© ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀÌ
+	// ´ÙÀ½ VSync±îÁö ´ë±âÇÏµµ·Ï ÇÕ´Ï´Ù. ÀÌ¸¦ ÅëÇØ È­¸é¿¡ Ç¥½ÃµÇÁö ¾Ê´Â ÇÁ·¹ÀÓÀ»
+	// ·»´õ¸µÇÏ´Â ÁÖ±â¸¦ ³¶ºñÇÏÁö ¾ÊÀ» ¼ö ÀÖ½À´Ï´Ù.
 	DXGI_PRESENT_PARAMETERS parameters = { 0 };
 	HRESULT hr = m_swapChain->Present1(1, 0, &parameters);
 
-	// ë Œë”ë§ ëŒ€ìƒì˜ ì½˜í…ì¸ ë¥¼ ì‚­ì œí•©ë‹ˆë‹¤.
-	// ì´ ìž‘ì—…ì€ ê¸°ì¡´ ì½˜í…ì¸ ë¥¼ ì™„ì „ížˆ ë®ì–´ì“¸ ê²½ìš°ì—ë§Œ
-	// ì˜¬ë°”ë¦…ë‹ˆë‹¤. ë³€ê²½ ë˜ëŠ” ìŠ¤í¬ë¡¤ ì˜ì—­ì´ ì‚¬ìš©ë˜ëŠ” ê²½ìš°ì—ëŠ” ì´ í˜¸ì¶œì„ ì œê±°í•´ì•¼ í•©ë‹ˆë‹¤.
+	// ·»´õ¸µ ´ë»óÀÇ ÄÜÅÙÃ÷¸¦ »èÁ¦ÇÕ´Ï´Ù.
+	// ÀÌ ÀÛ¾÷Àº ±âÁ¸ ÄÜÅÙÃ÷¸¦ ¿ÏÀüÈ÷ µ¤¾î¾µ °æ¿ì¿¡¸¸
+	// ¿Ã¹Ù¸¨´Ï´Ù. º¯°æ ¶Ç´Â ½ºÅ©·Ñ ¿µ¿ªÀÌ »ç¿ëµÇ´Â °æ¿ì¿¡´Â ÀÌ È£ÃâÀ» Á¦°ÅÇØ¾ß ÇÕ´Ï´Ù.
 	m_d3dContext->DiscardView1(m_d3dRenderTargetView.Get(), nullptr, 0);
 
-	// ê¹Šì´ ìŠ¤í…ì‹¤ì˜ ì½˜í…ì¸ ë¥¼ ì‚­ì œí•©ë‹ˆë‹¤.
+	// ±íÀÌ ½ºÅÙ½ÇÀÇ ÄÜÅÙÃ÷¸¦ »èÁ¦ÇÕ´Ï´Ù.
 	m_d3dContext->DiscardView1(m_d3dDepthStencilView.Get(), nullptr, 0);
 
-	// ì—°ê²°ì´ ëŠê¸°ê±°ë‚˜ ë“œë¼ì´ë²„ ì—…ê·¸ë ˆì´ë“œë¡œ ì¸í•´ ë””ë°”ì´ìŠ¤ê°€ ì œê±°ë˜ë©´ 
-	// ëª¨ë“  ë””ë°”ì´ìŠ¤ ë¦¬ì†ŒìŠ¤ë¥¼ ë‹¤ì‹œ ë§Œë“¤ì–´ì•¼ í•©ë‹ˆë‹¤.
+	// ¿¬°áÀÌ ²÷±â°Å³ª µå¶óÀÌ¹ö ¾÷±×·¹ÀÌµå·Î ÀÎÇØ µð¹ÙÀÌ½º°¡ Á¦°ÅµÇ¸é 
+	// ¸ðµç µð¹ÙÀÌ½º ¸®¼Ò½º¸¦ ´Ù½Ã ¸¸µé¾î¾ß ÇÕ´Ï´Ù.
 	if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 	{
 		HandleDeviceLost();
@@ -203,16 +203,16 @@ void DirectX11::DeviceResources::SetMarker(const std::wstring_view&)
 
 void DirectX11::DeviceResources::CreateDeviceIndependentResources()
 {
-	// Direct2D ë¦¬ì†ŒìŠ¤ë¥¼ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
+	// Direct2D ¸®¼Ò½º¸¦ ÃÊ±âÈ­ÇÕ´Ï´Ù.
 	D2D1_FACTORY_OPTIONS options;
 	ZeroMemory(&options, sizeof(D2D1_FACTORY_OPTIONS));
 
 #if defined(_DEBUG)
-	// í”„ë¡œì íŠ¸ê°€ ë””ë²„ê·¸ ë¹Œë“œ ì¤‘ì¸ ê²½ìš° SDK ë ˆì´ì–´ë¥¼ í†µí•´ Direct2D ë””ë²„ê¹…ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
+	// ÇÁ·ÎÁ§Æ®°¡ µð¹ö±× ºôµå ÁßÀÎ °æ¿ì SDK ·¹ÀÌ¾î¸¦ ÅëÇØ Direct2D µð¹ö±ëÀ» »ç¿ëÇÕ´Ï´Ù.
 	options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 #endif
 
-	// Direct2D íŒ©í„°ë¦¬ë¥¼ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
+	// Direct2D ÆÑÅÍ¸®¸¦ ÃÊ±âÈ­ÇÕ´Ï´Ù.
 	DirectX11::ThrowIfFailed(
 		D2D1CreateFactory(
 			D2D1_FACTORY_TYPE_SINGLE_THREADED,
@@ -222,7 +222,7 @@ void DirectX11::DeviceResources::CreateDeviceIndependentResources()
 		)
 	);
 
-	// DirectWrite íŒ©í„°ë¦¬ë¥¼ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
+	// DirectWrite ÆÑÅÍ¸®¸¦ ÃÊ±âÈ­ÇÕ´Ï´Ù.
 	DirectX11::ThrowIfFailed(
 		DWriteCreateFactory(
 			DWRITE_FACTORY_TYPE_SHARED,
@@ -231,7 +231,7 @@ void DirectX11::DeviceResources::CreateDeviceIndependentResources()
 		)
 	);
 
-	//// WIC(Windows Imaging Component) íŒ©í„°ë¦¬ë¥¼ ì´ˆê¸°í™”í•©ë‹ˆë‹¤. //ì´ê±° ì™œ í„°ì§€ëƒ? ã…‹ã…‹ã…‹
+	//// WIC(Windows Imaging Component) ÆÑÅÍ¸®¸¦ ÃÊ±âÈ­ÇÕ´Ï´Ù. //ÀÌ°Å ¿Ö ÅÍÁö³Ä? ¤»¤»¤»
 	//DirectX11::ThrowIfFailed(
 	//	CoCreateInstance(
 	//		CLSID_WICImagingFactory2,
@@ -244,22 +244,22 @@ void DirectX11::DeviceResources::CreateDeviceIndependentResources()
 
 void DirectX11::DeviceResources::CreateDeviceResources()
 {
-	// ì´ í”Œëž˜ê·¸ëŠ” API ê¸°ë³¸ê°’ê³¼ ë‹¤ë¥¸ ìƒ‰ ì±„ë„ ìˆœì„œì˜ í‘œë©´ì— ëŒ€í•œ ì§€ì›ì„
-	// ì¶”ê°€í•©ë‹ˆë‹¤. Direct2Dì™€ì˜ í˜¸í™˜ì„±ì„ ìœ„í•´ í•„ìš”í•©ë‹ˆë‹¤.
+	// ÀÌ ÇÃ·¡±×´Â API ±âº»°ª°ú ´Ù¸¥ »ö Ã¤³Î ¼ø¼­ÀÇ Ç¥¸é¿¡ ´ëÇÑ Áö¿øÀ»
+	// Ãß°¡ÇÕ´Ï´Ù. Direct2D¿ÍÀÇ È£È¯¼ºÀ» À§ÇØ ÇÊ¿äÇÕ´Ï´Ù.
 	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
 #if defined(_DEBUG)
 	if (DirectX11::SdkLayersAvailable())
 	{
-		// í”„ë¡œì íŠ¸ê°€ ë””ë²„ê·¸ ë¹Œë“œ ì¤‘ì¸ ê²½ìš°ì—ëŠ” ì´ í”Œëž˜ê·¸ê°€ ìžˆëŠ” SDK ë ˆì´ì–´ë¥¼ í†µí•´ ë””ë²„ê¹…ì„ ì‚¬ìš©í•˜ì‹­ì‹œì˜¤.
+		// ÇÁ·ÎÁ§Æ®°¡ µð¹ö±× ºôµå ÁßÀÎ °æ¿ì¿¡´Â ÀÌ ÇÃ·¡±×°¡ ÀÖ´Â SDK ·¹ÀÌ¾î¸¦ ÅëÇØ µð¹ö±ëÀ» »ç¿ëÇÏ½Ê½Ã¿À.
 		creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
 #endif
 
-	// ì´ ë°°ì—´ì€ ì´ ì‘ìš© í”„ë¡œê·¸ëž¨ì—ì„œ ì§€ì›í•˜ëŠ” DirectX í•˜ë“œì›¨ì–´ ê¸°ëŠ¥ ìˆ˜ì¤€ ì§‘í•©ì„ ì •ì˜í•©ë‹ˆë‹¤.
-	// ìˆœì„œë¥¼ ìœ ì§€í•´ì•¼ í•©ë‹ˆë‹¤.
-	// ì„¤ëª…ì—ì„œ ì• í”Œë¦¬ì¼€ì´ì…˜ì— í•„ìš”í•œ ìµœì†Œ ê¸°ëŠ¥ ìˆ˜ì¤€ì„ ì„ ì–¸í•´ì•¼ í•©ë‹ˆë‹¤.
-	// ë³„ë„ë¡œ ì§€ì •í•˜ì§€ ì•Šì€ ê²½ìš° ëª¨ë“  ì• í”Œë¦¬ì¼€ì´ì…˜ì€ 9.1ì„ ì§€ì›í•˜ëŠ” ê²ƒìœ¼ë¡œ ê°„ì£¼ë©ë‹ˆë‹¤.
+	// ÀÌ ¹è¿­Àº ÀÌ ÀÀ¿ë ÇÁ·Î±×·¥¿¡¼­ Áö¿øÇÏ´Â DirectX ÇÏµå¿þ¾î ±â´É ¼öÁØ ÁýÇÕÀ» Á¤ÀÇÇÕ´Ï´Ù.
+	// ¼ø¼­¸¦ À¯ÁöÇØ¾ß ÇÕ´Ï´Ù.
+	// ¼³¸í¿¡¼­ ¾ÖÇÃ¸®ÄÉÀÌ¼Ç¿¡ ÇÊ¿äÇÑ ÃÖ¼Ò ±â´É ¼öÁØÀ» ¼±¾ðÇØ¾ß ÇÕ´Ï´Ù.
+	// º°µµ·Î ÁöÁ¤ÇÏÁö ¾ÊÀº °æ¿ì ¸ðµç ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀº 9.1À» Áö¿øÇÏ´Â °ÍÀ¸·Î °£ÁÖµË´Ï´Ù.
 	D3D_FEATURE_LEVEL featureLevels[] =
 	{
 		D3D_FEATURE_LEVEL_11_1,
@@ -271,32 +271,32 @@ void DirectX11::DeviceResources::CreateDeviceResources()
 		D3D_FEATURE_LEVEL_9_1
 	};
 
-	// Direct3D 11 API ë””ë°”ì´ìŠ¤ ê°œì²´ì™€ í•´ë‹¹ ì»¨í…ìŠ¤íŠ¸ë¥¼ ë§Œë“­ë‹ˆë‹¤.
+	// Direct3D 11 API µð¹ÙÀÌ½º °³Ã¼¿Í ÇØ´ç ÄÁÅØ½ºÆ®¸¦ ¸¸µì´Ï´Ù.
 	ComPtr<ID3D11Device> device;
 	ComPtr<ID3D11DeviceContext> context;
 
 	HRESULT hr = D3D11CreateDevice(
-		nullptr,						// ê¸°ë³¸ ì–´ëŒ‘í„°ë¥¼ ì‚¬ìš©í•˜ë ¤ë©´ nullptrì„ ì§€ì •í•©ë‹ˆë‹¤.
-		D3D_DRIVER_TYPE_HARDWARE,	// í•˜ë“œì›¨ì–´ ê·¸ëž˜í”½ ë“œë¼ì´ë²„ë¥¼ ì‚¬ìš©í•˜ì—¬ ë””ë°”ì´ìŠ¤ë¥¼ ë§Œë“­ë‹ˆë‹¤.
-		0,							// ë“œë¼ì´ë²„ê°€ D3D_DRIVER_TYPE_SOFTWAREê°€ ì•„ë‹Œ ê²½ìš° 0ì´ì–´ì•¼ í•©ë‹ˆë‹¤.
-		creationFlags,						// ë””ë²„ê·¸ ë° Direct2D í˜¸í™˜ì„± í”Œëž˜ê·¸ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
-		featureLevels,			// ì´ ì‘ìš© í”„ë¡œê·¸ëž¨ì´ ì§€ì›í•  ìˆ˜ ìžˆëŠ” ê¸°ëŠ¥ ìˆ˜ì¤€ ëª©ë¡ìž…ë‹ˆë‹¤.
-		ARRAYSIZE(featureLevels),			// ìœ„ ëª©ë¡ì˜ í¬ê¸°ìž…ë‹ˆë‹¤.
-		D3D11_SDK_VERSION,			// Microsoft Store ì•±ì˜ ê²½ìš° í•­ìƒ ì´ ê°’ì„ D3D11_SDK_VERSIONìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
-		&device,						// ë§Œë“¤ì–´ì§„ Direct3D ë””ë°”ì´ìŠ¤ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
-		&m_d3dFeatureLevel,		// ë§Œë“¤ì–´ì§„ ë””ë°”ì´ìŠ¤ì˜ ê¸°ëŠ¥ ìˆ˜ì¤€ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
-		&context				// ë””ë°”ì´ìŠ¤ ì§ì ‘ ì»¨í…ìŠ¤íŠ¸ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
+		nullptr,						// ±âº» ¾î´ðÅÍ¸¦ »ç¿ëÇÏ·Á¸é nullptrÀ» ÁöÁ¤ÇÕ´Ï´Ù.
+		D3D_DRIVER_TYPE_HARDWARE,	// ÇÏµå¿þ¾î ±×·¡ÇÈ µå¶óÀÌ¹ö¸¦ »ç¿ëÇÏ¿© µð¹ÙÀÌ½º¸¦ ¸¸µì´Ï´Ù.
+		0,							// µå¶óÀÌ¹ö°¡ D3D_DRIVER_TYPE_SOFTWARE°¡ ¾Æ´Ñ °æ¿ì 0ÀÌ¾î¾ß ÇÕ´Ï´Ù.
+		creationFlags,						// µð¹ö±× ¹× Direct2D È£È¯¼º ÇÃ·¡±×¸¦ ¼³Á¤ÇÕ´Ï´Ù.
+		featureLevels,			// ÀÌ ÀÀ¿ë ÇÁ·Î±×·¥ÀÌ Áö¿øÇÒ ¼ö ÀÖ´Â ±â´É ¼öÁØ ¸ñ·ÏÀÔ´Ï´Ù.
+		ARRAYSIZE(featureLevels),			// À§ ¸ñ·ÏÀÇ Å©±âÀÔ´Ï´Ù.
+		D3D11_SDK_VERSION,			// Microsoft Store ¾ÛÀÇ °æ¿ì Ç×»ó ÀÌ °ªÀ» D3D11_SDK_VERSIONÀ¸·Î ¼³Á¤ÇÕ´Ï´Ù.
+		&device,						// ¸¸µé¾îÁø Direct3D µð¹ÙÀÌ½º¸¦ ¹ÝÈ¯ÇÕ´Ï´Ù.
+		&m_d3dFeatureLevel,		// ¸¸µé¾îÁø µð¹ÙÀÌ½ºÀÇ ±â´É ¼öÁØÀ» ¹ÝÈ¯ÇÕ´Ï´Ù.
+		&context				// µð¹ÙÀÌ½º Á÷Á¢ ÄÁÅØ½ºÆ®¸¦ ¹ÝÈ¯ÇÕ´Ï´Ù.
 	);
 
 	if (FAILED(hr))
 	{
-		// ì´ˆê¸°í™”ì— ì‹¤íŒ¨í•˜ë©´ WARP ë””ë°”ì´ìŠ¤ë¡œ ëŒ€ì²´ë©ë‹ˆë‹¤.
-		// WARPì— ëŒ€í•œ ìžì„¸í•œ ë‚´ìš©ì€ ë‹¤ìŒì„ ì°¸ì¡°í•˜ì„¸ìš”. 
+		// ÃÊ±âÈ­¿¡ ½ÇÆÐÇÏ¸é WARP µð¹ÙÀÌ½º·Î ´ëÃ¼µË´Ï´Ù.
+		// WARP¿¡ ´ëÇÑ ÀÚ¼¼ÇÑ ³»¿ëÀº ´ÙÀ½À» ÂüÁ¶ÇÏ¼¼¿ä. 
 		// https://go.microsoft.com/fwlink/?LinkId=286690
 		DirectX11::ThrowIfFailed(
 			D3D11CreateDevice(
 				nullptr,
-				D3D_DRIVER_TYPE_WARP, // í•˜ë“œì›¨ì–´ ë””ë°”ì´ìŠ¤ ëŒ€ì‹  WARP ë””ë°”ì´ìŠ¤ë¥¼ ë§Œë“­ë‹ˆë‹¤.
+				D3D_DRIVER_TYPE_WARP, // ÇÏµå¿þ¾î µð¹ÙÀÌ½º ´ë½Å WARP µð¹ÙÀÌ½º¸¦ ¸¸µì´Ï´Ù.
 				0,
 				creationFlags,
 				featureLevels,
@@ -309,7 +309,7 @@ void DirectX11::DeviceResources::CreateDeviceResources()
 		);
 	}
 
-	// Direct3D 11.3 API ë””ë°”ì´ìŠ¤ ë° ì§ì ‘ ì»¨í…ìŠ¤íŠ¸ì— ëŒ€í•œ í¬ì¸í„°ë¥¼ ì €ìž¥í•©ë‹ˆë‹¤.
+	// Direct3D 11.3 API µð¹ÙÀÌ½º ¹× Á÷Á¢ ÄÁÅØ½ºÆ®¿¡ ´ëÇÑ Æ÷ÀÎÅÍ¸¦ ÀúÀåÇÕ´Ï´Ù.
 	DirectX11::ThrowIfFailed(
 		device.As(&m_d3dDevice)
 	);
@@ -341,7 +341,7 @@ void DirectX11::DeviceResources::CreateDeviceResources()
     }
 #endif
 
-	// Direct2D ë””ë°”ì´ìŠ¤ ê°œì²´ ë° í•´ë‹¹ ì»¨í…ìŠ¤íŠ¸ë¥¼ ë§Œë“­ë‹ˆë‹¤.
+	// Direct2D µð¹ÙÀÌ½º °³Ã¼ ¹× ÇØ´ç ÄÁÅØ½ºÆ®¸¦ ¸¸µì´Ï´Ù.
 	ComPtr<IDXGIDevice3> dxgiDevice;
 	DirectX11::ThrowIfFailed(
 		m_d3dDevice.As(&dxgiDevice)
@@ -365,7 +365,7 @@ void DirectX11::DeviceResources::CreateDeviceResources()
 
 void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
 {
-	// ì´ì „ ì°½ í¬ê¸°ì™€ ê´€ë ¨ëœ ì»¨í…ìŠ¤íŠ¸ë¥¼ ì§€ì›ë‹ˆë‹¤.
+	// ÀÌÀü Ã¢ Å©±â¿Í °ü·ÃµÈ ÄÁÅØ½ºÆ®¸¦ Áö¿ó´Ï´Ù.
 	ID3D11RenderTargetView* nullViews[] = { nullptr };
 	m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
 	m_d3dRenderTargetView = nullptr;
@@ -401,15 +401,15 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
 		DXGI_SCALING scaling = DisplayMetrics::SupportHighResolutions ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
 
-		swapChainDesc.Width = lround(m_d3dRenderTargetSize.width);		// ì°½ì˜ í¬ê¸°ë¥¼ ë§žì¶¥ë‹ˆë‹¤.
+		swapChainDesc.Width = lround(m_d3dRenderTargetSize.width);		// Ã¢ÀÇ Å©±â¸¦ ¸ÂÃä´Ï´Ù.
 		swapChainDesc.Height = lround(m_d3dRenderTargetSize.height);
-		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				// ê°€ìž¥ ì¼ë°˜ì ì¸ ìŠ¤ì™‘ ì²´ì¸ í˜•ì‹ìž…ë‹ˆë‹¤.
+		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				// °¡Àå ÀÏ¹ÝÀûÀÎ ½º¿Ò Ã¼ÀÎ Çü½ÄÀÔ´Ï´Ù.
 		swapChainDesc.Stereo = false;
-		swapChainDesc.SampleDesc.Count = 1;								// ë‹¤ì¤‘ ìƒ˜í”Œë§ì„ ì‚¬ìš©í•˜ì§€ ë§ˆì‹­ì‹œì˜¤.
+		swapChainDesc.SampleDesc.Count = 1;								// ´ÙÁß »ùÇÃ¸µÀ» »ç¿ëÇÏÁö ¸¶½Ê½Ã¿À.
 		swapChainDesc.SampleDesc.Quality = 0;
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.BufferCount = 2;									// ì´ì¤‘ ë²„í¼ë§ì„ ì‚¬ìš©í•˜ì—¬ ëŒ€ê¸° ì‹œê°„ì„ ìµœì†Œí™”í•©ë‹ˆë‹¤.
-		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// ëª¨ë“  Microsoft Store ì•±ì€ ì´ SwapEffectë¥¼ ì‚¬ìš©í•´ì•¼ í•©ë‹ˆë‹¤.
+		swapChainDesc.BufferCount = 2;									// ÀÌÁß ¹öÆÛ¸µÀ» »ç¿ëÇÏ¿© ´ë±â ½Ã°£À» ÃÖ¼ÒÈ­ÇÕ´Ï´Ù.
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// ¸ðµç Microsoft Store ¾ÛÀº ÀÌ SwapEffect¸¦ »ç¿ëÇØ¾ß ÇÕ´Ï´Ù.
 		swapChainDesc.Flags = 0;
 		swapChainDesc.Scaling = scaling;
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
@@ -462,13 +462,13 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
 			)
 		);
 
-		// í•„ìš”í•œ ê²½ìš° 3D ë Œë”ë§ì— ì‚¬ìš©í•  ê¹Šì´ ìŠ¤í…ì‹¤ ë·°ë¥¼ ë§Œë“­ë‹ˆë‹¤.
+		// ÇÊ¿äÇÑ °æ¿ì 3D ·»´õ¸µ¿¡ »ç¿ëÇÒ ±íÀÌ ½ºÅÙ½Ç ºä¸¦ ¸¸µì´Ï´Ù.
 		CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 			lround(m_d3dRenderTargetSize.width),
 			lround(m_d3dRenderTargetSize.height),
-			1, // ì´ ê¹Šì´ ìŠ¤í…ì‹¤ ë·°ëŠ” í•˜ë‚˜ì˜ ì§ˆê°ë§Œ ê°€ì§€ê³  ìžˆìŠµë‹ˆë‹¤.
-			1, // ë‹¨ì¼ MIP ë§µ ìˆ˜ì¤€ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
+			1, // ÀÌ ±íÀÌ ½ºÅÙ½Ç ºä´Â ÇÏ³ªÀÇ Áú°¨¸¸ °¡Áö°í ÀÖ½À´Ï´Ù.
+			1, // ´ÜÀÏ MIP ¸Ê ¼öÁØÀ» »ç¿ëÇÕ´Ï´Ù.
 			D3D11_BIND_DEPTH_STENCIL
 		);
 
@@ -499,8 +499,8 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
 
 		m_d3dContext->RSSetViewports(1, &m_screenViewport);
 
-		// ìŠ¤ì™‘ ì²´ì¸ ë°± ë²„í¼ì— ì—°ê²°ëœ Direct2D ëŒ€ìƒ
-		// ë¹„íŠ¸ë§µì„ ë§Œë“¤ê³  ì´ë¥¼ í˜„ìž¬ ëŒ€ìƒìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
+		// ½º¿Ò Ã¼ÀÎ ¹é ¹öÆÛ¿¡ ¿¬°áµÈ Direct2D ´ë»ó
+		// ºñÆ®¸ÊÀ» ¸¸µé°í ÀÌ¸¦ ÇöÀç ´ë»óÀ¸·Î ¼³Á¤ÇÕ´Ï´Ù.
 		D2D1_BITMAP_PROPERTIES1 bitmapProperties =
 			D2D1::BitmapProperties1(
 				D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,

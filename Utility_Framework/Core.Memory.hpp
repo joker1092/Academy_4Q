@@ -13,13 +13,13 @@ std::derived_from<T, IUnknown>;
 
 namespace Memory
 {
-	//ë©”ëª¨ë¦¬ í• ë‹¹ ë° ë³µì‚¬
+	//¸Ş¸ğ¸® ÇÒ´ç ¹× º¹»ç
 	inline void AllocateAndCopy(void* pDst, const void* pSrc, uint32 size)
 	{
 		pDst = malloc(size);
 		memcpy(pDst, pSrc, size);
 	}
-  //ë©”ëª¨ë¦¬ í•´ì œ : IUnknownì„ ìƒì†ë°›ì€ í´ë˜ìŠ¤ì˜ ê²½ìš° Release() í˜¸ì¶œ -> ê·¸ ì™¸ delete í˜¸ì¶œ
+  //¸Ş¸ğ¸® ÇØÁ¦ : IUnknownÀ» »ó¼Ó¹ŞÀº Å¬·¡½ºÀÇ °æ¿ì Release() È£Ãâ -> ±× ¿Ü delete È£Ãâ
     void SafeDelete(Pointer auto& ptr)
     {
         if constexpr (std::is_pointer_v<decltype(ptr)>)
@@ -36,7 +36,7 @@ namespace Memory
         }
     }
 }
-//ì§€ì—° ì‚­ì œì : ì—°ì† ì»¨í…Œì´ë„ˆì— ì €ì¥ëœ ìš”ì†Œ(í¬ì¸í„°)ë“¤ì„ ìŠ¤ì½”í”„ê°€ ë²—ì–´ë‚˜ë©´ ì‚­ì œí•˜ëŠ” í´ë˜ìŠ¤ -> function ê°ì²´ë¥¼ ì‚¬ìš©í•˜ì—¬ ì‚­ì œ ì¡°ê±´ì„ ì§€ì •í•  ìˆ˜ ìˆìŒ
+//Áö¿¬ »èÁ¦ÀÚ : ¿¬¼Ó ÄÁÅ×ÀÌ³Ê¿¡ ÀúÀåµÈ ¿ä¼Ò(Æ÷ÀÎÅÍ)µéÀ» ½ºÄÚÇÁ°¡ ¹ş¾î³ª¸é »èÁ¦ÇÏ´Â Å¬·¡½º -> function °´Ã¼¸¦ »ç¿ëÇÏ¿© »èÁ¦ Á¶°ÇÀ» ÁöÁ¤ÇÒ ¼ö ÀÖÀ½
 template<typename T, typename Container>
 class DeferredDeleter final
 {
@@ -67,7 +67,7 @@ private:
 	Container* _container{};
 	Func m_deleteElementFunc{};
 };
-//í…œí”Œë¦¿ ì¶”ë¡  ê°€ì´ë“œ
+//ÅÛÇÃ¸´ Ãß·Ğ °¡ÀÌµå
 template<typename T, typename Allocator>
 DeferredDeleter(std::vector<T*, Allocator>*, auto) -> DeferredDeleter<T, std::vector<T*, Allocator>>;
 

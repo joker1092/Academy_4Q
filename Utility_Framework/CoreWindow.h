@@ -160,7 +160,7 @@ private:
 
         if (message == WM_NCCREATE)
         {
-            // ìœˆë„ìš° ìƒì„± ì‹œ ì´ˆê¸°í™”
+            // À©µµ¿ì »ı¼º ½Ã ÃÊ±âÈ­
             CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
             self = static_cast<CoreWindow*>(cs->lpCreateParams);
             SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));

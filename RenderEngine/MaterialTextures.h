@@ -1,9 +1,9 @@
 #pragma once
 #include "Texture.h"
 
-class MaterialTextures
+struct MaterialTextures
 {
-    Texture2D	baseColor{};	    // 1U << 0
+    Texture2D	baseColor{};	// 1U << 0
     Texture2D	roughness{};	// 1U << 1
     Texture2D	metallic{};	    // 1U << 2
     Texture2D	occlusion{};	// 1U << 3

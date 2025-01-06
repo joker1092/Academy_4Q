@@ -4,22 +4,87 @@
     <Filter Include="Renderer">
       <UniqueIdentifier>{446e2466-2897-4e8c-8e33-fbfe1da0c068}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Buffer">
+      <UniqueIdentifier>{2e62bed9-9fb8-4be1-9193-4be670b367c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PipelineStateObject">
+      <UniqueIdentifier>{146a4f69-8bee-45b7-8882-73c5b63e091b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{d6daa3dd-7cfe-4a84-b7b7-239c822b4f08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Objects">
+      <UniqueIdentifier>{0b127116-8849-41f3-b608-53cda9b39a82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loader">
+      <UniqueIdentifier>{c383ba85-2aed-42e3-b203-469f9f837ba1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h">
-      <Filter>Renderer</Filter>
+      <Filter>Renderer\Buffer</Filter>
     </ClInclude>
     <ClInclude Include="BufferType.h">
-      <Filter>Renderer</Filter>
+      <Filter>Renderer\Buffer</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Renderer</Filter>
+      <Filter>Renderer\Objects</Filter>
     </ClInclude>
     <ClInclude Include="MaterialTextures.h">
-      <Filter>Renderer</Filter>
+      <Filter>Renderer\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="IPipelineStateObject.h">
+      <Filter>PipelineStateObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshBasedPSO.h">
+      <Filter>PipelineStateObject</Filter>
+    </ClInclude>
+    <ClInclude Include="StateDevice.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneRenderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Renderer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureLoader.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="소스.cpp">
+      <Filter>PipelineStateObject</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Renderer\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureLoader.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

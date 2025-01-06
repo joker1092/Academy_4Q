@@ -155,22 +155,43 @@ namespace DirectX
         return CreateShaderResourceView(pDevice, image.GetImages(), image.GetImageCount(), metadata, ppTexture);
     }
 
-    inline HRESULT CreateTextureFromFile(ID3D11Device* pDevice, const file::path& fileName, ID3D11ShaderResourceView** ppTexture)
+    inline HRESULT CreateTextureFromFile(ID3D11Device* pDevice, const file::path& fileName, ID3D11ShaderResourceView** ppTextureView)
     {
         HRESULT hResult = S_OK;
         auto extension = fileName.extension();
 
         if (extension == L".tga")
         {
-            hResult = CreateTGATextureFormFile(pDevice, fileName.c_str(), ppTexture);
+            hResult = CreateTGATextureFormFile(pDevice, fileName.c_str(), ppTextureView);
         }
         else if (extension == L".dds")
         {
-            hResult = CreateDDSTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTexture);
+            hResult = CreateDDSTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTextureView);
         }
         else
         {
-            hResult = CreateWICTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTexture);
+            hResult = CreateWICTextureFromFile(pDevice, fileName.c_str(), nullptr, ppTextureView);
+        }
+
+        return hResult;
+    }
+
+    inline HRESULT CreateTextureFromFile(ID3D11Device* pDevice, const file::path& fileName, ID3D11Resource** ppTexture, ID3D11ShaderResourceView** ppTextureView)
+    {
+        HRESULT hResult = S_OK;
+        auto extension = fileName.extension();
+
+        if (extension == L".tga")
+        {
+            hResult = CreateTGATextureFormFile(pDevice, fileName.c_str(), ppTextureView);
+        }
+        else if (extension == L".dds")
+        {
+            hResult = CreateDDSTextureFromFile(pDevice, fileName.c_str(), ppTexture, ppTextureView);
+        }
+        else
+        {
+            hResult = CreateWICTextureFromFile(pDevice, fileName.c_str(), ppTexture, ppTextureView);
         }
 
         return hResult;
@@ -181,7 +202,7 @@ namespace DirectX
     {
         t->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
     };
-    // ë””ë²„ê¹…ì„ ì§€ì›í•˜ë ¤ë©´ ê°œì²´ì— ì´ë¦„ì„ í• ë‹¹í•˜ì„¸ìš”.
+    // µğ¹ö±ëÀ» Áö¿øÇÏ·Á¸é °³Ã¼¿¡ ÀÌ¸§À» ÇÒ´çÇÏ¼¼¿ä.
 #if defined(_DEBUG)
     inline void SetName(DXObjects auto pObject, const std::string_view& name)
     {
