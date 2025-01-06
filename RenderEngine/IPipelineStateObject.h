@@ -1,8 +1,9 @@
 #pragma once
 #include "Core.Minimal.h"
+#include "DeviceResources.h"
 
 interface IPipelineStateObject
 {
 	IPipelineStateObject() = default;
-	~IPipelineStateObject() = default;
+    virtual ~IPipelineStateObject() = default;
 };

@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Model.h"
 #include "MeshBasedPSO.h"
+#include "StateDevice.h"
 
 class SceneRenderer
 {
@@ -23,14 +24,13 @@ public:
 	void StageDrawModels();
 
 private:
-	std::shared_ptr<DirectX11::DeviceResources> m_deviceResources;
 	Camera* m_camera{};
 	Scene* m_scene{};
 
-	Mathf::Color4 m_clearColor{ 0.01f, 0.01f, 0.01f, 1.0f };
+	Mathf::xVColor4 m_clearColor{ 0.01f, 0.01f, 0.01f, 1.0f };
 
 	std::vector<Model*> m_drawModels{};
-	uint32 m_drawModelCount{};
 
-	std::unique_ptr<IPipelineStateObject> m_pso{};
+    std::unique_ptr<StateDevice> m_stateDevice{};
+	std::unique_ptr<MeshBasedPSO> m_pso{};
 };

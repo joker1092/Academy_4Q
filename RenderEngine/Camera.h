@@ -10,6 +10,7 @@ public:
 	~Camera() = default;
 
 	Mathf::xMatrix GetViewMatrix() const;
+    Mathf::xMatrix GetProjectionMatrix() const;
 
 	void Update(float deltaSeconds);
 

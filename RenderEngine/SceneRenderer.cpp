@@ -3,7 +3,7 @@
 #include "TextureLoader.h"
 
 SceneRenderer::SceneRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources)
+    m_stateDevice(std::make_unique<StateDevice>(deviceResources))
 {
 }
 
@@ -12,15 +12,12 @@ SceneRenderer::~SceneRenderer()
 	m_camera = nullptr;
 	m_scene = nullptr;
 	m_drawModels.clear();
-	m_drawModelCount = 0;
 	m_pso.reset();
 }
 
 void SceneRenderer::Initialize()
 {
-	TextureLoader::Initialize(m_deviceResources);
-
-	m_pso = std::make_unique<MeshBasedPSO>(m_deviceResources);
+    m_pso = std::make_unique<MeshBasedPSO>(m_stateDevice.get());
 
 	Texture2D texture = TextureLoader::LoadTextureFromFile("Assets/IBL/cubemap.dds");
 
@@ -44,7 +41,23 @@ void SceneRenderer::StagePrepare()
 	CORE_ASSERT(m_scene, "Scene is not set");
 #endif
 
+    m_stateDevice->ClearRenderTargetBackBuffer(m_clearColor);
 
+    Mathf::xMatrix proj = m_camera->GetProjectionMatrix();
+    Mathf::xMatrix view = m_camera->GetViewMatrix();
+
+    Mathf::Vector3 pos = { 0.f, 0.f, 0.f };
+    pos = m_camera->GetPosition();
+
+    CameraBuffer cameraBuff{
+        XMMatrixMultiplyTranspose(view, proj),
+        pos,
+        0,
+        float3(0, 0, 0),
+        0,
+    };
+
+    SceneBuffer sceneBuff{};
 
 }
 

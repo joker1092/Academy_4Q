@@ -43,6 +43,18 @@
     <Filter Include="Core.Memory\SpinLock">
       <UniqueIdentifier>{4584675b-2578-4d75-a537-a62df1b1dc49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectX11Common\DirectXHelper">
+      <UniqueIdentifier>{190416e9-a93a-4ee9-bd80-ab672916a61b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX11Common\DeviceResources">
+      <UniqueIdentifier>{2a34f36f-291f-4ad7-a8f2-591b7a0c90e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX11Common\TimeSystem">
+      <UniqueIdentifier>{9fb06a54-84b4-4fb5-9427-2e590b30f9e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX11Common\HLSLCompiler">
+      <UniqueIdentifier>{39dfc371-3946-477a-9148-ec3212f87486}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -53,15 +65,6 @@
     </ClInclude>
     <ClInclude Include="TypeDefinition.h">
       <Filter>Core.definition</Filter>
-    </ClInclude>
-    <ClInclude Include="DeviceResources.h">
-      <Filter>DirectX11Common</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXHelper.h">
-      <Filter>DirectX11Common</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeSystem.h">
-      <Filter>DirectX11Common</Filter>
     </ClInclude>
     <ClInclude Include="CoreWindow.h">
       <Filter>WindowsApplication\CoreWindow</Filter>
@@ -102,19 +105,34 @@
     <ClInclude Include="DumpHandler.h">
       <Filter>WindowsApplication\CoreWindow</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXDescHelper.h">
-      <Filter>DirectX11Common</Filter>
+    <ClInclude Include="DeviceResources.h">
+      <Filter>DirectX11Common\DeviceResources</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXHelper.h">
+      <Filter>DirectX11Common\DirectXHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSystem.h">
+      <Filter>DirectX11Common\TimeSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSLCompiler.h">
+      <Filter>DirectX11Common\HLSLCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DeviceResource.cpp">
-      <Filter>DirectX11Common</Filter>
-    </ClCompile>
     <ClCompile Include="CoreWindow.cpp">
       <Filter>WindowsApplication\CoreWindow</Filter>
     </ClCompile>
     <ClCompile Include="Core.Thread.cpp">
       <Filter>Core.Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceResources.cpp">
+      <Filter>DirectX11Common\DeviceResources</Filter>
+    </ClCompile>
+    <ClCompile Include="HLSLCompiler.cpp">
+      <Filter>DirectX11Common\HLSLCompiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

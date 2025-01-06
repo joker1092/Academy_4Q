@@ -16,6 +16,16 @@ Mathf::xMatrix Camera::GetViewMatrix() const
 	return DirectX::XMMatrixLookAtRH(pos, DirectX::XMVectorAdd(pos, m_front), up);
 }
 
+Mathf::xMatrix Camera::GetProjectionMatrix() const
+{
+    return DirectX::XMMatrixPerspectiveFovRH(
+        m_fov * 0.01f,
+        m_aspectRatio,
+        m_nearPlane,
+        m_farPlane
+    );
+}
+
 void Camera::Update(float deltaSeconds)
 {
 	float velocity = m_speed * deltaSeconds;

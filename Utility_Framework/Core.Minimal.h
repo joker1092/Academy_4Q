@@ -4,3 +4,4 @@
 #include "Core.Assert.hpp"
 #include "Core.Memory.hpp"
 #include "Core.Console.hpp"
+#include "PathFinder.h"

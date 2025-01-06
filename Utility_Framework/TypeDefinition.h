@@ -27,6 +27,7 @@ using guid = uint64_t;
 using flag = uint32;
 using mask = uint32;
 using constant = uint32;
+using bool32 = uint32;
 
 enum class MouseKey : int
 {
@@ -34,4 +35,33 @@ enum class MouseKey : int
 	RIGHT,
 	MIDDLE,
 	MAX = 3
+};
+
+struct BitFlag
+{
+public:
+    operator flag() const
+    {
+        return m_flag;
+    }
+    //helper functions
+    constexpr void Set(flag flag) noexcept
+    {
+        m_flag |= 1U << flag;
+    }
+    constexpr void Clear(flag flag) noexcept
+    {
+        m_flag &= ~(1U << flag);
+    }
+    constexpr void Toggle(flag flag) noexcept
+    {
+        m_flag ^= 1U << flag;
+    }
+    constexpr bool32 Test(flag flag) const noexcept
+    {
+        return m_flag & (1U << flag);
+    }
+
+private:
+    flag m_flag{};
 };

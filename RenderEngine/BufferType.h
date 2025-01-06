@@ -11,7 +11,7 @@ struct JointBuffer
 struct alignas(16) CameraBuffer
 {
     Mathf::xMatrix VP{};
-    alignas(16) Mathf::xMatrix position{};
+    alignas(16) Mathf::Vector3 position{};
     float          exposure{};
     alignas(16) Mathf::Vector3 viewDir{};
     float          placeholder{};

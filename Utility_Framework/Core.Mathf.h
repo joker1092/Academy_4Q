@@ -9,6 +9,7 @@ namespace Mathf
     using xVector = XMVECTOR;
     using Color3 = SimpleMath::Vector3;
     using Color4 = SimpleMath::Color;
+    using xVColor4 = XMVECTORF32;
     using Vector2 = SimpleMath::Vector2;
     using Vector3 = SimpleMath::Vector3;
     using Vector4 = SimpleMath::Vector4;
