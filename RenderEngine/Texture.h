@@ -38,6 +38,7 @@ struct Texture2D : public ITextureData
     ID3D11Texture2D* GetTexture() const { return m_Texture.Get(); }
     ID3D11Texture2D* const* GetTextureAddressOf() const { return m_Texture.GetAddressOf(); }
     ID3D11ShaderResourceView* Get() const { return m_SRV.Get(); }
+	ID3D11ShaderResourceView* const* GetAddressOf() const { return m_SRV.GetAddressOf(); }
 
     void Reset()
     {
@@ -65,6 +66,12 @@ struct Texture2D : public ITextureData
         pDevice->CreateTexture2D(&desc, nullptr, m_Texture.ReleaseAndGetAddressOf());
         pDevice->CreateShaderResourceView(m_Texture.Get(), &srvDesc, m_SRV.ReleaseAndGetAddressOf());
     }
+
+	void SetName(const std::string_view& name)
+	{
+		m_Name = name;
+		DirectX::SetName(m_Texture.Get(), name);
+	}
 
     uint32 m_Width{};
     uint32 m_Height{};

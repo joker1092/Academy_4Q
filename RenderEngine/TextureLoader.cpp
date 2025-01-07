@@ -17,11 +17,13 @@ Texture2D TextureLoader::LoadTextureFromFile(const std::string_view& filename)
 
 	ComPtr<ID3D11Resource> resource{};
 	ComPtr<ID3D11ShaderResourceView> srv{};
+	file::path path(filename);
 
-	HRESULT hr = DirectX::CreateTextureFromFile(m_d3dDevice, filename, resource.GetAddressOf(), srv.GetAddressOf());
+	HRESULT hr = DirectX::CreateTextureFromFile(m_d3dDevice, path, resource.GetAddressOf(), srv.GetAddressOf());
 	if (FAILED(hr))
 	{
 		OutputDebugString(L"TextureLoader::LoadTextureFromFile: CreateTextureFromFile failed\n");
+		assert(false);
 		return Texture2D();
 	}
 

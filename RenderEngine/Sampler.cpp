@@ -6,6 +6,11 @@ Sampler::Sampler(const std::shared_ptr<DirectX11::DeviceResources>& deviceResour
     Create(device, filter, addressMode, offset, borderColor);
 }
 
+Sampler::Sampler(ID3D11Device* device, D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, float offset, Mathf::Color4* borderColor)
+{
+	Create(device, filter, addressMode, offset, borderColor);
+}
+
 void Sampler::Create(ID3D11Device* device, D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, float offset, Mathf::Color4* borderColor)
 {
     CD3D11_SAMPLER_DESC samplerDesc{

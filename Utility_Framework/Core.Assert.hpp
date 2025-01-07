@@ -9,7 +9,7 @@ namespace Core
     using AssertionFailureFunction = void (*)(const char* expression, void* context);
 
     // 기본 Assertion 실패 처리 함수
-    void AssertionFailureFunctionDefault(const char* expression, void* context)
+    inline void AssertionFailureFunctionDefault(const char* expression, void* context)
     {
         // 기본적으로 오류 메시지 출력
         printf("Assertion failed: %s\n", expression);
@@ -32,14 +32,14 @@ namespace Core
     static void* g_assertionFailureFunctionContext = nullptr;
 
     // Assertion 실패 함수 설정
-    void SetAssertionFailureFunction(AssertionFailureFunction failureFunction, void* context)
+    inline void SetAssertionFailureFunction(AssertionFailureFunction failureFunction, void* context)
     {
         g_assertionFailureFunction = failureFunction;
         g_assertionFailureFunctionContext = context;
     }
 
     // Assertion 실패 처리 함수 호출
-    void AssertionFailure(const char* expression)
+    inline void AssertionFailure(const char* expression)
     {
         if (g_assertionFailureFunction)
         {
@@ -49,6 +49,7 @@ namespace Core
 }
 
 // CORE_ASSERT 함수 정의
+#ifndef CORE_ASSERT
 #ifdef NDEBUG
 #define CORE_ASSERT(expression) ((void)0)  // NDEBUG에서 assert 비활성화
 #else
@@ -58,3 +59,4 @@ namespace Core
         Core::AssertionFailure(#expression); \
     }
 #endif
+#endif // !CORE_ASSERT

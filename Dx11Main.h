@@ -1,6 +1,10 @@
 #pragma once
 #include "Utility_Framework/DeviceResources.h"
 #include "Utility_Framework/TimeSystem.h"
+#include "RenderEngine/DataSystem.h"
+#include "RenderEngine/SceneRenderer.h"
+#include "RenderEngine/Camera.h"
+#include "RenderEngine/Scene.h"
 #include <memory>
 
 namespace DirectX11
@@ -10,6 +14,7 @@ namespace DirectX11
 	public:
 		Dx11Main(const std::shared_ptr<DeviceResources>& deviceResources);
 		~Dx11Main();
+		void SceneInitialize();
 		void CreateWindowSizeDependentResources();
 		void Update();
 		bool Render();
@@ -21,5 +26,12 @@ namespace DirectX11
 	private:
 		std::shared_ptr<DeviceResources> m_deviceResources;
 		TimeSystem m_timeSystem;
+		std::unique_ptr<SceneRenderer> m_sceneRenderer;
+
+		std::unique_ptr<Camera> m_camera;
+		std::unique_ptr<Scene> m_scene;
+
+		Model* m_model{};
+		Model* m_ground{};
 	};
 }

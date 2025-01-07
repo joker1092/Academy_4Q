@@ -62,6 +62,24 @@ public:
         return m_flag & (1U << flag);
     }
 
+    BitFlag& operator|= (flag flag) noexcept
+	{
+		m_flag |= flag;
+		return *this;
+	}
+
+	BitFlag& operator&= (flag flag) noexcept
+	{
+		m_flag &= flag;
+		return *this;
+	}
+
+    BitFlag& operator^= (flag flag) noexcept
+    {
+        m_flag ^= flag;
+		return *this;
+    }
+
 private:
     flag m_flag{};
 };

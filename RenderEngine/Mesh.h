@@ -3,6 +3,7 @@
 #include "Buffer.h"
 #include "BufferType.h"
 #include "Material.h"
+#include "DeviceResources.h"
 
 using Index = uint32;
 
@@ -34,9 +35,10 @@ public:
 	Mesh& operator=(const Mesh&) = delete;
 	Mesh(const Mesh&) = delete;
 
-	void CreateBuffer()
+	void CreateBuffer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
 	{
 		m_IndexBuffer = Buffer<Index>{
+			deviceResources,
 			m_Indices,
 			D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE,
@@ -44,6 +46,7 @@ public:
 		};
 
 		m_VertexBuffer = Buffer<Vertex>{
+			deviceResources,
 			m_Vertices,
 			D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE,

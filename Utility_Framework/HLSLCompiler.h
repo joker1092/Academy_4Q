@@ -20,7 +20,7 @@ public:
         switch (IncludeType)
         {
         case D3D_INCLUDE_LOCAL:
-            filePath = m_shaderPath.parent_path() / pFileName;
+            filePath = m_shaderPath / pFileName;
             break;
         case D3D_INCLUDE_SYSTEM:
             filePath = PathFinder::Relative("Shaders/") / pFileName;

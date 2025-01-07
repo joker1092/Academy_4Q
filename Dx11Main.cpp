@@ -6,11 +6,41 @@ DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceReso
 	m_deviceResources->RegisterDeviceNotify(this);
 
 	//아래 렌더러	초기화 코드를 여기에 추가합니다.
+	m_sceneRenderer = std::make_unique<SceneRenderer>(m_deviceResources);
+
+	AssetsSystem->Initialize(m_deviceResources);
+	m_sceneRenderer->Initialize();
+
+	SceneInitialize();
 }
 
 DirectX11::Dx11Main::~Dx11Main()
 {
 	m_deviceResources->RegisterDeviceNotify(nullptr);
+}
+
+void DirectX11::Dx11Main::SceneInitialize()
+{
+	m_camera = std::make_unique<Camera>(m_deviceResources);
+	m_camera->SetPosition(-4.0f, 4.0f, 4.0f);
+	m_camera->m_pitch = -30.f;
+	m_camera->m_yaw = 320.f;
+
+	m_sceneRenderer->SetCamera(m_camera.get());
+
+	m_model = AssetsSystem->m_Models["sphere"];
+	m_model->scale = { 0.015f, 0.015f, 0.015f };
+
+	m_ground = AssetsSystem->m_Models["plane"];
+
+	m_scene = std::make_unique<Scene>();
+
+	m_scene->SunColor = { 1.f, 1.f, 0.96f };
+	m_scene->SunPos = { 3.f, 10.f, 3.f };
+	m_scene->IBLIntensity = 0.1f;
+	m_scene->IBLColor = { 1.f, 1.f, 1.f };
+
+	m_sceneRenderer->SetScene(m_scene.get());
 }
 
 void DirectX11::Dx11Main::CreateWindowSizeDependentResources()
@@ -24,6 +54,7 @@ void DirectX11::Dx11Main::Update()
 	m_timeSystem.Tick([&]
 	{
 		//렌더러의 업데이트 코드를 여기에 추가합니다.
+		m_camera->Update(m_timeSystem.GetElapsedSeconds());
 	});
 }
 
@@ -35,21 +66,12 @@ bool DirectX11::Dx11Main::Render()
 		return false;
 	}
 
-	auto context = m_deviceResources->GetD3DDeviceContext();
+	m_sceneRenderer->StagePrepare();
 
-	auto viewport = m_deviceResources->GetScreenViewport();
-	context->RSSetViewports(1, &viewport);
+	m_sceneRenderer->AddDrawModel(m_model);
+	m_sceneRenderer->AddDrawModel(m_ground);
 
-	// 렌더링 대상을 화면에 대해 다시 설정합니다.
-	ID3D11RenderTargetView* const targets[1] = { m_deviceResources->GetBackBufferRenderTargetView() };
-	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
-
-
-	// 백 버퍼 및 깊이 스텐실 뷰를 지웁니다.
-	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::CornflowerBlue);
-	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	// 장면 개체를 렌더링합니다.
+	m_sceneRenderer->StageDrawModels();
 
 	return true;
 }

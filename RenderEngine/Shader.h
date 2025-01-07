@@ -16,6 +16,11 @@ interface IShaderResource
     };
     virtual ~IShaderResource() = default;
 
+    void SetDevice(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+    {
+        m_d3dDevice = deviceResources->GetD3DDevice();
+    }
+
     virtual void Compile() abstract;
 
     void* GetBufferPointer() const

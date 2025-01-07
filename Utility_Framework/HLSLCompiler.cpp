@@ -95,5 +95,6 @@ bool HLSLCompiler::CheckExtension(const std::string_view& shaderExtension)
         return true;
     }
 
+	return false;
 
 }

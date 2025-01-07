@@ -13,6 +13,13 @@ public:
         float offset = 0.0f,
         Mathf::Color4* borderColor = nullptr
     );
+	Sampler(
+		ID3D11Device* device,
+		D3D11_FILTER filter,
+		D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR,
+		float offset = 0.0f,
+		Mathf::Color4* borderColor = nullptr
+	);
     ~Sampler() = default;
 
     ID3D11SamplerState* Get() { return m_Sampler.Get(); }
@@ -23,8 +30,8 @@ private:
         ID3D11Device* device,
         D3D11_FILTER filter,
         D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR,
-        float offset,
-        Mathf::Color4* borderColor
+        float offset = 0,
+		Mathf::Color4* borderColor = nullptr
     );
 
     ComPtr<ID3D11SamplerState> m_Sampler{};

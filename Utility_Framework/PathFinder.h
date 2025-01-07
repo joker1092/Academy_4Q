@@ -21,15 +21,15 @@ namespace InternalPath
         ExecuteablePath = p.remove_filename();
 
         auto base = file::path(ExecuteablePath);
-        DataPath = file::path(base).append("../Data/").lexically_normal();
-        ShaderSourcePath = file::path(base).append("../Data/Shaders/").lexically_normal();
+        DataPath = file::path(base).append("..\\Assets\\").lexically_normal();
+        ShaderSourcePath = file::path(base).append("..\\Assets\\Shaders\\").lexically_normal();
     }
 };
 
-static class PathFinder
+class PathFinder
 {
 public:
-    inline PathFinder()
+	static inline void Initialize() noexcept
     {
         InternalPath::Initialize();
     }

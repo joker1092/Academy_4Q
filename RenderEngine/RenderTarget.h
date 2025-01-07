@@ -9,6 +9,7 @@ public:
 		ID3D11Texture2D* texture, DXGI_FORMAT format, uint32 width, uint32 height);
 	RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources, 
 		DXGI_FORMAT format, uint32 width, uint32 height);
+	RenderTarget(ID3D11Device* device, DXGI_FORMAT format, uint32 width, uint32 height);
 	~RenderTarget();
 
 	void Resize(uint32 width, uint32 height);

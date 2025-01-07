@@ -1,21 +1,21 @@
 #pragma once
-#include "Core.Minimal.h"
 #include "TextureLoader.h"
 #include "Model.h"
 #include "Material.h"
 
 #include <assimp/scene.h>
 #include <assimp/material.h>
-#include <assimp/pbrmaterial.h>
+//#include <assimp/pbrmaterial.h>
 
 class ModelLoader
 {
 public:
+	static void Initialize(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources);
+
     static void LoadFormFile(const file::path& path, const file::path& dir,
     _inout_opt Model** ppModel, _inout_opt AnimModel** ppAnimModel);
 
 private:
-
     struct MatOverrides
     {
         MatOverrides() = default;
@@ -35,4 +35,6 @@ private:
     static void LoadMeshes(const aiScene* scene, const file::path& dir, std::vector<Mesh>* meshes);
 
     static Material* CreateMaterial(const file::path& fir, aiMesh* mesh, const aiScene* scene);
+
+	static std::shared_ptr<DirectX11::DeviceResources> m_deviceResources;
 };

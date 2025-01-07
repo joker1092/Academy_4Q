@@ -65,7 +65,7 @@ void Camera::Update(float deltaSeconds)
 	if (InputManagement->IsMouseButtonPressed(MouseKey::RIGHT))
 	{
 		float mouseSensitive = m_sensitivity * deltaSeconds;
-		float2 mouseDelta = { InputManagement->GetMouseDelta().x, InputManagement->GetMouseDelta().y };
+		float2 mouseDelta = { (float)InputManagement->GetMouseDelta().x, (float)InputManagement->GetMouseDelta().y };
 		m_yaw += mouseDelta.x * mouseSensitive;
 		m_pitch -= mouseDelta.y * mouseSensitive;
 	}

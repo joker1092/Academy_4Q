@@ -28,6 +28,9 @@
     <Filter Include="Manager&amp;System">
       <UniqueIdentifier>{0d451d80-798a-4694-b7aa-3dd05159ce0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{828e32cd-c430-41a3-9976-e407faed8eae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h">
@@ -90,6 +93,9 @@
     <ClInclude Include="ModelLoader.h">
       <Filter>Loader</Filter>
     </ClInclude>
+    <ClInclude Include="Interfaces.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RenderTarget.cpp">
@@ -112,6 +118,12 @@
     </ClCompile>
     <ClCompile Include="ModelLoader.cpp">
       <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="DataSystem.cpp">
+      <Filter>Manager&amp;System</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshBasedPSO.cpp">
+      <Filter>PipelineStateObject</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -206,7 +206,7 @@ namespace DirectX
 #if defined(_DEBUG)
     inline void SetName(DXObjects auto pObject, const std::string_view& name)
     {
-        pObject->SetPrivateData(WKPDID_D3DDebugObjectName, name.length(), name.data());
+        pObject->SetPrivateData(WKPDID_D3DDebugObjectName, (uint32)name.length(), name.data());
     }
 #else
     inline void SetName(DXObjects auto, const std::string_view&)

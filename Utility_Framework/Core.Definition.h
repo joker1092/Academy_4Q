@@ -31,13 +31,13 @@ namespace file = std::filesystem;
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <ranges>
 #include <stack>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 #include <cstdint>
-#include <ranges>
 //Custom
 #include "ClassProperty.h"
 #include "TypeDefinition.h"
@@ -51,5 +51,6 @@ namespace file = std::filesystem;
 #define _in_opt
 #define _out_opt
 #define _inout_opt
+#define unsafe
 #endif // !_in
 

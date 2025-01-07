@@ -47,6 +47,12 @@ public:
     void SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
     void ClearRenderTargetBackBuffer(DirectX::XMVECTORF32 clearColor);
 
+	float GetBackBufferWidth() const { return m_viewPort.Width; }
+    float GetBackBufferHeight() const { return m_viewPort.Height; }
+
+	ID3D11Device* GetDevice() const { return m_Device; }
+	ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext; }
+
 private:
     void CreateDepthState();
     void CreateRasterizerState();

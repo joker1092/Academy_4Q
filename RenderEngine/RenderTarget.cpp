@@ -14,6 +14,14 @@ RenderTarget::RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& de
 	CreateShaderResourceView();
 }
 
+RenderTarget::RenderTarget(ID3D11Device* device, DXGI_FORMAT format, uint32 width, uint32 height) :
+	m_Device(device), format(format), width(width), height(height)
+{
+	CreateTexture();
+	CreateTargets();
+	CreateShaderResourceView();
+}
+
 RenderTarget::~RenderTarget()
 {
 	DestroyTargets();
@@ -45,6 +53,8 @@ void RenderTarget::Resize(uint32 width, uint32 height)
 
 void RenderTarget::ClearView()
 {
+	m_DeviceContext->ClearRenderTargetView(m_RTV.Get(), color);
+	m_DeviceContext->ClearDepthStencilView(m_DSV.Get(), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH | D3D11_CLEAR_FLAG::D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void RenderTarget::CreateTexture()
