@@ -65,7 +65,7 @@ void DataSystem::LoadModels()
 
 Model* DataSystem::AllocateModel()
 {
-	Model* model = new Model();
+	Model* model{ DataSystem::GetInstance()->m_ModelPool.allocate_element() };
 	return model;
 }
 
@@ -76,7 +76,7 @@ AnimModel* DataSystem::AllocateAnimModel()
 
 Material* DataSystem::AllocateMaterial()
 {
-	Material* material = new Material();
+	Material* material{ DataSystem::GetInstance()->m_MaterialPool.allocate_element() };
 	return material;
 }
 

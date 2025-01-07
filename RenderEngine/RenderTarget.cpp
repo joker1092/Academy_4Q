@@ -1,21 +1,23 @@
 #include "RenderTarget.h"
 
 RenderTarget::RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources, ID3D11Texture2D* texture, DXGI_FORMAT format, uint32 width, uint32 height)
-	: m_Device(deviceResources->GetD3DDevice()), m_Texture(texture), format(format), width(width), height(height)
+	: m_Device(deviceResources->GetD3DDevice()), m_DeviceContext(deviceResources->GetD3DDeviceContext()),
+	m_Texture(texture), format(format), width(width), height(height)
 {
 	CreateTargets();
 }
 
 RenderTarget::RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources, DXGI_FORMAT format, uint32 width, uint32 height)
-	: m_Device(deviceResources->GetD3DDevice()), format(format), width(width), height(height)
+	: m_Device(deviceResources->GetD3DDevice()), m_DeviceContext(deviceResources->GetD3DDeviceContext()),
+	format(format), width(width), height(height)
 {
 	CreateTexture();
 	CreateTargets();
 	CreateShaderResourceView();
 }
 
-RenderTarget::RenderTarget(ID3D11Device* device, DXGI_FORMAT format, uint32 width, uint32 height) :
-	m_Device(device), format(format), width(width), height(height)
+RenderTarget::RenderTarget(ID3D11Device* device, ID3D11DeviceContext* deviceContext, DXGI_FORMAT format, uint32 width, uint32 height) :
+	m_Device(device), m_DeviceContext(deviceContext), format(format), width(width), height(height)
 {
 	CreateTexture();
 	CreateTargets();
