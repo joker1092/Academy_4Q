@@ -9,8 +9,7 @@ public:
 		ID3D11Texture2D* texture, DXGI_FORMAT format, uint32 width, uint32 height);
 	RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources, 
 		DXGI_FORMAT format, uint32 width, uint32 height);
-	RenderTarget(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
-		DXGI_FORMAT format, uint32 width, uint32 height);
+	RenderTarget(ID3D11Device* device, DXGI_FORMAT format, uint32 width, uint32 height);
 	~RenderTarget();
 
 	void Resize(uint32 width, uint32 height);
@@ -39,7 +38,6 @@ private:
 
 	bool m_bHasSRV{ false };
 	ID3D11Device* m_Device{};
-	ID3D11DeviceContext* m_DeviceContext{};
 	ComPtr<ID3D11Texture2D> m_Texture{};
 	ComPtr<ID3D11Texture2D> m_Stencil{};
 

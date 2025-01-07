@@ -448,21 +448,17 @@ void MeshBasedPSO::CreateTextures()
 	{
 		m_target = std::make_unique<RenderTarget>(
 			m_stateDevice->GetDevice(),
-			m_deviceContext,
 			DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
 			m_stateDevice->GetBackBufferWidth(),
 			m_stateDevice->GetBackBufferHeight()
 		);
-
-		m_target->color = Mathf::xVColor4{ 0.05f, 0.05f, 0.05f, 1.0f };
 	}
 
 	{
 		m_shadowTarget = std::make_unique<RenderTarget>(
 			m_stateDevice->GetDevice(),
-			m_deviceContext,
 			DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT,
-			m_stateDevice->GetBackBufferWidth(),
+		m_stateDevice->GetBackBufferWidth(),
 			m_stateDevice->GetBackBufferHeight()
 		);
 
