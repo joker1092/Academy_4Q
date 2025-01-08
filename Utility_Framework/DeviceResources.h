@@ -42,6 +42,7 @@ namespace DirectX11
 		IDXGISwapChain3* GetSwapChain() const { return m_swapChain.Get(); }
 		D3D_FEATURE_LEVEL GetDeviceFeatureLevel() const { return m_d3dFeatureLevel; }
 		ID3D11RenderTargetView1* GetBackBufferRenderTargetView() const { return m_d3dRenderTargetView.Get(); }
+		ID3D11Texture2D1* GetBackBuffer() const { return m_backBuffer.Get(); }
 		ID3D11DepthStencilView* GetDepthStencilView() const { return m_d3dDepthStencilView.Get(); }
 		D3D11_VIEWPORT GetScreenViewport() const { return m_screenViewport; }
 
@@ -71,6 +72,7 @@ namespace DirectX11
         ComPtr<ID3DUserDefinedAnnotation> m_annotation;
 
 		ComPtr<ID3D11RenderTargetView1> m_d3dRenderTargetView;
+		ComPtr<ID3D11Texture2D1> m_backBuffer;
 		ComPtr<ID3D11DepthStencilView> m_d3dDepthStencilView;
 		D3D11_VIEWPORT m_screenViewport;
 

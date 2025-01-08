@@ -18,7 +18,6 @@ public:
 	void SetScene(Scene* scene);
 
 	void StagePrepare();
-	void StageSubmit();
 
 	void AddDrawModel(Model* model);
 	void StageDrawModels();

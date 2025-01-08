@@ -26,8 +26,11 @@ public:
         m_DeviceContext(deviceResources->GetD3DDeviceContext()),
         m_viewPort(deviceResources->GetScreenViewport()),
         m_RenderTargetViewBackBuffer(deviceResources->GetBackBufferRenderTargetView()),
-        m_DepthStencilViewMain(deviceResources->GetDepthStencilView())
+        m_DepthStencilViewMain(deviceResources->GetDepthStencilView()),
+		m_backBuffer(deviceResources->GetBackBuffer())
     {
+        CreateDepthState();
+        CreateRasterizerState();
     }
 	~StateDevice() = default;
 
@@ -52,6 +55,8 @@ public:
 
 	ID3D11Device* GetDevice() const { return m_Device; }
 	ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext; }
+	ID3D11RenderTargetView* GetRenderTargetViewBackBuffer() const { return m_RenderTargetViewBackBuffer; }
+	ID3D11Texture2D1* GetBackBuffer() const { return m_backBuffer; }
 
 private:
     void CreateDepthState();
@@ -62,6 +67,7 @@ private:
     ID3D11DeviceContext*            m_DeviceContext{};
     ID3D11RenderTargetView*         m_RenderTargetViewBackBuffer{};
     ID3D11DepthStencilView*         m_DepthStencilViewMain{};
+	ID3D11Texture2D1*               m_backBuffer{};
 
     ComPtr<ID3D11DepthStencilState> m_DepthStencilStateLess{};
     ComPtr<ID3D11DepthStencilState> m_DepthStencilStateLessEqual{};

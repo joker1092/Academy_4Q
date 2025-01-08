@@ -57,7 +57,7 @@ void SceneRenderer::StagePrepare()
         XMMatrixMultiplyTranspose(view, proj),
         pos,
         0,
-        float3(0, 0, 0),
+        float3(0.f, 0.f, 0.f),
         0,
     };
 
@@ -73,11 +73,6 @@ void SceneRenderer::StagePrepare()
 	m_drawModels.clear();
 }
 
-void SceneRenderer::StageSubmit()
-{
-    //ºÒÇÊ¿ä
-}
-
 void SceneRenderer::AddDrawModel(Model* model)
 {
 	m_drawModels.push_back(model);
@@ -85,7 +80,7 @@ void SceneRenderer::AddDrawModel(Model* model)
 
 void SceneRenderer::StageDrawModels()
 {
-    for (auto&& model : std::views::drop(m_drawModels, 1))
+    for (auto&& model : drop(m_drawModels, 1))
     {
         ModelBuffer modelBuff{};
         modelBuff.modelMatrix = XMMatrixTranspose(model->GetMatrix());
@@ -110,6 +105,6 @@ void SceneRenderer::StageDrawModels()
 			m_pso->DrawMesh(mesh.m_IndexBuffer, mesh.m_VertexBuffer, mesh.m_Material);
 		}
     }
-
+	m_pso->Finish();
     m_stateDevice->SetRenderTargetBackBuffer();
 }
