@@ -394,6 +394,8 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
             swapChain.As(&m_swapChain)
         );
 
+		DirectX::SetName(m_swapChain.Get(), "IDXGISwapChain1");
+
         DirectX11::ThrowIfFailed(
             dxgiDevice->SetMaximumFrameLatency(1)
         );
@@ -410,6 +412,12 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
                 &m_d3dRenderTargetView
             )
         );
+
+		DirectX::SetName(backBuffer.Get(), "BackBuffer");
+        //백버퍼 텍스쳐 받아오기
+        ID3D11Resource* pResource = nullptr;
+		m_d3dRenderTargetView->GetResource(&pResource);
+		pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&m_backBuffer);
 
         // 필요한 경우 3D 렌더링에 사용할 깊이 스텐실 뷰를 만듭니다.
         CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
@@ -438,6 +446,8 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
                 &m_d3dDepthStencilView
             )
         );
+
+		DirectX::SetName(depthStencil.Get(), "DepthStencil");
 
         m_screenViewport = CD3D11_VIEWPORT(
             0.0f,

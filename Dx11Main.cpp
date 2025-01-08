@@ -1,4 +1,6 @@
 #include "Dx11Main.h"
+#include "Utility_Framework/CoreWindow.h"
+#include "InputManager.h"
 
 DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceResources)
 	: m_deviceResources(deviceResources)
@@ -29,7 +31,7 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_sceneRenderer->SetCamera(m_camera.get());
 
 	m_model = AssetsSystem->m_Models["sphere"];
-	m_model->scale = { 0.015f, 0.015f, 0.015f };
+	m_model->scale = { 0.0015f, 0.0015f, 0.0015f };
 
 	m_ground = AssetsSystem->m_Models["plane"];
 
@@ -53,6 +55,20 @@ void DirectX11::Dx11Main::Update()
 	//렌더러의 업데이트 코드를 여기에 추가합니다.
 	m_timeSystem.Tick([&]
 	{
+		//렌더러의 업데이트 코드를 여기에 추가합니다.
+		std::wostringstream woss;
+		woss.precision(6);
+		woss << L"4Q Graphics Application"
+			<< L"Width: "
+			<< m_deviceResources->GetOutputSize().width
+			<< L" Height: "
+			<< m_deviceResources->GetOutputSize().height
+			<< L" FPS: "
+			<< m_timeSystem.GetFramesPerSecond()
+			<< L" FrameCount: "
+			<< m_timeSystem.GetFrameCount();
+
+		SetWindowText(m_deviceResources->GetWindow()->GetHandle(), woss.str().c_str());
 		//렌더러의 업데이트 코드를 여기에 추가합니다.
 		m_camera->Update(m_timeSystem.GetElapsedSeconds());
 	});

@@ -26,9 +26,9 @@ void StateDevice::SetRenderTarget(const RenderTarget* mainTarget, const RenderTa
 
 void StateDevice::SetRenderTargetBackBuffer()
 {
-    ID3D11RenderTargetView* views[]{ m_RenderTargetViewBackBuffer };
+    ID3D11RenderTargetView* views[]{ m_RenderTargetViewBackBuffer, nullptr };
 
-    m_DeviceContext->OMSetRenderTargets(1, views, m_DepthStencilViewMain);
+    m_DeviceContext->OMSetRenderTargets(2, views, m_DepthStencilViewMain);
     m_DeviceContext->RSSetViewports(1, &m_viewPort);
 }
 
@@ -37,10 +37,10 @@ void StateDevice::SetDepthStencilState(DepthStencilType type)
     switch (type)
     {
     case DepthStencilType::Less:
-        m_DeviceContext->OMSetDepthStencilState(m_DepthStencilStateLess.Get(), 1);
+        m_DeviceContext->OMSetDepthStencilState(m_DepthStencilStateLess.Get(), 0);
         break;
     case DepthStencilType::LessEqual:
-        m_DeviceContext->OMSetDepthStencilState(m_DepthStencilStateLessEqual.Get(), 1);
+        m_DeviceContext->OMSetDepthStencilState(m_DepthStencilStateLessEqual.Get(), 0);
         break;
     }
 }

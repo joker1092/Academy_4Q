@@ -43,7 +43,7 @@ void MeshBasedPSO::Prepare(CameraBuffer* camera, SceneBuffer* scene)
 		0.f,
 		0.f,
 		SHADOW_MAP_SIZE,
-		SHADOW_MAP_SIZE,
+		SHADOW_MAP_SIZE
 	};
 
 	m_deviceContext->OMSetRenderTargets(0, nullptr, m_shadowDepthStencilView.Get());
@@ -164,6 +164,8 @@ void MeshBasedPSO::Finish()
 	m_deviceContext->ClearDepthStencilView(m_shadowDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_stateDevice->SetRenderTarget();
+
+	m_deviceContext->CopyResource(m_stateDevice->GetBackBuffer(), m_target->GetTexture());
 }
 
 void MeshBasedPSO::CreateCubeMap(const Texture2D& texture)
@@ -184,7 +186,7 @@ void MeshBasedPSO::DrawCubeMap(CameraBuffer* camera)
 	m_deviceContext->VSSetShader(m_cubeMapVertexShader.Get(), nullptr, 0);
 	m_deviceContext->PSSetShader(m_cubeMapPixelShader.Get(), nullptr, 0);
 
-	m_stateDevice->SetRasterizerState(RasterizerType::SolidNoCull);
+	m_stateDevice->SetRasterizerState(RasterizerType::SolidFrontCull);
 	m_stateDevice->SetDepthStencilState(DepthStencilType::LessEqual);
 	m_stateDevice->SetRenderTarget(m_target.get());
 
@@ -230,7 +232,7 @@ void MeshBasedPSO::CreateInputLayout()
 
 		DirectX11::ThrowIfFailed(
 			m_stateDevice->GetDevice()->CreateInputLayout(
-				layout,
+				&layout[0],
 				ARRAYSIZE(layout),
 				m_vertexShader.GetBufferPointer(),
 				m_vertexShader.GetBufferSize(),
@@ -253,7 +255,7 @@ void MeshBasedPSO::CreateInputLayout()
 
 		DirectX11::ThrowIfFailed(
 			m_stateDevice->GetDevice()->CreateInputLayout(
-				layout,
+				&layout[0],
 				ARRAYSIZE(layout),
 				m_cubeMapVertexShader.GetBufferPointer(),
 				m_cubeMapVertexShader.GetBufferSize(),
@@ -270,11 +272,26 @@ void MeshBasedPSO::InitializeShaders()
 	m_vertexShader = DataSystem::GetInstance()->m_VertexShaders["mesh"];
 	m_pixelShader = DataSystem::GetInstance()->m_PixelShaders["mesh"];
 
+	if (m_vertexShader.Get() == nullptr || m_pixelShader.Get() == nullptr)
+	{
+		throw std::exception("MeshBasedPSO::InitializeShaders() : Shader is nullptr");
+	}
+
 	m_cubeMapVertexShader = DataSystem::GetInstance()->m_VertexShaders["cubemap"];
 	m_cubeMapPixelShader = DataSystem::GetInstance()->m_PixelShaders["cubemap"];
 
+	if (m_cubeMapVertexShader.Get() == nullptr || m_cubeMapPixelShader.Get() == nullptr)
+	{
+		throw std::exception("MeshBasedPSO::InitializeShaders() : CubeMap Shader is nullptr");
+	}
+
 	m_shadowVertexShader = DataSystem::GetInstance()->m_VertexShaders["shadow"];
 	m_shadowPixelShader = DataSystem::GetInstance()->m_PixelShaders["shadow"];
+
+	if (m_shadowVertexShader.Get() == nullptr || m_shadowPixelShader.Get() == nullptr)
+	{
+		throw std::exception("MeshBasedPSO::InitializeShaders() : Shadow Shader is nullptr");
+	}
 }
 
 void MeshBasedPSO::CreateBuffers()
@@ -287,6 +304,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
 
+	DirectX::SetName(m_mvpBuffer.Get(), "MVP Buffer");
+
 	m_modelBuffer = Buffer<ModelBuffer>{
 		m_stateDevice->GetDevice(),
 		m_stateDevice->GetDeviceContext(),
@@ -294,6 +313,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
+
+	DirectX::SetName(m_modelBuffer.Get(), "Model Buffer");
 
 	m_materialBuffer = Buffer<MaterialProperties>{
 		m_stateDevice->GetDevice(),
@@ -303,6 +324,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
 
+	DirectX::SetName(m_materialBuffer.Get(), "Material Buffer");
+
 	m_cameraBuffer = Buffer<CameraBuffer>{
 		m_stateDevice->GetDevice(),
 		m_stateDevice->GetDeviceContext(),
@@ -310,6 +333,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
+
+	DirectX::SetName(m_cameraBuffer.Get(), "Camera Buffer");
 
 	m_lightSpaceBuffer = Buffer<LightSpaceBuffer>{
 		m_stateDevice->GetDevice(),
@@ -319,6 +344,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
 
+	DirectX::SetName(m_lightSpaceBuffer.Get(), "Light Space Buffer");
+
 	m_sceneBuffer = Buffer<SceneBuffer>{
 		m_stateDevice->GetDevice(),
 		m_stateDevice->GetDeviceContext(),
@@ -326,6 +353,8 @@ void MeshBasedPSO::CreateBuffers()
 		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 	};
+
+	DirectX::SetName(m_sceneBuffer.Get(), "Scene Buffer");
 }
 
 void MeshBasedPSO::CreateSamplers()
@@ -335,10 +364,14 @@ void MeshBasedPSO::CreateSamplers()
 		D3D11_FILTER::D3D11_FILTER_ANISOTROPIC
 	};
 
+	DirectX::SetName(m_anisotropicSampler.Get(), "Anisotropic Sampler");
+
 	m_linearSampler = Sampler{
 		m_stateDevice->GetDevice(),
 		D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR
 	};
+
+	DirectX::SetName(m_linearSampler.Get(), "Linear Sampler");
 
 	Mathf::Color4 borderColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -350,11 +383,15 @@ void MeshBasedPSO::CreateSamplers()
 		&borderColor
 	};
 
+	DirectX::SetName(m_clampSampler.Get(), "Clamp Sampler");
+
 	m_cubeMapSampler = Sampler{
 		m_stateDevice->GetDevice(),
 		D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR,
 		D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP
 	};
+
+	DirectX::SetName(m_cubeMapSampler.Get(), "CubeMap Sampler");
 
 	m_IBLSampler = Sampler{
 		m_stateDevice->GetDevice(),
@@ -362,6 +399,8 @@ void MeshBasedPSO::CreateSamplers()
 		D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP,
 		1.f
 	};
+
+	DirectX::SetName(m_IBLSampler.Get(), "IBL Sampler");
 }
 
 void MeshBasedPSO::CreateTextures()
@@ -448,10 +487,16 @@ void MeshBasedPSO::CreateTextures()
 	{
 		m_target = std::make_unique<RenderTarget>(
 			m_stateDevice->GetDevice(),
-			DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+			m_deviceContext,
+			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
 			m_stateDevice->GetBackBufferWidth(),
 			m_stateDevice->GetBackBufferHeight()
 		);
+
+		m_target->color = Mathf::xVColor4{ 0.05f, 0.05f, 0.05f, 1.0f };
+
+		DirectX::SetName(m_target->GetDSV(), "Depth Stencil View");
+		DirectX::SetName(m_target->GetRTV(), "Render Target View");
 	}
 
 	{
@@ -461,6 +506,9 @@ void MeshBasedPSO::CreateTextures()
 		m_stateDevice->GetBackBufferWidth(),
 			m_stateDevice->GetBackBufferHeight()
 		);
+
+		DirectX::SetName(m_shadowTarget->GetDSV(), "Shadow Depth Stencil View");
+		DirectX::SetName(m_shadowTarget->GetRTV(), "Shadow Render Target View");
 
 		m_shadowTarget->color = Mathf::xVColor4{ 1.f, 1.f, 1.f, 1.f };
 	}
