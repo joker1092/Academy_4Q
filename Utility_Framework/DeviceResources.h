@@ -6,7 +6,7 @@ class CoreWindow;
 
 namespace DirectX11
 {
-	struct Size
+	struct Sizef
 	{
 		float width;
 		float height;
@@ -24,7 +24,7 @@ namespace DirectX11
 		DeviceResources();
 
 		void SetWindow(CoreWindow& window);
-		void SetLogicalSize(Size logicalSize);
+		void SetLogicalSize(Sizef logicalSize);
 		void SetDpi(float dpi);
 		void ValidateDevice();
 		void HandleDeviceLost();
@@ -32,8 +32,8 @@ namespace DirectX11
 		void Trim();
 		void Present();
 
-		Size GetOutputSize() const { return m_outputSize; }
-		Size GetLogicalSize() const { return m_logicalSize; }
+		Sizef GetOutputSize() const { return m_outputSize; }
+		Sizef GetLogicalSize() const { return m_logicalSize; }
 		float GetDpi() const { return m_dpi; }
 		float GetAspectRatio() const { return m_logicalSize.width / m_logicalSize.height; }
 
@@ -87,9 +87,9 @@ namespace DirectX11
 		CoreWindow* m_window;
 
 		D3D_FEATURE_LEVEL m_d3dFeatureLevel;
-		Size m_d3dRenderTargetSize;
-		Size m_outputSize;
-		Size m_logicalSize;
+		Sizef m_d3dRenderTargetSize;
+		Sizef m_outputSize;
+		Sizef m_logicalSize;
 		float m_dpi;
 		float m_effectiveDpi;
 

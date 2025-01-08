@@ -199,7 +199,8 @@ void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices
 	UINT stride = vertices.Stride();
 	const UINT offset = 0;
 
-	ID3D11ShaderResourceView* views[] = {
+	ID3D11ShaderResourceView* views[]
+    {
 		material->textures.diffuse.Get(),
 		material->textures.metallic.Get(),
 		material->textures.roughness.Get(),
