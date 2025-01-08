@@ -1,110 +1,95 @@
 #include "SceneRenderer.h"
-#include "CoreWindow.h"
-#include "TextureLoader.h"
 
-SceneRenderer::SceneRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources) :
-    m_stateDevice(std::make_unique<StateDevice>(deviceResources))
+SceneRenderer::SceneRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources) : deviceResources(deviceResources)
 {
+	// Create our renering device which includes swapchain
+	_device = std::make_unique<LogicalDevice>(deviceResources);
 }
 
 SceneRenderer::~SceneRenderer()
 {
-	m_camera = nullptr;
-	m_scene = nullptr;
-	m_drawModels.clear();
-	m_pso.reset();
+	_mpso.reset();
+	_device.reset();
 }
 
 void SceneRenderer::Initialize()
 {
-    m_pso = std::make_unique<MeshBasedPSO>(m_stateDevice.get());
+	// State object that performs rendering operations in steps
+	_mpso = std::make_unique<MPSO>(_device.get());
 
-	file::path path = PathFinder::Relative("IBL\\");
+	// Load cubemap
+	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\cubemap.dds"));
 
-    path /= "cubemap.dds";
+	// Create and set cubemap to that state object
+	_mpso->CreateCubeMap(tex);
 
-	Texture2D texture = TextureLoader::LoadTextureFromFile(path.string());
-
-	m_pso->CreateCubeMap(texture);
 }
 
 void SceneRenderer::SetCamera(Camera* camera)
 {
-	m_camera = camera;
-}
-
-void SceneRenderer::SetScene(Scene* scene)
-{
-	m_scene = scene;
+	_camera = camera;
 }
 
 void SceneRenderer::StagePrepare()
 {
-#if defined(DEBUG) || defined(_DEBUG)
-	CORE_ASSERT(m_camera);
-	CORE_ASSERT(m_scene);
+#ifdef _DEBUG
+	assert(_camera != nullptr);
 #endif
 
-    m_stateDevice->ClearRenderTargetBackBuffer(m_clearColor);
+	_device->ClearBackbuffer();
 
-    Mathf::xMatrix proj = m_camera->GetProjectionMatrix();
-    Mathf::xMatrix view = m_camera->GetViewMatrix();
+	// Craete camera and scene buffers
+	DirectX::XMMATRIX proj = _camera->GetProjectionMatrix();
+	DirectX::XMMATRIX view = _camera->GetViewMatrix();
 
-    Mathf::Vector3 pos = { 0.f, 0.f, 0.f };
-    pos = m_camera->GetPosition();
+	DirectX::XMFLOAT3 pos = { 0.0f,0.0f,0.0f };
+	DirectX::XMStoreFloat3(&pos, _camera->GetPosition());
 
-    CameraBuffer cameraBuff{
-        XMMatrixMultiplyTranspose(view, proj),
-        pos,
-        0,
-        float3(0.f, 0.f, 0.f),
-        0,
-    };
+	CameraBuffer cbuff{
+		DirectX::XMMatrixMultiplyTranspose(view, proj),
+		pos,
+		0,
+		DirectX::XMFLOAT3{0.0,0.0f,0.0f},
+		0
+	};
+	SceneBuffer sbuff{};
 
-    SceneBuffer sceneBuff{};
-    sceneBuff.SunPos = m_scene->SunPos;
-    sceneBuff.SunColor = m_scene->SunColor;
-    sceneBuff.IBLColor = m_scene->IBLColor;
-    sceneBuff.IBLIntensity = m_scene->IBLIntensity;
-    sceneBuff.ambientColor = float3(0.0f, 0.0f, 0.0f);
-    sceneBuff.preciseShadow = m_scene->bMoreShadowSamplers;
+	sbuff.sunpos = _scene->sunpos;
+	sbuff.suncolor = _scene->suncolor;
+	sbuff.iblColor = _scene->iblcolor;
+	sbuff.iblIntensity = _scene->iblIntensity;
+	sbuff.ambientcolor = DirectX::XMFLOAT3{ 0.0f,0.0f,0.0f };
+	sbuff.preciseShadows = _scene->moreShadowSamples;
 
-	m_pso->Prepare(&cameraBuff, &sceneBuff);
-	m_drawModels.clear();
+	// Start the pipeline
+	_mpso->Prepare(&cbuff, &sbuff);
+	_drawmodels.clear();
+	_modelcount = 0;
 }
 
-void SceneRenderer::AddDrawModel(Model* model)
+void SceneRenderer::EndStage()
 {
-	m_drawModels.push_back(model);
+	// Finish up pipeline
+	if (_scene->fxaa)
+	{
+		FxaaBuffer fxaabuff = {};
+		fxaabuff.textureSize = DirectX::XMINT2{ 
+			static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().width),
+			static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().height)
+		};
+		fxaabuff.bias = _scene->bias;
+		fxaabuff.biasMin = _scene->biasMin;
+		fxaabuff.spanMax = _scene->spanMax;
+
+		_mpso->Finish(_scene->gaussianShadowBlur, &fxaabuff);
+	}
+	else
+	{
+		_mpso->Finish(_scene->gaussianShadowBlur, nullptr);
+	}
+
+	// Set rendering to back buffer for ImGui
+	// As it is rendered on top
+	_device->SetRenderTargetBackbuffer();
 }
 
-void SceneRenderer::StageDrawModels()
-{
-    for (auto&& model : drop(m_drawModels, 1))
-    {
-        ModelBuffer modelBuff{};
-        modelBuff.modelMatrix = XMMatrixTranspose(model->GetMatrix());
-
-        m_pso->SetModelConstants(&modelBuff);
-
-        for (auto&& mesh : model->meshes)
-        {
-            m_pso->DrawMeshShadows(mesh.m_IndexBuffer, mesh.m_VertexBuffer);
-        }
-    }
-
-	m_pso->FinishShadows();
-
-    for (auto&& model : m_drawModels)
-    {
-		ModelBuffer modelBuff{};
-		modelBuff.modelMatrix = XMMatrixTranspose(model->GetMatrix());
-		m_pso->SetModelConstants(&modelBuff);
-		for (auto&& mesh : model->meshes)
-		{
-			m_pso->DrawMesh(mesh.m_IndexBuffer, mesh.m_VertexBuffer, mesh.m_Material);
-		}
-    }
-	m_pso->Finish();
-    m_stateDevice->SetRenderTargetBackBuffer();
-}

@@ -1,40 +1,66 @@
 #pragma once
-#include "TextureLoader.h"
-#include "Model.h"
+#include "Core.Minimal.h"
+#include "Mesh.h"
 #include "Material.h"
+#include "Model.h"
 
-#include <assimp/scene.h>
+#include "TextureLoader.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h> 
 #include <assimp/material.h>
-//#include <assimp/pbrmaterial.h>
+#include <assimp/pbrmaterial.h>
 
 class ModelLoader
 {
 public:
-	static void Initialize(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources);
 
-    static void LoadFormFile(const file::path& path, const file::path& dir,
-    _inout_opt Model** ppModel, _inout_opt AnimModel** ppAnimModel);
+	// Takes model path, and returns mesh and/or animation
+	static void	LoadFromFile(
+			const file::path&	path,
+			const file::path&	dir,
+			std::shared_ptr<Model>*			model,
+			std::shared_ptr<AnimModel>*		animmodel
+		);
 
 private:
-    struct MatOverrides
-    {
-        MatOverrides() = default;
-        MatOverrides(const std::string& _name, float _roughness, float _metalness) : name(_name), roughness(_roughness), metalness(_metalness), enabled(1) {}
-        bool enabled{};
-        std::string name{};
-        float roughness{};
-        float metalness{};
-    };
 
-    static Model* LoadModel(const std::string_view& name, const aiScene* scene,
-        const file::path& path, const file::path& dir);
+	struct MatOverrides
+	{
 
-    static AnimModel* LoadAnimModel(const std::string_view& name, const aiScene* scene,
-        const file::path& path, const file::path& dir);
+		inline MatOverrides() {};
+		inline MatOverrides(const std::string& _name, float _roughness, float _metalness) : name(_name), roughness(_roughness), metalness(_metalness), enabled(1) {}
+		bool enabled = true;
+		std::string name;
+		float roughness;
+		float metalness;
+	};
 
-    static void LoadMeshes(const aiScene* scene, const file::path& dir, std::vector<Mesh>* meshes);
+	static std::shared_ptr<Model> LoadModel(
+			const std::string&				name,
+			const aiScene*					scene,
+			const file::path&	path,
+			const file::path&	dir
+		);
 
-    static Material* CreateMaterial(const file::path& fir, aiMesh* mesh, const aiScene* scene);
+	static std::shared_ptr<AnimModel> LoadAnimatedModel(
+			const std::string&				name,
+			const aiScene*					scene,
+			const file::path&	path,
+			const file::path&	dir
+		);
 
-	static std::shared_ptr<DirectX11::DeviceResources> m_deviceResources;
+	static void	LoadMeshes(
+			const aiScene*					scene,
+			const file::path&	dir,
+			std::vector<Mesh>*				meshes
+		);
+
+	static std::shared_ptr<Material> CreateMaterial(
+			const file::path&	dir,
+			aiMesh*							aimesh,
+			const aiScene*					scene
+		);
+
 };

@@ -1,269 +1,174 @@
 #pragma once
 #include "Core.Minimal.h"
-#include "DeviceResources.h"
+#include "LogicalDevice.h"
 
-interface IShaderResource
+class IShader
 {
-    IShaderResource() : m_name("null") {};
-    IShaderResource(
-        const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        m_d3dDevice(deviceResources->GetD3DDevice()),
-        m_name(name),
-        m_bCompiled(false),
-        m_Blob(blob)
-    {
-    };
-    virtual ~IShaderResource() = default;
+public:
+	inline IShader() : name("null") {};
+	inline IShader(const std::string& _name, const ComPtr<ID3DBlob>& blob)
+		: _iscompiled(0), _blob(blob), name(_name) { };
+	virtual ~IShader() = default;
 
-    void SetDevice(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
-    {
-        m_d3dDevice = deviceResources->GetD3DDevice();
-    }
+	virtual void Compile() = 0;
+	std::string name;
 
-    virtual void Compile() abstract;
-
-    void* GetBufferPointer() const
-    {
-        return m_Blob->GetBufferPointer();
-    }
-
-    size_t GetBufferSize() const
-    {
-        return m_Blob->GetBufferSize();
-    }
-
-    std::string m_name{};
+	inline LPVOID GetBufferPointer()
+	{
+		return _blob->GetBufferPointer();
+	}
+	inline SIZE_T GetBufferSize()
+	{
+		return _blob->GetBufferSize();
+	}
 
 protected:
-    ID3D11Device* m_d3dDevice{};
-    bool m_bCompiled{};
-    ComPtr<ID3DBlob> m_Blob{};
+	BOOL								_iscompiled;
+	ComPtr<ID3DBlob>	_blob;
 };
 
-class VertexShader : public IShaderResource
-{
+
+class VertexShader : public IShader {
 public:
-    VertexShader() = default;
-    VertexShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~VertexShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
+	inline VertexShader() {};
+	inline VertexShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreateVertexShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_VertexShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
+	};
+	inline ~VertexShader() {};
 
-    ID3D11VertexShader* Get()
-    {
-        return m_VertexShader.Get();
-    }
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateVertexShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _vs.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
 
-    void Reset()
-    {
-        m_VertexShader.Reset();
-    }
+	inline ID3D11VertexShader* Get() {
+		return _vs.Get();
+	}
+	inline void Reset() {
+		_vs.Reset();
+	}
 
 private:
-    ComPtr<ID3D11VertexShader> m_VertexShader{};
+	ComPtr<ID3D11VertexShader>	_vs;
 };
 
-class HullShader : public IShaderResource
-{
+class HullShader : public IShader {
 public:
-    HullShader() = default;
-    HullShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~HullShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreateHullShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_HullShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
-    ID3D11HullShader* Get()
-    {
-        return m_HullShader.Get();
-    }
-    void Reset()
-    {
-        m_HullShader.Reset();
-    }
+	inline HullShader() {};
+	inline HullShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
+	};
+	inline ~HullShader() {};
+
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateHullShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _hs.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
+
+	inline ID3D11HullShader* Get() {
+		return _hs.Get();
+	}
+	inline void Reset() {
+		_hs.Reset();
+	}
 private:
-    ComPtr<ID3D11HullShader> m_HullShader{};
+	ComPtr<ID3D11HullShader>	_hs;
 };
 
-class DomainShader : public IShaderResource
-{
+class DomainShader : public IShader {
 public:
-    DomainShader() = default;
-    DomainShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~DomainShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreateDomainShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_DomainShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
-    ID3D11DomainShader* Get()
-    {
-        return m_DomainShader.Get();
-    }
-    void Reset()
-    {
-        m_DomainShader.Reset();
-    }
+	inline DomainShader() {};
+	inline DomainShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
+	};
+	inline ~DomainShader() {};
+
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateDomainShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _ds.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
+
+	inline ID3D11DomainShader* Get() {
+		return _ds.Get();
+	}
+	inline void Reset() {
+		_ds.Reset();
+	}
 private:
-    ComPtr<ID3D11DomainShader> m_DomainShader{};
+	ComPtr<ID3D11DomainShader>	_ds;
 };
 
-class GeometryShader : public IShaderResource
-{
+class GeometryShader : public IShader {
 public:
-    GeometryShader() = default;
-    GeometryShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~GeometryShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreateGeometryShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_GeometryShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
-    ID3D11GeometryShader* Get()
-    {
-        return m_GeometryShader.Get();
-    }
-    void Reset()
-    {
-        m_GeometryShader.Reset();
-    }
+	inline GeometryShader() {};
+	inline GeometryShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
+	};
+	inline ~GeometryShader() {};
+
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateGeometryShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _gs.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
+
+	inline ID3D11GeometryShader* Get() {
+		return _gs.Get();
+	}
+	inline void Reset() {
+		_gs.Reset();
+	}
 private:
-    ComPtr<ID3D11GeometryShader> m_GeometryShader{};
+	ComPtr<ID3D11GeometryShader>	_gs;
 };
 
-class PixelShader : public IShaderResource
-{
+class PixelShader : public IShader {
 public:
-    PixelShader() = default;
-    PixelShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~PixelShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreatePixelShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_PixelShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
-    ID3D11PixelShader* Get()
-    {
-        return m_PixelShader.Get();
-    }
-    void Reset()
-    {
-        m_PixelShader.Reset();
-    }
+	inline PixelShader() {};
+	inline PixelShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
+	};
+	inline ~PixelShader() {};
+
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreatePixelShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _ps.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
+
+	inline ID3D11PixelShader* Get() {
+		return _ps.Get();
+	}
+	inline void Reset() {
+		_ps.Reset();
+	}
 private:
-    ComPtr<ID3D11PixelShader> m_PixelShader{};
+	ComPtr<ID3D11PixelShader>	_ps;
 };
 
-
-class ComputeShader : public IShaderResource
-{
+class ComputeShader : public IShader {
 public:
-    ComputeShader() = default;
-    ComputeShader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        const std::string_view& name, ID3DBlob* blob) :
-        IShaderResource(deviceResources, name, blob)
-    {
-    };
-    ~ComputeShader() override = default;
-    void Compile() override
-    {
-        if (m_bCompiled)
-            return;
-        DirectX11::ThrowIfFailed(
-            m_d3dDevice->CreateComputeShader(
-                m_Blob->GetBufferPointer(),
-                m_Blob->GetBufferSize(),
-                nullptr,
-                m_ComputeShader.ReleaseAndGetAddressOf()
-            )
-        );
-        m_bCompiled = true;
-    }
-    ID3D11ComputeShader* Get()
-    {
-        return m_ComputeShader.Get();
-    }
-    void Reset()
-    {
-        m_ComputeShader.Reset();
-    }
+	inline ComputeShader() {};
+	inline ComputeShader(const std::string& name, const ComPtr<ID3DBlob>& blob) : IShader(name, blob) {
 
+	};
+	inline ~ComputeShader() {};
+
+	inline void Compile() {
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateComputeShader(this->_blob->GetBufferPointer(), this->_blob->GetBufferSize(),
+			nullptr, _cs.ReleaseAndGetAddressOf()));
+		this->_iscompiled = 1;
+	}
+
+	inline ID3D11ComputeShader* Get() {
+		return _cs.Get();
+	}
+	inline void Reset() {
+		_cs.Reset();
+	}
 private:
-    ComPtr<ID3D11ComputeShader> m_ComputeShader{};
+	ComPtr<ID3D11ComputeShader>	_cs;
 };
-

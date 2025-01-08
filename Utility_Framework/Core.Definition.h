@@ -56,3 +56,11 @@ constexpr inline decltype(auto) foreach = std::ranges::for_each;
 #define unsafe
 #endif // !_in
 
+#if defined(_DEBUG)
+#define WARN(x) std::cout << std::string("WARNING: ") + x << std::endl
+#define INFO(x) std::cout << std::string("INFO: ") + x << std::endl
+#else
+#define WARN(x)
+#define ERROR(x) InternalHelper::Terminate(x)
+#define INFO(x)
+#endif

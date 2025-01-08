@@ -1,13 +1,18 @@
 #pragma once
-#include "BufferType.h"
+#include "Buffers.h"
 #include "MaterialTextures.h"
 
-struct Material : public Noncopyable
+struct Material
 {
-    Material(const std::string_view& name = "BasicMaterial") : m_Name(name) {}
-    ~Material() = default;
+	inline Material(const std::string& _name = "") : name(_name) { };
+	inline ~Material() {};
 
-    std::string m_Name;
-    MaterialProperties m_Properties{};
-    MaterialTextures m_Textures{};
+	// No copy
+	Material(const Material&) = delete;
+	Material& operator=(const Material&) = delete;
+
+	std::string			name;
+	MaterialProperties	properties;
+	MaterialTextures	textures;
+
 };

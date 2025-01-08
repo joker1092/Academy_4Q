@@ -28,102 +28,96 @@
     <Filter Include="Manager&amp;System">
       <UniqueIdentifier>{0d451d80-798a-4694-b7aa-3dd05159ce0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Interfaces">
-      <UniqueIdentifier>{828e32cd-c430-41a3-9976-e407faed8eae}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Buffer.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferType.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
+    <ClCompile Include="SceneRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="MPSO.cpp">
+      <Filter>PipelineStateObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DataSystem.cpp">
+      <Filter>Manager&amp;System</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureLoader.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicalDevice.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DXStates.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Material.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialTextures.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
       <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="IPipelineStateObject.h">
-      <Filter>PipelineStateObject</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshBasedPSO.h">
-      <Filter>PipelineStateObject</Filter>
-    </ClInclude>
-    <ClInclude Include="StateDevice.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
-      <Filter>Objects</Filter>
+    <ClInclude Include="Model.h">
+      <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="Primitives.h">
       <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
+    <ClInclude Include="Texture.h">
       <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="SceneRenderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="TextureLoader.h">
-      <Filter>Loader</Filter>
+    <ClInclude Include="PSO.h">
+      <Filter>PipelineStateObject</Filter>
     </ClInclude>
-    <ClInclude Include="Sampler.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Shaders</Filter>
+    <ClInclude Include="MPSO.h">
+      <Filter>PipelineStateObject</Filter>
     </ClInclude>
     <ClInclude Include="DataSystem.h">
       <Filter>Manager&amp;System</Filter>
     </ClInclude>
+    <ClInclude Include="Buffers.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
     <ClInclude Include="ModelLoader.h">
       <Filter>Loader</Filter>
     </ClInclude>
-    <ClInclude Include="Interfaces.h">
-      <Filter>Interfaces</Filter>
+    <ClInclude Include="TextureLoader.h">
+      <Filter>Loader</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="RenderTarget.cpp">
+    <ClInclude Include="MaterialTextures.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
       <Filter>Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneRenderer.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureLoader.cpp">
-      <Filter>Loader</Filter>
-    </ClCompile>
-    <ClCompile Include="StateDevice.cpp">
+    </ClInclude>
+    <ClInclude Include="LogicalDevice.h">
       <Filter>Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Sampler.cpp">
+    </ClInclude>
+    <ClInclude Include="DXStates.h">
       <Filter>Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelLoader.cpp">
-      <Filter>Loader</Filter>
-    </ClCompile>
-    <ClCompile Include="DataSystem.cpp">
-      <Filter>Manager&amp;System</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshBasedPSO.cpp">
-      <Filter>PipelineStateObject</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,20 +1,34 @@
 #pragma once
 #include "Core.Minimal.h"
-#include "DeviceResources.h"
 #include "Texture.h"
 
 class TextureLoader
 {
 public:
-	TextureLoader() = default;
-	~TextureLoader() = default;
 
-	static void Initialize(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources);
-
-	static Texture2D LoadTextureFromFile(const std::string_view& filename);
+	static Texture2D LoadFromFile(
+			const file::path& filepath
+		);
+	static Texture2D LoadCubemapFromFile(
+		const file::path& filepath
+	);
 
 private:
-	static Texture2D CreateTexture(const std::string_view& name, ID3D11Resource* resource, ID3D11ShaderResourceView* srv);
 
-	static ID3D11Device* m_d3dDevice;
+	static Texture2D LoadDDSFromFile(
+			const file::path& filepath
+		);
+	static Texture2D LoadPNGFromFile(
+			const file::path& filepath
+		);
+	static Texture2D LoadCubemapDDSFromFile(
+		const file::path& filepath
+	);
+
+	static Texture2D CreateTexture(
+			const std::string&									name, 
+			const ComPtr<ID3D11Resource>&		res, 
+			const ComPtr<ID3D11ShaderResourceView>&	srv
+		);
+
 };

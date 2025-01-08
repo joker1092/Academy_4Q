@@ -1,28 +1,38 @@
 #pragma once
-#include "Core.Minimal.h"
 #include "Mesh.h"
 
 class Model
 {
 public:
-	Model() : position(Mathf::xVectorZero), rotation(Mathf::xVectorZero), scale(Mathf::xVectorOne) {}
-	~Model() = default;
+	inline Model() : position{ 0.0f, 0.0f, 0.0f, 0.0f }, rotation{ DirectX::XMQuaternionIdentity() }, scale(1.0f)
+	{ };
+	inline ~Model() { };
 
-	std::string name{};
-	std::vector<Mesh> meshes{};
+	std::string				name;
+	std::vector<Mesh>		meshes;
 
-	Mathf::xVector position{};
-	Mathf::xVector rotation{};
-	Mathf::xVector scale{};
+	DirectX::XMVECTOR		position;
+	DirectX::XMVECTOR		rotation;
+	float					scale;
 
-	Mathf::xMatrix GetMatrix() const
+	inline DirectX::XMMATRIX GetMatrix() const
 	{
-		return XMMatrixScalingFromVector(scale) * 
-			XMMatrixRotationQuaternion(rotation) *
-			XMMatrixTranslationFromVector(position);
+
+		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(DirectX::XMVECTOR{ scale, scale, scale, 0.0f });
+		trans *= DirectX::XMMatrixTranslationFromVector(position);
+		trans *= DirectX::XMMatrixRotationQuaternion(rotation);
+		return trans;
 	}
 };
 
-class AnimModel : public Model
+class AnimModel
 {
+public:
+	std::string				name;
+	std::vector<AnimMesh>	meshes;
+
+	inline DirectX::XMMATRIX GetMatrix()
+	{
+		return DirectX::XMMatrixIdentity();
+	}
 };

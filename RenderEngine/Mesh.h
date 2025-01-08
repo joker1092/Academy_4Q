@@ -1,67 +1,76 @@
 #pragma once
-#include "Core.Minimal.h"
+#include "Buffers.h"
 #include "Buffer.h"
-#include "BufferType.h"
 #include "Material.h"
-#include "DeviceResources.h"
-
-using Index = uint32;
 
 class Mesh
 {
 public:
-	Mesh() = default;
-	Mesh(const std::string_view& name, const std::vector<Index>& indices, const std::vector<Vertex>& vertices) :
-		m_Name(name), m_Indices(indices), m_Vertices(vertices)
-	{
-	}
-	Mesh(const std::string_view& name, 
-		const std::vector<Index>& indices, 
-		const std::vector<Vertex>& vertices, Material* material) :
-		m_Name(name), m_Indices(indices), m_Vertices(vertices), m_Material(material)
-	{
-	}
-	~Mesh() = default;
+	inline Mesh() { };
+	inline Mesh(
+		const std::string _name,
+		const std::vector<Index>& _indices,
+		const std::vector<Vertex>& _vertices
+	)
+		: name(_name), indices(_indices), vertices(_vertices){ };
+	inline Mesh(
+		const std::string _name,
+		const std::vector<Index>& _indices,
+		const std::vector<Vertex>& _vertices,
+		const std::shared_ptr<Material>& _material
+	)
+		: name(_name), indices(_indices), vertices(_vertices), material(_material) { };
+	inline ~Mesh() { };
 
-	Mesh(Mesh&& mesh) noexcept : 
-		m_Name(std::move(mesh.m_Name)),
-		m_Indices(std::move(mesh.m_Indices)),
-		m_Vertices(std::move(mesh.m_Vertices)),
-		m_Material(std::move(mesh.m_Material))
-	{
-	}
-	Mesh& operator=(Mesh&&) noexcept = default;
+	// Move constructor
+	Mesh(Mesh&& mesh) noexcept
+		: name(mesh.name), indices(std::move(mesh.indices)), vertices(std::move(mesh.vertices)), material(mesh.material) { };
 
+	Mesh& operator=(Mesh&& mesh) = default;
+
+	// No implicit copy
 	Mesh& operator=(const Mesh&) = delete;
 	Mesh(const Mesh&) = delete;
 
-	void CreateBuffer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
-	{
-		m_IndexBuffer = Buffer<Index>{
-			deviceResources,
-			m_Indices,
+	void CreateBuffers() {
+		bindex = Buffer<Index>(
+			indices,
 			D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE,
 			NULL
-		};
-
-		m_VertexBuffer = Buffer<Vertex>{
-			deviceResources,
-			m_Vertices,
+		);
+		bvertex = Buffer<Vertex>(
+			vertices,
 			D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE,
 			NULL
-		};
-		m_IndexBuffer.SetName(m_Name + " Index Buffer");
-		m_VertexBuffer.SetName(m_Name + " Vertex Buffer");
+		);
+		bindex.SetName(name + " Index Buffer");
+		bvertex.SetName(name + " Vertex Buffer");
 	}
 
-	std::vector<Index> m_Indices;
-	std::vector<Vertex> m_Vertices;
+	std::vector<Index>		indices;
+	std::vector<Vertex>		vertices;
 
-	Buffer<Index> m_IndexBuffer;
-	Buffer<Vertex> m_VertexBuffer;
+	Buffer<Index>			bindex;
+	Buffer<Vertex>			bvertex;
 
-	Material* m_Material = nullptr;
-	std::string m_Name;
+	std::shared_ptr<Material>	material;
+	std::string				name;
+
+private:
+
+};
+
+class AnimMesh
+{
+public:
+	std::vector<Index>		indices;
+	std::vector<AnimVertex>	vertices;
+
+	Buffer<Index>			bindex;
+	Buffer<AnimVertex>		bvertex;
+
+	std::shared_ptr<Material>	material;
+	std::string				name;
 };

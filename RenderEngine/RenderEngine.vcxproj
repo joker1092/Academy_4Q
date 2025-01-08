@@ -19,43 +19,42 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
+    <ProjectReference Include="..\Utility_Framework\Utility_Framework.vcxproj">
+      <Project>{9cec19f4-03b4-4563-8d42-6e4bfb0059bb}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="DataSystem.cpp" />
-    <ClCompile Include="MeshBasedPSO.cpp" />
+    <ClCompile Include="DXStates.cpp" />
+    <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
-    <ClCompile Include="RenderTarget.cpp" />
-    <ClCompile Include="Sampler.cpp" />
+    <ClCompile Include="MPSO.cpp" />
     <ClCompile Include="SceneRenderer.cpp" />
-    <ClCompile Include="StateDevice.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="BufferType.h" />
+    <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DataSystem.h" />
-    <ClInclude Include="Interfaces.h" />
+    <ClInclude Include="DXStates.h" />
+    <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="MeshBasedPSO.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="IPipelineStateObject.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="MPSO.h" />
     <ClInclude Include="Primitives.h" />
-    <ClInclude Include="Sampler.h" />
+    <ClInclude Include="PSO.h" />
     <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="StateDevice.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Utility_Framework\Utility_Framework.vcxproj">
-      <Project>{9cec19f4-03b4-4563-8d42-6e4bfb0059bb}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

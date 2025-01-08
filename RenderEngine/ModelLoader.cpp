@@ -1,290 +1,295 @@
 #include "ModelLoader.h"
-#include "DataSystem.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 
-std::shared_ptr<DirectX11::DeviceResources> ModelLoader::m_deviceResources{};
-
-void ModelLoader::Initialize(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, std::shared_ptr<Model>* model, std::shared_ptr<AnimModel>* animmodel)
 {
-	m_deviceResources = deviceResources;
-}
-
-void ModelLoader::LoadFormFile(const file::path& path, const file::path& dir, _inout_opt Model** ppModel, _inout_opt AnimModel** ppAnimModel)
-{
-	Assimp::Importer importer{};
-	BitFlag flags{};
-
+	Assimp::Importer importer = Assimp::Importer();
+	unsigned int flags = 0;
 	flags |= aiProcess_FlipUVs;
+	
 
 	std::string name = file::path(path.filename()).replace_extension().string();
 
 	const aiScene* scene = importer.ReadFile(path.string(), flags);
-	if (!scene)
-	{
-		const char* errorMsg = importer.GetErrorString();
-		Console.WriteLine("Error: {}", std::string(errorMsg));
-		return;
-	}
 
-	const char* errorMsg = importer.GetErrorString();
+	const char* error = importer.GetErrorString();
 
 	if (scene->mNumMeshes > 0)
 	{
 		if (!scene->mMeshes[0]->HasTangentsAndBitangents())
 		{
-			BitFlag postFlags{};
-			postFlags |= aiProcess_CalcTangentSpace;
+			unsigned int postflags = 0;
+			postflags |= aiProcess_CalcTangentSpace;
 
-			scene = importer.ApplyPostProcessing(postFlags);
+			scene = importer.ApplyPostProcessing(postflags);
 		}
 	}
 
-	if (scene->HasAnimations())
+
+	if (scene->mNumAnimations == 0)
 	{
-		*ppAnimModel = LoadAnimModel(name, scene, path, dir);
+		*model = LoadModel(name, scene, path, dir);
+		*animmodel = nullptr;
 	}
 	else
 	{
-		*ppModel = LoadModel(name, scene, path, dir);
+		*animmodel = LoadAnimatedModel(name, scene, path, dir);
+		*model = nullptr;
 	}
 
 }
 
-Model* ModelLoader::LoadModel(const std::string_view& name, const aiScene* scene, const file::path& path, const file::path& dir)
+std::shared_ptr<Model> ModelLoader::LoadModel(const std::string& name, const aiScene* scene, const file::path& path, const file::path& dir)
 {
-	auto ptr = DataSystem::AllocateModel();
-	ptr->name = name;
-	LoadMeshes(scene, dir, &ptr->meshes);
-	return ptr;
+	std::shared_ptr<Model> model = std::make_shared<Model>();
+	model->name = name;
+	LoadMeshes(scene, dir, &model->meshes);
+	return model;
 }
 
-AnimModel* ModelLoader::LoadAnimModel(const std::string_view& name, const aiScene* scene, const file::path& path, const file::path& dir)
+std::shared_ptr<AnimModel> ModelLoader::LoadAnimatedModel(const std::string& name, const aiScene* scene, const file::path& path, const file::path& dir)
 {
-	return nullptr;
+	std::shared_ptr<AnimModel> model = std::make_shared<AnimModel>();
+	model->name = name;
+
+	// Load Animated mesh
+	// To be implemented...
+	// Load Animations
+	// To be implemented...
+	return model;
 }
 
 void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::vector<Mesh>* meshes)
 {
-	for (uint32 i = 0; i < scene->mNumMeshes; ++i)
+	for (UINT i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* aimesh = scene->mMeshes[i];
-		auto vertices = 
-			std::views::iota(0U, aimesh->mNumVertices) |
-			std::views::transform([aimesh](uint32 idx)
-			{
-				Vertex vertex{};
-				vertex.position = 
-				{ 
-					aimesh->mVertices[idx].x, 
-					aimesh->mVertices[idx].y, 
-					aimesh->mVertices[idx].z 
-				};
 
-				if (aimesh->mNormals)
-				{
-					vertex.normal =
-					{
-						aimesh->mNormals[idx].x,
-						aimesh->mNormals[idx].y,
-						aimesh->mNormals[idx].z
-					};
-				}
+		//if ()
 
-				if (aimesh->mTangents)
-				{
-					vertex.tangent =
-					{
-						aimesh->mTangents[idx].x,
-						aimesh->mTangents[idx].y,
-						aimesh->mTangents[idx].z
-					};
-				}
-
-				if (aimesh->mBitangents)
-				{
-					vertex.bitangent =
-					{
-						aimesh->mBitangents[idx].x,
-						aimesh->mBitangents[idx].y,
-						aimesh->mBitangents[idx].z
-					};
-				}
-
-				if (aimesh->mTextureCoords[0])
-				{
-					vertex.texCoord =
-					{
-						aimesh->mTextureCoords[0][idx].x,
-						aimesh->mTextureCoords[0][idx].y
-					};
-				}
-
-				return vertex;
-					
-			}) | std::ranges::to<std::vector>();
-
-		auto indices =
-			std::views::iota(0U, aimesh->mNumFaces) |
-			std::views::transform([aimesh](uint32 idx)
-			{
-				auto face = aimesh->mFaces[idx];
-				return std::array<uint32, 3>
-				{
-					face.mIndices[0],
-					face.mIndices[1],
-					face.mIndices[2]
-				};
-			}) | std::ranges::to<std::vector>();
-
-		std::vector<Index> flattenedIndices{};
-		for (const auto& face : indices)
+		std::vector<Vertex> vertices = std::vector<Vertex>(aimesh->mNumVertices);
+		std::vector<Index> indices = std::vector<Index>(aimesh->mNumVertices);
+		for (unsigned int i = 0; i < vertices.size(); i++)
 		{
-			flattenedIndices.insert(flattenedIndices.end(), face.begin(), face.end());
+			vertices[i].position = DirectX::XMFLOAT3{
+				aimesh->mVertices[i].x,
+				aimesh->mVertices[i].y,
+				aimesh->mVertices[i].z
+			};
+
+			vertices[i].normal = DirectX::XMFLOAT3{
+				aimesh->mNormals[i].x,
+				aimesh->mNormals[i].y,
+				aimesh->mNormals[i].z,
+			};
+
+			vertices[i].tangent = DirectX::XMFLOAT3{
+				aimesh->mTangents[i].x,
+				aimesh->mTangents[i].y,
+				aimesh->mTangents[i].z,
+			};
+
+			vertices[i].bitangent = DirectX::XMFLOAT3{
+				aimesh->mBitangents[i].x,
+				aimesh->mBitangents[i].y,
+				aimesh->mBitangents[i].z,
+			};
+
+			if (aimesh->mTextureCoords[0])
+			{
+				vertices[i].texcoord = DirectX::XMFLOAT2{
+					aimesh->mTextureCoords[0][i].x,  // Take first texture coord
+					aimesh->mTextureCoords[0][i].y
+				};
+			}
+
+		}
+		for (unsigned int u = 0; u < aimesh->mNumFaces; u++)
+		{
+			// Heavily assumes that mesh is triangulated
+			indices.push_back(aimesh->mFaces[u].mIndices[0]);
+			indices.push_back(aimesh->mFaces[u].mIndices[1]);
+			indices.push_back(aimesh->mFaces[u].mIndices[2]);
 		}
 
-		std::string name = std::string(scene->mMeshes[i]->mName.C_Str());
-		auto material = CreateMaterial(dir, aimesh, scene);
+		// Add in materials at the same time
 
-		meshes->emplace_back(name, flattenedIndices, vertices, material);
+		std::string name = std::string(scene->mMeshes[i]->mName.C_Str());
+		std::shared_ptr<Material> mat = CreateMaterial(dir, aimesh, scene);
+
+		meshes->emplace_back(
+			name,
+			indices,
+			vertices,
+			mat
+		);
 	}
 
-	for (auto& mesh : *meshes)
+	for (UINT i = 0; i < meshes->size(); i++)
 	{
-		mesh.CreateBuffer(m_deviceResources);
+		(*meshes)[i].CreateBuffers();
 	}
 }
 
-Material* ModelLoader::CreateMaterial(const file::path& fir, aiMesh* mesh, const aiScene* scene)
+std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene)
 {
-	Material* material = DataSystem::AllocateMaterial();
+	std::shared_ptr<Material> material = std::make_shared<Material>();
 
-	uint32 idx = mesh->mMaterialIndex;
-	float fOut{};
-	aiMaterial* aiMat = scene->mMaterials[idx];
 
-	aiString name = aiMat->GetName();
-	material->m_Name = std::string(name.C_Str());
+	UINT idx = aimesh->mMaterialIndex;
+	float fOut = 0.0f;
+	aiMaterial* aimat = scene->mMaterials[idx];
 
-	MatOverrides overrides{};
 
-#pragma region BaseColor
+	aiString matname = aimat->GetName();
+	material->name = std::string(matname.C_Str());
+
+	MatOverrides overrides;
+
+	// Diffuse
 	{
 		aiReturn res = aiReturn_FAILURE;
-		aiString path{};
+		aiString path;
 
-		res = aiMat->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path);
+		res = aimat->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path);
 		if (res == aiReturn_SUCCESS)
 		{
-			file::path texPath = fir / path.C_Str();
-			if (!file::exists(texPath))
+			file::path filepath = dir / path.C_Str();
+
+			if (!file::exists(filepath))
 			{
-				texPath.replace_extension(".dds");
+				filepath.replace_extension(".dds");
 			}
-			material->m_Textures.baseColor = TextureLoader::LoadTextureFromFile(texPath.string());
-			material->m_Properties.bitMask |= BASE_COLOR_BIT;
+			material->textures.diffuse = TextureLoader::LoadFromFile(filepath);
+			material->properties.bitmask |= DIFFUSE_BIT;
 		}
 		else
 		{
-			aiReturn res = aiReturn_FAILURE;
-			aiColor3D color{};
-			res = aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			if (res == aiReturn_SUCCESS)
-			{
-				material->m_Properties.baseColor = { color.r, color.g, color.b };
-			}
+			aiReturn ressec = aiReturn_FAILURE;
+			aiColor3D pOut;
+
+			ressec = aimat->Get(AI_MATKEY_COLOR_DIFFUSE, pOut);
+			if (ressec == aiReturn_SUCCESS)
+				material->properties.diffuse = DirectX::XMFLOAT3{ pOut.r, pOut.g, pOut.b };
 		}
 	}
-#pragma endregion
-#pragma region Metallic
+	// Metallic
 	{
 		aiReturn res = aiReturn_FAILURE;
-		aiString path{};
+		aiString path;
 
-		res = aiMat->GetTexture(aiTextureType::aiTextureType_METALNESS, 0, &path);
+		res = aimat->GetTexture(aiTextureType::aiTextureType_METALNESS, 0, &path);
 		if (res == aiReturn_SUCCESS)
 		{
-			file::path texPath = fir / path.C_Str();
-			if (!file::exists(texPath))
+			file::path filepath = dir / path.C_Str();
+
+			if (!file::exists(filepath))
 			{
-				texPath.replace_extension(".dds");
+				filepath.replace_extension(".dds");
 			}
-			material->m_Textures.metallic = TextureLoader::LoadTextureFromFile(texPath.string());
-			material->m_Properties.bitMask |= METALLIC_BIT;
+			material->textures.metallic = TextureLoader::LoadFromFile(filepath);
+			material->properties.bitmask |= METALNESS_BIT;
 		}
 		else
 		{
-			aiReturn res = aiReturn_FAILURE;
-			res = aiMat->Get(AI_MATKEY_METALLIC_FACTOR, fOut);
-			if (res == aiReturn_SUCCESS)
-			{
-				material->m_Properties.metallic = fOut;
-			}
+			aiReturn ressec = aiReturn_FAILURE;
+			float pOut;
+
+			ressec = aimat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, pOut);
+			if (ressec == aiReturn_SUCCESS)
+				material->properties.metalness = pOut;
 		}
 	}
-#pragma endregion
-#pragma region Roughness
+	// Roughness
 	{
 		aiReturn res = aiReturn_FAILURE;
-		aiString path{};
-		res = aiMat->GetTexture(aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS, 0, &path);
+		aiString path;
+
+		res = aimat->GetTexture(aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS, 0, &path);
 		if (res == aiReturn_SUCCESS)
 		{
-			file::path texPath = fir / path.C_Str();
-			if (!file::exists(texPath))
+			file::path filepath = dir / path.C_Str();
+
+			if (!file::exists(filepath))
 			{
-				texPath.replace_extension(".dds");
+				filepath.replace_extension(".dds");
 			}
-			material->m_Textures.roughness = TextureLoader::LoadTextureFromFile(texPath.string());
-			material->m_Properties.bitMask |= ROUGHNESS_BIT;
+			material->textures.roughness = TextureLoader::LoadFromFile(filepath);
+			material->properties.bitmask |= ROUGHNESS_BIT;
 		}
 		else
 		{
-			aiReturn res = aiReturn_FAILURE;
-			res = aiMat->Get(AI_MATKEY_ROUGHNESS_FACTOR, fOut);
-			if (res == aiReturn_SUCCESS)
-			{
-				material->m_Properties.roughness = fOut;
-			}
-		}
-	}
-#pragma endregion
-#pragma region Occulsion
-	{
-		aiReturn res = aiReturn_FAILURE;
-		aiString path{};
+			aiReturn ressec = aiReturn_FAILURE;
+			float pOut;
 
-		res = aiMat->GetTexture(aiTextureType::aiTextureType_AMBIENT_OCCLUSION, 0, &path);
-		if (res == aiReturn_SUCCESS)
-		{
-			file::path texPath = fir / path.C_Str();
-			if (!file::exists(texPath))
-			{
-				texPath.replace_extension(".dds");
-			}
-			material->m_Textures.occlusion = TextureLoader::LoadTextureFromFile(texPath.string());
-			material->m_Properties.bitMask |= OCCLUSION_BIT;
+			ressec = aimat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, pOut);
+			if (ressec == aiReturn_SUCCESS)
+				material->properties.roughness = pOut;
 		}
 	}
-#pragma endregion
-#pragma region Normal
+	// Occlusion
 	{
 		aiReturn res = aiReturn_FAILURE;
-		aiString path{};
-		res = aiMat->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &path);
+		aiString path;
+
+		res = aimat->GetTexture(aiTextureType::aiTextureType_AMBIENT_OCCLUSION, 0, &path);
 		if (res == aiReturn_SUCCESS)
 		{
-			file::path texPath = fir / path.C_Str();
-			if (!file::exists(texPath))
+			file::path filepath = dir / path.C_Str();
+
+			if (!file::exists(filepath))
 			{
-				texPath.replace_extension(".dds");
+				filepath.replace_extension(".dds");
 			}
-			material->m_Textures.normal = TextureLoader::LoadTextureFromFile(texPath.string());
-			material->m_Properties.bitMask |= NORMAL_BIT;
+			material->textures.occlusion= TextureLoader::LoadFromFile(filepath);
+			material->properties.bitmask |= OCCLUSION_BIT;
 		}
 	}
-#pragma endregion
+	// Tangent Space Normal
+	{
+		aiReturn res = aiReturn_FAILURE;
+		aiString path;
+
+		res = aimat->GetTexture(aiTextureType::aiTextureType_NORMALS, 0, &path);
+		if (res == aiReturn_SUCCESS)
+		{
+			file::path filepath = dir / path.C_Str();
+
+			if (!file::exists(filepath))
+			{
+				filepath.replace_extension(".dds");
+			}
+			material->textures.normal = TextureLoader::LoadFromFile(filepath);
+			material->properties.bitmask |= NORMAL_BIT;
+		}
+	}
+
+	// A bit unecessary to parse every time
+
+	//file::path overridepath = dir / "matoverride.json";
+	//if (file::exists(overridepath))
+	//{
+	//	json j;
+	//	std::ifstream in(overridepath);
+	//	in >> j;
+
+	//	for (auto& element : j)
+	//	{
+	//		std::string name = element["Name"];
+
+	//		if (name == material->name)
+	//		{
+	//			float roughness = element["Roughness"].get<float>();
+	//			float metalness = element["Metalness"].get<float>();
+
+	//			// Will be ignored if proper maps are set
+	//			material->properties.metalness = metalness;
+	//			material->properties.roughness = roughness;
+	//		}
+	//	}
+
+	//}
 
 	return material;
+
 }

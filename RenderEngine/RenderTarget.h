@@ -1,49 +1,54 @@
 #pragma once
 #include "Core.Minimal.h"
-#include "DeviceResources.h"
+#include "DXStates.h"
 
 class RenderTarget
 {
 public:
-    RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        ID3D11Texture2D* texture, DXGI_FORMAT format, uint32 width, uint32 height);
-    RenderTarget(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        DXGI_FORMAT format, uint32 width, uint32 height);
-    RenderTarget(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
-        DXGI_FORMAT format, uint32 width, uint32 height);
-    ~RenderTarget();
+	RenderTarget(ComPtr<ID3D11Texture2D>& texture, DXGI_FORMAT _format, UINT _width, UINT _height);
+	RenderTarget(DXGI_FORMAT _format, UINT _width, UINT _height);
+	~RenderTarget();
 
-    void Resize(uint32 width, uint32 height);
+	void Resize(UINT _width, UINT _height);
 
-    void ClearView();
+	void inline ClearView()
+    {
+		DX::States::Context->ClearRenderTargetView(_rtv.Get(), color);
+		DX::States::Context->ClearDepthStencilView(_dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
 
-    ID3D11RenderTargetView* const* GetRTVAddressOf() const { return m_RTV.GetAddressOf(); }
-    ID3D11RenderTargetView* GetRTV() const { return m_RTV.Get(); }
-    ID3D11DepthStencilView* const* GetDSVAddressOf() const { return m_DSV.GetAddressOf(); }
-    ID3D11DepthStencilView* GetDSV() const { return m_DSV.Get(); }
-    ID3D11ShaderResourceView* GetSRV() const { return m_SRV.Get(); }
+	inline ID3D11RenderTargetView* const* GetRTVAddress() const { return _rtv.GetAddressOf(); }
+	inline ID3D11RenderTargetView* GetRTV() const { return _rtv.Get(); }
+	inline ID3D11DepthStencilView* const* GetDSVAddress() const { return _dsv.GetAddressOf(); }
+	inline ID3D11DepthStencilView* GetDSV() const { return _dsv.Get(); }
+	inline ID3D11ShaderResourceView* GetSRV() const { return _srv.Get(); }
 
-    ID3D11Texture2D* GetTexture() const { return m_Texture.Get(); }
-    ID3D11Texture2D* GetStencil() const { return m_Stencil.Get(); }
+	inline ID3D11Texture2D* GetTexture()
+	{
+		return _texture.Get();
+	}
+	inline ID3D11Texture2D* GetStencil()
+	{
+		return _stencil.Get();
+	}
 
-    XMVECTORF32 color{};
-    uint32 width{};
-    uint32 height{};
-    DXGI_FORMAT format{};
+	DirectX::XMVECTORF32 color;
+	UINT width;
+	UINT height;
+	DXGI_FORMAT format;
 
 private:
-    void CreateTexture();
-    void CreateTargets();
-    void CreateShaderResourceView();
-    void DestroyTargets();
+	void CreateTexture();
+	void CreateTargets();
+	void CreateShaderResourceView();
+	void DestroyTargets();
 
-    bool m_bHasSRV{ false };
-    ID3D11Device* m_Device{};
-    ID3D11DeviceContext* m_DeviceContext{};
-    ComPtr<ID3D11Texture2D> m_Texture{};
-    ComPtr<ID3D11Texture2D> m_Stencil{};
+	BOOL _bsrv;
+	ComPtr<ID3D11Texture2D>				_texture;
+	ComPtr<ID3D11Texture2D>				_stencil;
 
-    ComPtr<ID3D11RenderTargetView> m_RTV{};
-    ComPtr<ID3D11DepthStencilView> m_DSV{};
-    ComPtr<ID3D11ShaderResourceView> m_SRV{};
+	ComPtr<ID3D11RenderTargetView>		_rtv;
+	ComPtr<ID3D11DepthStencilView>		_dsv;
+	ComPtr<ID3D11ShaderResourceView>	_srv;
+
 };

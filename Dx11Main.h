@@ -31,7 +31,7 @@ namespace DirectX11
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<Scene> m_scene;
 
-		Model* m_model{};
-		Model* m_ground{};
+        std::shared_ptr<Model> m_model{};
+        std::shared_ptr<Model> m_ground{};
 	};
 }

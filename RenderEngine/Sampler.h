@@ -1,39 +1,48 @@
 #pragma once
-#include "Core.Minimal.h"
-#include "DeviceResources.h"
 
 class Sampler
 {
 public:
-    Sampler() = default;
-    Sampler(
-        const std::shared_ptr<DirectX11::DeviceResources>& deviceResources,
-        D3D11_FILTER filter,
-        D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR,
-        float offset = 0.0f,
-        Mathf::Color4* borderColor = nullptr
-    );
-	Sampler(
-		ID3D11Device* device,
-		D3D11_FILTER filter,
-		D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR,
-		float offset = 0.0f,
-		Mathf::Color4* borderColor = nullptr
-	);
-    ~Sampler() = default;
+	inline Sampler() {};
+	inline Sampler(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR, float offset = 0, DirectX::XMFLOAT4* borderColor = nullptr)
+	{
+		Create(filter, addressMode, offset, borderColor);
+	};
+	inline ~Sampler() {};
 
-    ID3D11SamplerState* Get() { return m_Sampler.Get(); }
-    ID3D11SamplerState* const* GetAddressOf() const { return m_Sampler.GetAddressOf(); }
+	inline ID3D11SamplerState* Get()
+	{
+		return _sampler.Get();
+	}
+	inline ID3D11SamplerState* const* GetAddressOf()
+	{
+		return _sampler.GetAddressOf();
+	}
 
 private:
-    void Create(
-        ID3D11Device* device,
-        D3D11_FILTER filter,
-        D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR,
-        float offset = 0,
-		Mathf::Color4* borderColor = nullptr
-    );
+	void Create(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode = D3D11_TEXTURE_ADDRESS_MIRROR, float offset = 0, DirectX::XMFLOAT4* borderColor = nullptr)
+    {
+		D3D11_SAMPLER_DESC desc = {};
+		desc.Filter = filter;
+		desc.AddressU = addressMode;
+		desc.AddressV = addressMode;
+		desc.AddressW = addressMode;
+		desc.MipLODBias = offset;
+		desc.MaxAnisotropy = D3D11_MAX_MAXANISOTROPY;
+		desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		desc.MinLOD = 0;
+		desc.MaxLOD = D3D11_FLOAT32_MAX;
 
-    ComPtr<ID3D11SamplerState> m_Sampler{};
+		if (borderColor != nullptr)
+		{
+			desc.BorderColor[0] = borderColor->x;
+			desc.BorderColor[1] = borderColor->y;
+			desc.BorderColor[2] = borderColor->z;
+			desc.BorderColor[3] = borderColor->w;
+		}
+
+		DX::States::Device->CreateSamplerState(&desc, _sampler.ReleaseAndGetAddressOf());
+	};
+	ComPtr<ID3D11SamplerState> _sampler;
+
 };
-

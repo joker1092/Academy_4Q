@@ -202,7 +202,7 @@ namespace DirectX
     {
         t->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
     };
-    // µğ¹ö±ëÀ» Áö¿øÇÏ·Á¸é °³Ã¼¿¡ ÀÌ¸§À» ÇÒ´çÇÏ¼¼¿ä.
+    // ë””ë²„ê¹…ì„ ì§€ì›í•˜ë ¤ë©´ ê°œì²´ì— ì´ë¦„ì„ í• ë‹¹í•˜ì„¸ìš”.
 #if defined(_DEBUG)
     inline void SetName(DXObjects auto pObject, const std::string_view& name)
     {
@@ -213,4 +213,14 @@ namespace DirectX
     {
     }
 #endif
+    static inline DXGI_FORMAT NoSRGB(DXGI_FORMAT fmt)
+    {
+        switch (fmt)
+        {
+        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:   return DXGI_FORMAT_R8G8B8A8_UNORM;
+        case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:   return DXGI_FORMAT_B8G8R8A8_UNORM;
+        case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:   return DXGI_FORMAT_B8G8R8X8_UNORM;
+        default:                                return fmt;
+        }
+    }
 }

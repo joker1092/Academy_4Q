@@ -1,11 +1,10 @@
 #pragma once
-#include "Core.Minimal.h"
 #include "DeviceResources.h"
-#include "Camera.h"
+#include "LogicalDevice.h"
+#include "Buffers.h"
+#include "MPSO.h"
 #include "Scene.h"
-#include "Model.h"
-#include "MeshBasedPSO.h"
-#include "StateDevice.h"
+#include "Primitives.h"
 
 class SceneRenderer
 {
@@ -15,21 +14,66 @@ public:
 
 	void Initialize();
 	void SetCamera(Camera* camera);
-	void SetScene(Scene* scene);
-
+	inline void SetScene(Scene* scene) { _scene = scene; };
+	// Stages
 	void StagePrepare();
+    void EndStage();
 
-	void AddDrawModel(Model* model);
-	void StageDrawModels();
+	inline void PoolModel(const std::shared_ptr<Model>& model)
+	{
+		_drawmodels.push_back(model);
+		_modelcount += 1;
+	}
+	inline void StageDrawModels()
+	{
+		// Compute shadow map from Sun view
+		for (UINT i = 1; i < _modelcount; i++)
+		{
+			ModelBuffer modelbuff;
+			modelbuff.modelmatrix = DirectX::XMMatrixTranspose(_drawmodels[i]->GetMatrix());
+
+			_mpso->SetModelConstants(&modelbuff);
+
+			for (size_t u = 0; u < _drawmodels[i]->meshes.size(); u++)
+			{
+				_mpso->DrawMeshShadows(
+					_drawmodels[i]->meshes[u].bindex,
+					_drawmodels[i]->meshes[u].bvertex
+				);
+			}
+		}
+
+		// Perpare for main rendering
+		_mpso->FinishShadows();
+
+		// Draw 
+		for (UINT i = 0; i < _modelcount; i++)
+		{
+			ModelBuffer modelbuff;
+			modelbuff.modelmatrix = DirectX::XMMatrixTranspose(_drawmodels[i]->GetMatrix());
+
+			_mpso->SetModelConstants(&modelbuff);
+
+			for (UINT u = 0; u < _drawmodels[i]->meshes.size(); u++)
+			{
+				_mpso->DrawMesh(
+					_drawmodels[i]->meshes[u].bindex,
+					_drawmodels[i]->meshes[u].bvertex,
+					_drawmodels[i]->meshes[u].material
+				);
+			}
+		}
+	}
 
 private:
-	Camera* m_camera{};
-	Scene* m_scene{};
+	Camera*							_camera;
+    std::shared_ptr<DirectX11::DeviceResources> deviceResources;
+	Scene*							_scene;
 
-	Mathf::xVColor4 m_clearColor{ 0.01f, 0.01f, 0.01f, 1.0f };
+	std::vector<std::shared_ptr<Model>> _drawmodels;
+	UINT								_modelcount;
 
-	std::vector<Model*> m_drawModels{};
+	std::unique_ptr<LogicalDevice>	_device;
+	std::unique_ptr<MPSO>			_mpso;
 
-    std::unique_ptr<StateDevice> m_stateDevice{};
-	std::unique_ptr<MeshBasedPSO> m_pso{};
 };

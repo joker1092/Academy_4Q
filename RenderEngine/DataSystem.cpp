@@ -1,7 +1,4 @@
 #include "DataSystem.h"
-#include "HLSLCompiler.h"
-#include "ModelLoader.h"
-#include "TextureLoader.h"
 
 DataSystem::DataSystem()
 {
@@ -9,173 +6,132 @@ DataSystem::DataSystem()
 
 DataSystem::~DataSystem()
 {
-	ReleaseShaders();
-	ReleaseModels();
+	RemoveShaders();
 }
 
-void DataSystem::Initialize(const std::shared_ptr<DirectX11::DeviceResources>& deviceResource)
-{
-	m_deviceResources = deviceResource;
-	ModelLoader::Initialize(m_deviceResources);
-	TextureLoader::Initialize(m_deviceResources);
-	LoadShaders();
-	LoadModels();
-}
 
 void DataSystem::LoadShaders()
 {
 	try
 	{
-		file::path shaderpath = PathFinder::ShaderPath();
+		file::path shaderpath = PathFinder::Relative("Shaders\\");
 		for (auto& dir : file::recursive_directory_iterator(shaderpath))
 		{
-			if(dir.is_directory())
+			if (dir.is_directory())
 				continue;
 
 			if (dir.path().extension() == ".hlsl")
 			{
-				AddShaderFormPath(dir.path());
+				AddShaderFromPath(dir.path());
 			}
 		}
 	}
 	catch (const file::filesystem_error& e)
 	{
-		OutputDebugStringA(e.what());
+		WARN("Could not load shaders" + e.what());
 	}
 	catch (const std::exception& e)
 	{
-		OutputDebugStringA(e.what());
+		WARN("Error" + e.what());
 	}
 }
 
 void DataSystem::LoadModels()
 {
-	file::path modelPath = PathFinder::Relative("Models/");
-	for (auto& dir : file::recursive_directory_iterator(modelPath))
+	file::path shaderpath = PathFinder::Relative("Models\\");
+	for (auto& dir : file::recursive_directory_iterator(shaderpath))
 	{
 		if (dir.is_directory())
 			continue;
 
-		if (dir.path().extension() == ".fbx" || dir.path().extension() == ".obj")
+		if (dir.path().extension() == ".dae" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
 		{
 			AddModel(dir.path(), dir.path().parent_path());
 		}
 	}
 }
 
-Model* DataSystem::AllocateModel()
-{
-	Model* model = new Model();
-	return model;
-}
+//void DataSystem::ReloadShaders()
+//{
+//	OnShadersReloadedEvent.Invoke();
+//	RemoveShaders();
+//	LoadShaders();
+//	ShadersReloadedEvent.Invoke();
+//}
 
-AnimModel* DataSystem::AllocateAnimModel()
+void DataSystem::AddShaderFromPath(const file::path& filepath)
 {
-	return nullptr;
-}
-
-Material* DataSystem::AllocateMaterial()
-{
-	Material* material = new Material();
-	return material;
-}
-
-void DataSystem::ReleaseModel(Model* model)
-{
-	DataSystem::GetInstance()->m_ModelPool.destroy(model);
-}
-
-void DataSystem::ReleaseAnimModel(AnimModel* model)
-{
-	DataSystem::GetInstance()->m_AnimModelPool.destroy(model);
-}
-
-void DataSystem::ReleaseMaterial(Material* material)
-{
-	DataSystem::GetInstance()->m_MaterialPool.destroy(material);
-}
-
-void DataSystem::AddShaderFormPath(const file::path& path)
-{
-	ComPtr<ID3DBlob> blob = HLSLCompiler::LoadFormFile(path.string());
-	file::path filename = path.filename();
+	ComPtr<ID3DBlob> blob = HLSLCompiler::LoadFormFile(filepath.string());
+	file::path filename = filepath.filename();
 	std::string ext = filename.replace_extension().extension().string();
 	filename.replace_extension();
 	ext.erase(0, 1);
 
-	AddShader(filename.string(), ext, blob.Get());
+	AddShader(filename.string(), ext, blob);
 }
 
-void DataSystem::AddModel(const file::path& path, const file::path& dir)
+void DataSystem::AddModel(const file::path& filepath, const file::path& dir)
 {
-	Model* model = AllocateModel();
+	std::shared_ptr<Model>		model;
+	std::shared_ptr<AnimModel>	animmodel;
 
-	ModelLoader::LoadFormFile(path, dir, &model, nullptr);
+	ModelLoader::LoadFromFile(filepath,dir, &model, &animmodel);
 	if (model)
 	{
-		m_Models[model->name] = model;
+		Models[model->name] = model;
 	}
 }
 
-void DataSystem::AddShader(const std::string_view& name, const std::string_view& ext, ID3DBlob* blob)
+void DataSystem::AddShader(const std::string& name, const std::string& ext, const ComPtr<ID3DBlob>& blob)
 {
 	if (ext == "vs")
 	{
-		VertexShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_VertexShaders[std::string(name)] = shader;
+		VertexShader vs = VertexShader(name, blob);
+		vs.Compile();
+		VertexShaders[name] = vs;
 	}
 	else if (ext == "hs")
 	{
-		HullShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_HullShaders[std::string(name)] = shader;
+		HullShader hs = HullShader(name, blob);
+		hs.Compile();
+		HullShaders[name] = hs;
 	}
 	else if (ext == "ds")
 	{
-		DomainShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_DomainShaders[std::string(name)] = shader;
+		DomainShader ds = DomainShader(name, blob);
+		ds.Compile();
+		DomainShaders[name] = ds;
 	}
 	else if (ext == "gs")
 	{
-		GeometryShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_GeometryShaders[std::string(name)] = shader;
+		GeometryShader gs = GeometryShader(name, blob);
+		gs.Compile();
+		GeometryShaders[name] = gs;
 	}
 	else if (ext == "ps")
 	{
-		PixelShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_PixelShaders[std::string(name)] = shader;
+		PixelShader ps = PixelShader(name, blob);
+		ps.Compile();
+		PixelShaders[name] = ps;
 	}
 	else if (ext == "cs")
 	{
-		ComputeShader shader{ m_deviceResources, name, blob };
-		shader.Compile();
-		m_ComputeShaders[std::string(name)] = shader;
+		ComputeShader cs = ComputeShader(name, blob);
+		cs.Compile();
+		ComputeShaders[name] = cs;
 	}
 	else
 	{
-		OutputDebugStringA("Invalid Shader Extension");
+		WARN("Unrecognized shader extension \"" + ext + "\" for shader \"" + name + "\"");
 	}
 }
 
-void DataSystem::ReleaseShaders()
+void DataSystem::RemoveShaders()
 {
-	m_VertexShaders.clear();
-	m_HullShaders.clear();
-	m_DomainShaders.clear();
-	m_GeometryShaders.clear();
-	m_PixelShaders.clear();
-	m_ComputeShaders.clear();
-}
-
-void DataSystem::ReleaseModels()
-{
-	for (auto& [name, model] : m_Models)
-	{
-		ReleaseModel(model);
-	}
-	m_Models.clear();
+	VertexShaders.clear();
+	HullShaders.clear();
+	DomainShaders.clear();
+	GeometryShaders.clear();
+	PixelShaders.clear();
+	ComputeShaders.clear();
 }
