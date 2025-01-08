@@ -15,7 +15,7 @@
 MAIN_ENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	PathFinder::Initialize();
-
+	//시작
 	Core::App app;
 	app.Initialize(hInstance, L"HeroP Editor", 1280, 720);
 
