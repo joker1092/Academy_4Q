@@ -502,6 +502,7 @@ void MeshBasedPSO::CreateTextures()
 	{
 		m_shadowTarget = std::make_unique<RenderTarget>(
 			m_stateDevice->GetDevice(),
+            m_deviceContext,
 			DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT,
 		m_stateDevice->GetBackBufferWidth(),
 			m_stateDevice->GetBackBufferHeight()
