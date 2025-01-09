@@ -1,5 +1,5 @@
 #include "MPSO.h"
-
+#include "ImGuiRegister.h"
 
 MPSO::MPSO(LogicalDevice* device) : _device(device)
 {
@@ -56,7 +56,7 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 
 
 	float near_plane = 5.0f, far_plane = 30.0f;
-	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(32.0f, 32.0f, near_plane, far_plane);
+	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(32.f, 32.f, near_plane, far_plane);
 
 	DirectX::XMMATRIX lookdir = DirectX::XMMatrixLookAtRH(
 		DirectX::XMLoadFloat3(&sceneBuffer->sunpos),
@@ -72,8 +72,6 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	_lightspacebuffer.Unmap();
 
 	DX::States::Context->VSSetConstantBuffers(0, 1, _lightspacebuffer.GetAddressOf());
-
-	// All set ready to pool and draw meshes for shadows
 }
 
 void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
@@ -132,14 +130,11 @@ void MPSO::SetModelConstants(const ModelBuffer* modelbuffer)
 	_modelbuffer.Unmap();
 }
 
-
-
-
 void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<Vertex>& vertices)
 {
 	// Draw shadows
-	UINT stride = vertices.Stride();
-	const UINT offset = 0;
+	uint32 stride = vertices.Stride();
+	const uint32 offset = 0;
 
 	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
 	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
@@ -148,10 +143,6 @@ void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<Vertex>& v
 
 void MPSO::FinishShadows()
 {
-
-	// Finish up shadows by rebinding last depth stencil as texture for actual drawing stage
-	// this is so we know what's in shadows what is not
-
 	_device->SetRenderTargets(_target.get(), _shadowtarget.get());
 
 	_device->SetRasterizer(RasterizerType::Solid);
@@ -160,12 +151,14 @@ void MPSO::FinishShadows()
 	DX::States::Context->VSSetShader(_vs.Get(), NULL, 0);
 
 
-	ID3D11Buffer* psbuffers[]{
+	ID3D11Buffer* psbuffers[]
+	{
 		_camerabuffer.Get(),
 		_scenebuffer.Get()
 	};
 
-	ID3D11Buffer* vsbuffers[]{
+	ID3D11Buffer* vsbuffers[]
+	{
 		_camerabuffer.Get(),
 		nullptr,
 		_lightspacebuffer.Get()
@@ -185,11 +178,6 @@ void MPSO::FinishShadows()
 
 void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices, const std::shared_ptr<Material>& material)
 {
-	// Draw actual mesh
-	// During this drawing shadows are split in to separate render target, but that is uncessary as it could be blended
-	// at the same time
-	// I wanted to see if bluring shadows and combining later would give a nicer effect
-
 	DX::States::Context->PSSetConstantBuffers(2, 1, _materialbuffer.GetAddressOf());
 
 	D3D11_MAPPED_SUBRESOURCE mat = _materialbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
@@ -238,9 +226,6 @@ void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 	{
 		DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _blendOutput.Get());
 	}
-
-
-
 }
 
 void MPSO::CreateInputLayout()
@@ -295,7 +280,7 @@ void MPSO::InitializeShaders()
 
 	if (_vs.Get() == nullptr || _ps.Get() == nullptr)
 	{
-		ERROR("Unable to load mesh shaders in MPSO");
+		ERR("Unable to load mesh shaders in MPSO");
 	}
 
 	_cubemapvs = AssetsSystem->VertexShaders["cubemap"];
@@ -303,7 +288,7 @@ void MPSO::InitializeShaders()
 
 	if (_cubemapvs.Get() == nullptr || _cubemapps.Get() == nullptr)
 	{
-		ERROR("Unable to load cubemap shaders in MPSO");
+		ERR("Unable to load cubemap shaders in MPSO");
 	}
 
 	_shadowvs = AssetsSystem->VertexShaders["shadow"];
@@ -311,7 +296,7 @@ void MPSO::InitializeShaders()
 
 	if (_shadowvs.Get() == nullptr || _shadowps.Get() == nullptr)
 	{
-		ERROR("Unable to load shadow shaders in MPSO");
+		ERR("Unable to load shadow shaders in MPSO");
 	}
 
 	_shadowblurcsX = AssetsSystem->ComputeShaders["shadowblur-x"];
@@ -321,7 +306,7 @@ void MPSO::InitializeShaders()
 
 	if (_shadowblurcsX.Get() == nullptr || _shadowblurcsY.Get() == nullptr || _blendcs.Get() == nullptr || _fxaacs.Get() == nullptr)
 	{
-		ERROR("Unable to load compute shaders in MPSO");
+		ERR("Unable to load compute shaders in MPSO");
 	}
 }
 
@@ -404,10 +389,7 @@ void MPSO::CreateSamplers()
 
 void MPSO::CreateTextures()
 {
-
 	{
-		// Boilerplate
-
 		DXGI_FORMAT format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
 		CD3D11_TEXTURE2D_DESC desc(
 			format,
@@ -422,18 +404,17 @@ void MPSO::CreateTextures()
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateTexture2D(&desc, nullptr, texture.ReleaseAndGetAddressOf()));
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC viewdesc = {};
-		viewdesc.Texture2D.MostDetailedMip = 0;
-		viewdesc.Texture2D.MipLevels = 1;
 		viewdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		viewdesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
+		viewdesc.Texture2D.MostDetailedMip = 0;
+		viewdesc.Texture2D.MipLevels = 1;
 
 		ComPtr<ID3D11ShaderResourceView> srv;
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateShaderResourceView(texture.Get(), &viewdesc, srv.ReleaseAndGetAddressOf()));
 		_shadowmap = Texture2D(texture, srv);
 		_shadowmap.SetName("Shadow Map");
 
-
-		CD3D11_DEPTH_STENCIL_VIEW_DESC dsvdesc(D3D11_DSV_DIMENSION_TEXTURE2D, DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT);
+		CD3D11_DEPTH_STENCIL_VIEW_DESC dsvdesc{ D3D11_DSV_DIMENSION_TEXTURE2D, DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT };
 
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateDepthStencilView(texture.Get(), &dsvdesc, _shadowmapDsv.ReleaseAndGetAddressOf()));
 
@@ -466,24 +447,28 @@ void MPSO::CreateTextures()
 
 	}
 
-	// Render Target Texture
 	{
 		_target = std::make_unique<RenderTarget>(
-            DXGI_FORMAT_B8G8R8A8_UNORM,
+			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
 			_device->GetDeviceResources()->GetLogicalSize().width,
             _device->GetDeviceResources()->GetLogicalSize().height
-			);
+		);
 
 		_target->color = DirectX::XMVECTORF32{ 0.05f, 0.05f, 0.05f, 1.0f };
 	}
 
-	// Render Target ShadowMap
 	{
 		_shadowtarget = std::make_unique<RenderTarget>(
 			DXGI_FORMAT::DXGI_FORMAT_R16_FLOAT,
             _device->GetDeviceResources()->GetLogicalSize().width,
             _device->GetDeviceResources()->GetLogicalSize().height
-			);
+		);
+
+		// Create ImGui texture
+		ImGui::ContextRegister("Shadow Map", [&]()
+			{
+				ImGui::Image(_shadowtarget->GetSRV(), ImVec2(300, 300));
+			});
 
 		_shadowtarget->color = DirectX::XMVECTORF32{ 1.0f, 1.0f, 1.0f, 1.0f };
 	}
@@ -609,7 +594,6 @@ void MPSO::CreateComputeResources()
 
 	// FXAA output
 	{
-
 		D3D11_TEXTURE2D_DESC fxaaDesc = {};
 		fxaaDesc.Width = _device->GetDeviceResources()->GetLogicalSize().width;
 		fxaaDesc.Height = _device->GetDeviceResources()->GetLogicalSize().height;
@@ -634,8 +618,6 @@ void MPSO::CreateComputeResources()
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateUnorderedAccessView(_fxaaOutput.Get(), &uavDesc, _fxaaOutputUAV.ReleaseAndGetAddressOf()));
 	}
 
-
-	// Craete if it's first time
 	if (_blurbuffer.Get() == nullptr)
 	{
 		_blurbuffer = Buffer<BlurParameters>(
@@ -649,8 +631,6 @@ void MPSO::CreateComputeResources()
 	params.textureSize = DirectX::XMINT2{ static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().width), static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().height) };
 
 	DX::States::Context->UpdateSubresource(_blurbuffer.Get(), 0, NULL, &params, NULL, NULL);
-
-
 }
 
 void MPSO::Blend(BOOL blurShadows)
@@ -659,7 +639,6 @@ void MPSO::Blend(BOOL blurShadows)
 
 	if (blurShadows)
 	{
-
 		// Blur in X
 		{
 			DX::States::Context->CSSetShader(_shadowblurcsX.Get(), nullptr, NULL);
@@ -674,12 +653,11 @@ void MPSO::Blend(BOOL blurShadows)
 
 			DX::States::Context->CSSetConstantBuffers(0, 1, _blurbuffer.GetAddressOf());
 
+			uint32 threadsX = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().width / 256.0f);
+			uint32 threadsY = (uint32)_device->GetDeviceResources()->GetLogicalSize().height;
+
 			// 256 threads per group
-			DX::States::Context->Dispatch(
-				std::ceilf(static_cast<float>(_device->GetDeviceResources()->GetLogicalSize().width) / 256.0f),
-                _device->GetDeviceResources()->GetLogicalSize().height,
-				1
-			);
+			DX::States::Context->Dispatch(threadsX, threadsY, 1);
 		}
 
 		// Blur in Y
@@ -696,12 +674,11 @@ void MPSO::Blend(BOOL blurShadows)
 
 			DX::States::Context->CSSetConstantBuffers(0, 1, _blurbuffer.GetAddressOf());
 
+			uint32 threadsX = (uint32)_device->GetDeviceResources()->GetLogicalSize().width;
+			uint32 threadsY = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().height / 256.0f);
+
 			// 256 threads per group
-			DX::States::Context->Dispatch(
-                _device->GetDeviceResources()->GetLogicalSize().width,
-				std::ceilf(static_cast<float>(_device->GetDeviceResources()->GetLogicalSize().height) / 256.0f),
-				1
-			);
+			DX::States::Context->Dispatch(threadsX, threadsY, 1);
 		}
 	}
 
@@ -725,22 +702,15 @@ void MPSO::Blend(BOOL blurShadows)
 		DX::States::Context->CSSetShaderResources(0, 2, srvs);
 	}
 
+	uint32 threadsX = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().width / 16.0f);
+	uint32 threadsY = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().height / 16.0f);
 
 	// 32 threads per group
-	DX::States::Context->Dispatch(
-		std::ceilf(_device->GetDeviceResources()->GetLogicalSize().width / 16.0f),
-		std::ceilf(_device->GetDeviceResources()->GetLogicalSize().height / 16.0f),
-		1
-	);
+	DX::States::Context->Dispatch(threadsX, threadsY, 1);
 
 	ID3D11ShaderResourceView* blanksrvs[]{ nullptr, nullptr };
 
-
 	DX::States::Context->CSSetShaderResources(0, 2, blanksrvs);
-
-	// Clear views
-	// DX::States::Context->CSSetShaderResources(0, 1, blankviews);
-
 }
 
 void MPSO::FXAA(FxaaBuffer* fxaabuffer)
@@ -765,21 +735,17 @@ void MPSO::FXAA(FxaaBuffer* fxaabuffer)
 
 	DX::States::Context->CSSetConstantBuffers(0, 1, _fxaabuffer.GetAddressOf());
 
+	uint32 threadsX = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().width / 16.0f);
+	uint32 threadsY = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().height / 16.0f);
 	// 256 threads per group
-	DX::States::Context->Dispatch(
-		std::ceilf(static_cast<float>(_device->GetDeviceResources()->GetLogicalSize().width) / 16.0f),
-		std::ceilf(static_cast<float>(_device->GetDeviceResources()->GetLogicalSize().height) / 16.0f),
-		1
-	);
+	DX::States::Context->Dispatch(threadsX, threadsY, 1);
 
 	DX::States::Context->CSSetUnorderedAccessViews(0, 1, blankuavs, offsets);
 	DX::States::Context->CSSetShaderResources(0, 1, blankviews);
 }
 
-
-
 void MPSO::CreateCubeMap(const Texture2D& texture)
 {
-	_skybox = std::make_unique<Sphere>("Cubemap", 30);
+	_skybox = std::make_unique<Cube>( 30);
 	_skybox->material->textures.diffuse = texture;
 }

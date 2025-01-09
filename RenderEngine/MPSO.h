@@ -8,8 +8,7 @@
 #include "Camera.h"
 #include "Primitives.h"
 
-// Change in shader too
-#define SHADOWMAP_RES 4096
+constexpr uint32 SHADOWMAP_RES = 4096;
 
 // Mesh based Pipeline State object
 class MPSO : public PSO
@@ -108,7 +107,7 @@ private:
 	std::unique_ptr<RenderTarget>	_target;
 	std::unique_ptr<RenderTarget>	_shadowtarget;
 	ComPtr<ID3D11DepthStencilView>	_shadowmapDsv;
-	std::unique_ptr<Sphere>	_skybox;
+	std::unique_ptr<Cube>	_skybox;
 
 
 };

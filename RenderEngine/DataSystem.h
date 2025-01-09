@@ -14,13 +14,10 @@ public:
 	DataSystem();
 	~DataSystem();
 
+	void RenderForEditer();
+	void MonitorFiles();
 	void LoadShaders();
 	void LoadModels();
-
-	//void ReloadShaders();
-
-	//Event<> OnShadersReloadedEvent;
-	//Event<> ShadersReloadedEvent;
 
 	std::unordered_map<std::string, VertexShader>	VertexShaders;
 	std::unordered_map<std::string, HullShader>		HullShaders;
@@ -33,12 +30,17 @@ public:
 	std::unordered_map<std::string, std::shared_ptr<AnimModel>>	AnimatedModels;
 
 private:
-
 	void AddShaderFromPath(const file::path& filepath);
 	void AddModel(const file::path& filepath, const file::path& dir);
 	void AddShader(const std::string& name, const std::string& ext, const ComPtr<ID3DBlob>& blob);
 	void RemoveShaders();
 
+private:
+	uint32 currModelFileCount = 0;
+	uint32 currShaderFileCount = 0;
+	uint32 prevModelFileCount = 0;
+	uint32 prevShaderFileCount = 0;
+	std::thread m_DataThread{};
 };
 
 static inline auto& AssetsSystem = DataSystem::GetInstance();

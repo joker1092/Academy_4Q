@@ -38,6 +38,20 @@ Texture2D TextureLoader::LoadCubemapFromFile(const file::path& filepath)
 // Expects that mips are already in dds, so thread safe
 Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
 {
+	if (!file::exists(filepath))
+	{
+		WARN("File does not exist \"" + filepath.string() + "\"");
+		return Texture2D();
+	}
+
+	file::path file = filepath.filename();
+	std::string filename = file.replace_extension().string();
+
+	if (m_textures.find(filename) != m_textures.end())
+	{
+		return m_textures[filename];
+	}
+
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
 
@@ -55,21 +69,34 @@ Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
 		nullptr
 	));
 
+	Texture2D texture = CreateTexture(filename, res, srv);
+	m_textures[filename] = texture;
+
+	return texture;
+}
+
+Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
+{
+	if (!file::exists(filepath))
+	{
+		WARN("File does not exist \"" + filepath.string() + "\"");
+		return Texture2D();
+	}
+
 	file::path file = filepath.filename();
 	std::string filename = file.replace_extension().string();
 
-	return CreateTexture(filename, res, srv);
-}
+	if (m_textures.find(filename) != m_textures.end())
+	{
+		return m_textures[filename];
+	}
 
-// Thread unsafe, generates mipmaps
-Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
-{
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
 
-	DirectX::CreateWICTextureFromFileEx(
+	DirectX11::ThrowIfFailed(DirectX::CreateWICTextureFromFileEx(
 		DX::States::Device,
-		DX::States::Context,
+		nullptr,
 		filepath.wstring().c_str(),
 		0,
 		D3D11_USAGE_DEFAULT,
@@ -79,16 +106,30 @@ Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
         WIC_LOADER_FORCE_SRGB,	// WIC_LOADER_FORCE_SRGB No actual conversion takes, just renames to correct format
 		res.ReleaseAndGetAddressOf(),
 		srv.ReleaseAndGetAddressOf()
-	);
+	));
 
-	file::path file = filepath.filename();
-	std::string filename = file.replace_extension().string();
+	Texture2D texture = CreateTexture(filename, res, srv);
+	m_textures[filename] = texture;
 
-	return CreateTexture(filename, res, srv);
+	return texture;
 }
 
 Texture2D TextureLoader::LoadCubemapDDSFromFile(const file::path& filepath)
 {
+	if (!file::exists(filepath))
+	{
+		WARN("File does not exist \"" + filepath.string() + "\"");
+		return Texture2D();
+	}
+
+	file::path file = filepath.filename();
+	std::string filename = file.replace_extension().string();
+
+	if (m_textures.find(filename) != m_textures.end())
+	{
+		return m_textures[filename];
+	}
+
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
 
@@ -106,10 +147,10 @@ Texture2D TextureLoader::LoadCubemapDDSFromFile(const file::path& filepath)
 		nullptr
 	));
 
-	file::path file = filepath.filename();
-	std::string filename = file.replace_extension().string();
+	Texture2D texture = CreateTexture(filename, res, srv);
+	m_textures[filename] = texture;
 
-	return CreateTexture(filename, res, srv);
+	return texture;
 }
 
 Texture2D TextureLoader::CreateTexture(const std::string& name, const ComPtr<ID3D11Resource>& res, const ComPtr<ID3D11ShaderResourceView>& srv)

@@ -14,9 +14,12 @@ HWND InputManager::GetHwnd() const
 
 void InputManager::Update()
 {
-    std::copy(std::begin(_keyState), std::end(_keyState), std::begin(_prevKeyState));
-    std::copy(std::begin(_mouseState), std::end(_mouseState), std::begin(_prevMouseState));
+    /*std::copy(std::begin(_keyState), std::end(_keyState), std::begin(_prevKeyState));
+    std::copy(std::begin(_mouseState), std::end(_mouseState), std::begin(_prevMouseState));*/
 
+	memcpy(_prevKeyState, _keyState, sizeof(bool) * 256);
+	memcpy(_prevMouseState, _mouseState, sizeof(bool) * 3);
+	ResetMouseDelta();
     // _mouseDelta = { 0, 0 };
 }
 
@@ -68,7 +71,7 @@ POINT InputManager::GetMousePos() const
     return _mousePos;
 }
 
-POINT InputManager::GetMouseDelta() const
+float2 InputManager::GetMouseDelta() const
 {
     return _mouseDelta;
 }
@@ -103,6 +106,7 @@ void InputManager::ShowCursor()
 
 void InputManager::ResetMouseDelta()
 {
+	_prevMousePos = _mousePos;
     _mouseDelta = { 0, 0 };
     _mouseWheelDelta = 0;
 }
@@ -163,8 +167,8 @@ void InputManager::ProcessRawInput(LPARAM lParam)
             _mouseWheelDelta = static_cast<SHORT>(raw->data.mouse.usButtonData);
         }
 
-        _mouseDelta.x = _mousePos.x - _prevMousePos.x;
-        _mouseDelta.y = _mousePos.y - _prevMousePos.y;
+        _mouseDelta.x = (_mousePos.x - _prevMousePos.x) * 0.5f;
+        _mouseDelta.y = (_mousePos.y - _prevMousePos.y) * 0.5f;
 
     }
 }

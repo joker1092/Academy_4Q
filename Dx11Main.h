@@ -5,6 +5,7 @@
 #include "RenderEngine/SceneRenderer.h"
 #include "RenderEngine/Camera.h"
 #include "RenderEngine/Scene.h"
+#include "RenderEngine/ImGuiRenderer.h"
 #include <memory>
 
 namespace DirectX11
@@ -27,6 +28,7 @@ namespace DirectX11
 		std::shared_ptr<DeviceResources> m_deviceResources;
 		TimeSystem m_timeSystem;
 		std::unique_ptr<SceneRenderer> m_sceneRenderer;
+		std::unique_ptr<ImGuiRenderer> m_imguiRenderer;
 
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<Scene> m_scene;

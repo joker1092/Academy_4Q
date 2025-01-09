@@ -1,4 +1,5 @@
 #include "SceneRenderer.h"
+#include "Banchmark.hpp"
 
 SceneRenderer::SceneRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources) : deviceResources(deviceResources)
 {
@@ -35,21 +36,21 @@ void SceneRenderer::StagePrepare()
 #ifdef _DEBUG
 	assert(_camera != nullptr);
 #endif
-
+	//여기서 컬링하고, 렌더링할 모델을 정합니다.
 	_device->ClearBackbuffer();
 
 	// Craete camera and scene buffers
 	DirectX::XMMATRIX proj = _camera->GetProjectionMatrix();
 	DirectX::XMMATRIX view = _camera->GetViewMatrix();
 
-	DirectX::XMFLOAT3 pos = { 0.0f,0.0f,0.0f };
+	float3 pos = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMStoreFloat3(&pos, _camera->GetPosition());
 
 	CameraBuffer cbuff{
 		DirectX::XMMatrixMultiplyTranspose(view, proj),
 		pos,
 		0,
-		DirectX::XMFLOAT3{0.0,0.0f,0.0f},
+		float3{0.0,0.0f,0.0f},
 		0
 	};
 	SceneBuffer sbuff{};
@@ -67,13 +68,46 @@ void SceneRenderer::StagePrepare()
 	_modelcount = 0;
 }
 
+void SceneRenderer::StageDrawModels()
+{
+	// Compute shadow map from Sun view
+	foreach(drop(_drawmodels, 1), [this](auto&& model) 
+	{
+		ModelBuffer modelBuff{};
+		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
+
+		_mpso->SetModelConstants(&modelBuff);
+
+		for (auto&& mesh : model->meshes) 
+		{
+			_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+		}
+	});
+
+	_mpso->FinishShadows();
+
+	foreach(_drawmodels, [this](auto&& model) 
+	{
+		ModelBuffer modelBuff{};
+		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
+
+		_mpso->SetModelConstants(&modelBuff);
+
+		for (auto&& mesh : model->meshes) 
+		{
+			_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+		}
+	});
+}
+
 void SceneRenderer::EndStage()
 {
 	// Finish up pipeline
 	if (_scene->fxaa)
 	{
 		FxaaBuffer fxaabuff = {};
-		fxaabuff.textureSize = DirectX::XMINT2{ 
+		fxaabuff.textureSize = int2
+		{ 
 			static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().width),
 			static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().height)
 		};
@@ -91,5 +125,11 @@ void SceneRenderer::EndStage()
 	// Set rendering to back buffer for ImGui
 	// As it is rendered on top
 	_device->SetRenderTargetBackbuffer();
+}
+
+void SceneRenderer::AddDrawModel(const std::shared_ptr<Model>& model)
+{
+	_drawmodels.push_back(model);
+	_modelcount += 1;
 }
 

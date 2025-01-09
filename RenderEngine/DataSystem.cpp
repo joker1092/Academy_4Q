@@ -1,7 +1,11 @@
 #include "DataSystem.h"
+#include "ImGuiRegister.h"
 
 DataSystem::DataSystem()
 {
+	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
+	m_DataThread.detach();
+	RenderForEditer();
 }
 
 DataSystem::~DataSystem()
@@ -9,6 +13,85 @@ DataSystem::~DataSystem()
 	RemoveShaders();
 }
 
+void DataSystem::RenderForEditer()
+{
+	static std::string selectedModel;
+	ImGui::ContextRegister("Data System", [&]()
+	{
+		for (const auto& [key, model] : Models)
+		{
+			if (ImGui::Selectable(key.c_str(), key == selectedModel))
+			{
+				selectedModel = key;
+			}
+		}
+	});
+}
+
+void DataSystem::MonitorFiles()
+{
+	while (true)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		uint32 modelcount = 0;
+		uint32 shadercount = 0;
+		try
+		{
+			file::path shaderpath = PathFinder::Relative("Shaders\\");
+			for (auto& dir : file::recursive_directory_iterator(shaderpath))
+			{
+				if (dir.is_directory())
+					continue;
+
+				if (dir.path().extension() == ".hlsl")
+				{
+					shadercount++;
+				}
+			}
+		}
+		catch (const file::filesystem_error& e)
+		{
+			WARN("Could not load shaders" + e.what());
+		}
+		catch (const std::exception& e)
+		{
+			WARN("Error" + e.what());
+		}
+		try
+		{
+			file::path modelpath = PathFinder::Relative("Models\\");
+			for (auto& dir : file::recursive_directory_iterator(modelpath))
+			{
+				if (dir.is_directory())
+					continue;
+				if (dir.path().extension() == ".dae" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
+				{
+					modelcount++;
+				}
+			}
+		}
+		catch (const file::filesystem_error& e)
+		{
+			WARN("Could not load models" + e.what());
+		}
+		catch (const std::exception& e)
+		{
+			WARN("Error" + e.what());
+		}
+		if (modelcount != currModelFileCount)
+		{
+			std::cout << "Model count changed" << std::endl;
+			LoadModels();
+			currModelFileCount = modelcount;
+		}
+		if (shadercount != currShaderFileCount)
+		{
+			std::cout << "Shader count changed" << std::endl;
+			LoadShaders();
+			currShaderFileCount = shadercount;
+		}
+	}
+}
 
 void DataSystem::LoadShaders()
 {
@@ -23,6 +106,7 @@ void DataSystem::LoadShaders()
 			if (dir.path().extension() == ".hlsl")
 			{
 				AddShaderFromPath(dir.path());
+				currShaderFileCount++;
 			}
 		}
 	}
@@ -47,17 +131,10 @@ void DataSystem::LoadModels()
 		if (dir.path().extension() == ".dae" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
 		{
 			AddModel(dir.path(), dir.path().parent_path());
+			currModelFileCount++;
 		}
 	}
 }
-
-//void DataSystem::ReloadShaders()
-//{
-//	OnShadersReloadedEvent.Invoke();
-//	RemoveShaders();
-//	LoadShaders();
-//	ShadersReloadedEvent.Invoke();
-//}
 
 void DataSystem::AddShaderFromPath(const file::path& filepath)
 {
@@ -72,10 +149,17 @@ void DataSystem::AddShaderFromPath(const file::path& filepath)
 
 void DataSystem::AddModel(const file::path& filepath, const file::path& dir)
 {
+	std::string name = file::path(filepath.filename()).replace_extension().string();
+	if(Models[name])
+	{
+		WARN("Model \"" + name + "\" already exists");
+		return;
+	}
+
 	std::shared_ptr<Model>		model;
 	std::shared_ptr<AnimModel>	animmodel;
 
-	ModelLoader::LoadFromFile(filepath,dir, &model, &animmodel);
+	ModelLoader::LoadFromFile(filepath, dir, &model, &animmodel);
 	if (model)
 	{
 		Models[model->name] = model;

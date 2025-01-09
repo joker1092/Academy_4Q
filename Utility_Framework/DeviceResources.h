@@ -32,6 +32,8 @@ namespace DirectX11
 		void Trim();
 		void Present();
 
+		void ResizeResources();
+
 		Sizef GetOutputSize() const { return m_outputSize; }
 		Sizef GetLogicalSize() const { return m_logicalSize; }
 		float GetDpi() const { return m_dpi; }

@@ -28,6 +28,9 @@
     <Filter Include="Manager&amp;System">
       <UniqueIdentifier>{0d451d80-798a-4694-b7aa-3dd05159ce0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ImGuiControl">
+      <UniqueIdentifier>{3b74fc47-81f8-4f44-aa6b-e2c8dd923284}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SceneRenderer.cpp">
@@ -53,6 +56,12 @@
     </ClCompile>
     <ClCompile Include="DXStates.cpp">
       <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiRenderer.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -118,6 +127,18 @@
     </ClInclude>
     <ClInclude Include="DXStates.h">
       <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiContext.h">
+      <Filter>ImGuiControl</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRegister.h">
+      <Filter>ImGuiControl</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGUiRegisterClass.h">
+      <Filter>ImGuiControl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

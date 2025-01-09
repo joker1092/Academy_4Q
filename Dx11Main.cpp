@@ -7,9 +7,9 @@ DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceReso
 {
 	m_deviceResources->RegisterDeviceNotify(this);
 
-
-	//ì•„ë˜ ë Œë”ëŸ¬	ì´ˆê¸°í™” ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
+	//¾Æ·¡ ·»´õ·¯	ÃÊ±âÈ­ ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
 	m_sceneRenderer = std::make_unique<SceneRenderer>(m_deviceResources);
+	m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_deviceResources);
     AssetsSystem->LoadModels();
     AssetsSystem->LoadShaders();
 
@@ -33,33 +33,29 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_sceneRenderer->SetCamera(m_camera.get());
 
 	m_model = AssetsSystem->Models["sphere"];
-	m_model->scale = { 0.02f };
+	m_model->position = { 0.f, 3.f, 0.f, 0.f };
+	m_model->scale = { 0.02f, 0.02f, 0.02f, 0.f };
 
 	m_ground = AssetsSystem->Models["plane"];
+	m_ground->scale = { 20.f, 1.f, 20.f, 0.f };
+	m_ground->meshes[0].material->properties.roughness = 1.0f;
 
 	m_scene = std::make_unique<Scene>();
-
-	m_scene->suncolor = { 1.f, 1.f, 0.96f };
-	m_scene->sunpos = { 3.f, 10.f, 3.f };
-	m_scene->iblIntensity = 0.1f;
-	m_scene->iblcolor = { 1.f, 1.f, 1.f };
-    m_scene->moreShadowSamples = true;
-    m_scene->gaussianShadowBlur = false;
-
 	m_sceneRenderer->SetScene(m_scene.get());
 }
 
 void DirectX11::Dx11Main::CreateWindowSizeDependentResources()
 {
-	//ë Œë”ëŸ¬ì˜ ì°½ í¬ê¸°ì— ë”°ë¼ ë¦¬ì†ŒìŠ¤ë¥¼ ë‹¤ì‹œ ë§Œë“œëŠ” ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
+	//·»´õ·¯ÀÇ Ã¢ Å©±â¿¡ µû¶ó ¸®¼Ò½º¸¦ ´Ù½Ã ¸¸µå´Â ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	m_deviceResources->ResizeResources();
 }
 
 void DirectX11::Dx11Main::Update()
 {
-	//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
+	//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
 	m_timeSystem.Tick([&]
 	{
-		//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
+		//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
 		std::wostringstream woss;
 		woss.precision(6);
 		woss << L"4Q Graphics Application"
@@ -73,14 +69,15 @@ void DirectX11::Dx11Main::Update()
 			<< m_timeSystem.GetFrameCount();
 
 		SetWindowText(m_deviceResources->GetWindow()->GetHandle(), woss.str().c_str());
-		//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
+		//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
         m_camera->Update(m_timeSystem.GetElapsedSeconds());
+		InputManagement->Update();
 	});
 }
 
 bool DirectX11::Dx11Main::Render()
 {
-	// ì²˜ìŒ ì—…ë°ì´íŠ¸í•˜ê¸° ì „ì— ì•„ë¬´ ê²ƒë„ ë Œë”ë§í•˜ì§€ ë§ˆì„¸ìš”.
+	// Ã³À½ ¾÷µ¥ÀÌÆ®ÇÏ±â Àü¿¡ ¾Æ¹« °Íµµ ·»´õ¸µÇÏÁö ¸¶¼¼¿ä.
 	if (m_timeSystem.GetFrameCount() == 0)
 	{
 		return false;
@@ -88,20 +85,23 @@ bool DirectX11::Dx11Main::Render()
 
 	m_sceneRenderer->StagePrepare();
 
-	m_sceneRenderer->PoolModel(m_ground);
-	m_sceneRenderer->PoolModel(m_model);
+	m_sceneRenderer->AddDrawModel(m_ground);
+	m_sceneRenderer->AddDrawModel(m_model);
 
 	m_sceneRenderer->StageDrawModels();
     m_sceneRenderer->EndStage();
 
+	m_imguiRenderer->Render();
+
 	return true;
 }
-// ë¦´ë¦¬ìŠ¤ê°€ í•„ìš”í•œ ë””ë°”ì´ìŠ¤ ë¦¬ì†ŒìŠ¤ë¥¼ ë Œë”ëŸ¬ì— ì•Œë¦½ë‹ˆë‹¤.
+// ¸±¸®½º°¡ ÇÊ¿äÇÑ µğ¹ÙÀÌ½º ¸®¼Ò½º¸¦ ·»´õ·¯¿¡ ¾Ë¸³´Ï´Ù.
 void DirectX11::Dx11Main::OnDeviceLost()
 {
+
 }
 
-// ë””ë°”ì´ìŠ¤ ë¦¬ì†ŒìŠ¤ê°€ ì´ì œ ë‹¤ì‹œ ë§Œë“¤ì–´ì§ˆ ìˆ˜ ìˆìŒì„ ë Œë”ëŸ¬ì— ì•Œë¦½ë‹ˆë‹¤.
+// µğ¹ÙÀÌ½º ¸®¼Ò½º°¡ ÀÌÁ¦ ´Ù½Ã ¸¸µé¾îÁú ¼ö ÀÖÀ½À» ·»´õ·¯¿¡ ¾Ë¸³´Ï´Ù.
 void DirectX11::Dx11Main::OnDeviceRestored()
 {
 	CreateWindowSizeDependentResources();

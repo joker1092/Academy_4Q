@@ -4,21 +4,19 @@
 class Model
 {
 public:
-	inline Model() : position{ 0.0f, 0.0f, 0.0f, 0.0f }, rotation{ DirectX::XMQuaternionIdentity() }, scale(1.0f)
-	{ };
-	inline ~Model() { };
+	Model() = default;
+	~Model() = default;
 
-	std::string				name;
-	std::vector<Mesh>		meshes;
+	std::string				name{};
+	std::vector<Mesh>		meshes{};
 
-	DirectX::XMVECTOR		position;
-	DirectX::XMVECTOR		rotation;
-	float					scale;
+	DirectX::XMVECTOR		position{ Mathf::xVectorZero };
+	DirectX::XMVECTOR		rotation{ DirectX::XMQuaternionIdentity() };
+	DirectX::XMVECTOR		scale{ 1.f, 1.f, 1.f, 0.f };
 
-	inline DirectX::XMMATRIX GetMatrix() const
+	DirectX::XMMATRIX GetMatrix() const
 	{
-
-		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(DirectX::XMVECTOR{ scale, scale, scale, 0.0f });
+		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(scale);
 		trans *= DirectX::XMMatrixTranslationFromVector(position);
 		trans *= DirectX::XMMatrixRotationQuaternion(rotation);
 		return trans;
@@ -31,7 +29,7 @@ public:
 	std::string				name;
 	std::vector<AnimMesh>	meshes;
 
-	inline DirectX::XMMATRIX GetMatrix()
+	DirectX::XMMATRIX GetMatrix()
 	{
 		return DirectX::XMMatrixIdentity();
 	}

@@ -17,14 +17,14 @@ MAIN_ENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	PathFinder::Initialize();
 	//시작
 	Core::App app;
-	app.Initialize(hInstance, L"HeroP Editor", 1280, 720);
+	app.Initialize(hInstance, L"HeroP Editor", 1920, 1080);
 
 	return 0;
 }
 
 void Core::App::Initialize(HINSTANCE hInstance, const wchar_t* title, int width, int height)
 {
-	CoreWindow coreWindow(hInstance, L"HeroP Editor", 1280, 720);
+	CoreWindow coreWindow(hInstance, L"HeroP Editor", width, height);
 
 	Concurrency::SchedulerPolicy policy
 	{

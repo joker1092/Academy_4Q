@@ -24,8 +24,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DataSystem.cpp" />
     <ClCompile Include="DXStates.cpp" />
+    <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="MPSO.cpp" />
@@ -39,6 +41,10 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DataSystem.h" />
     <ClInclude Include="DXStates.h" />
+    <ClInclude Include="ImGuiContext.h" />
+    <ClInclude Include="ImGuiRegister.h" />
+    <ClInclude Include="ImGUiRegisterClass.h" />
+    <ClInclude Include="ImGuiRenderer.h" />
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />

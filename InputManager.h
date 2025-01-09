@@ -3,7 +3,7 @@
 
 constexpr int KEY_COUNT = 256;
 constexpr int MOUSE_BUTTON_COUNT = 3;
-//ì–˜ ì´ì œ ìˆ˜ì •í•´ì•¼í•  í•„ìš”ê°€ ìˆê² ë„¤
+//¾ê ÀÌÁ¦ ¼öÁ¤ÇØ¾ßÇÒ ÇÊ¿ä°¡ ÀÖ°Ú³×
 class InputManager : public Singleton<InputManager>
 {
 private:
@@ -31,7 +31,7 @@ public:
 public:
 	void SetMousePos(POINT pos);
 	POINT GetMousePos() const;
-	POINT GetMouseDelta() const;
+	float2 GetMouseDelta() const;
 	void SetCursorPos(int x, int y);
 	void GetCursorPos(LPPOINT lpPoint);
 	void HideCursor();
@@ -58,7 +58,7 @@ private:
 private:
 	POINT _prevMousePos{};
 	POINT _mousePos{};
-	POINT _mouseDelta{};
+	float2 _mouseDelta{};
 	short _mouseWheelDelta{};
 
 private:

@@ -22,6 +22,12 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b05c0c36-6745-41d0-bcfd-e137476215b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEntity">
+      <UniqueIdentifier>{369fa4f5-3f84-41ff-bcc4-ab9158ed8f6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -45,6 +51,9 @@
     <ClInclude Include="Dependancies\Geometry.h">
       <Filter>vcpkg에 추가할 파일</Filter>
     </ClInclude>
+    <ClInclude Include="GameEntity.h">
+      <Filter>GameEntity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Academy_4Q.rc">
@@ -61,6 +70,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="x64\Assets\Shaders\common.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="x64\Assets\Shaders\lighting.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="x64\Assets\Shaders\pbr.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -75,5 +93,37 @@
     <ClCompile Include="Dependancies\Geometry.cpp">
       <Filter>vcpkg에 추가할 파일</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="x64\Assets\Shaders\blend-gs.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\cubemap.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\cubemap.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\fxaa.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\mesh.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\mesh.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadow.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadow.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadowblur-x.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadowblur-y.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

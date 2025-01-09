@@ -18,6 +18,7 @@ namespace Mathf
 
 	static xVector xVectorZero = XMVectorZero();
 	static xVector xVectorOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	static xVector xVectorUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
     template<class T> inline T lerp(T low, T high, float t)
     {
@@ -34,9 +35,14 @@ namespace Mathf
 
     template<class T> void Clamp(T& val, const T lo, const T hi)
     {
-        val = min(val, lo);
-        val = max(val, hi);
+        val = max(lo, min(hi, val));
     }
+
+	template<class T> void Wrap(T& val, const T lo, const T hi)
+	{
+		if (val >= hi) val = lo;
+		if (val < lo) val = hi;
+	}
 
     template<class T> T Clamp(const T& val, const T lo, const T hi)
     {

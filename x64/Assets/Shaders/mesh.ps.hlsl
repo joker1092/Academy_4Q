@@ -40,6 +40,8 @@ Texture2D<float3>      NormalTexture       : register(t5);
 
 TextureCube       	   SkyboxTexture   	   : register(t6);
 Texture2D<float>       ShadowTexture   	   : register(t7);
+TextureCube			   SkyboxPrefilter	   : register(t8);
+Texture2D			   brdfLUT			   : register(t9);
 
 SamplerState    AnisotropicSampler  : register(s0);
 SamplerState    LinearSampler  		: register(s1);
@@ -72,20 +74,19 @@ void GetTextureSamples(
 	[branch]	// Diffuse
 	if(Bitmask & (1 << 0))
 	{
-		diffuse = DiffuseTexture.Sample(AnisotropicSampler, texcoord) * float4(Diffuse, 1.0f);
+        diffuse = DiffuseTexture.Sample(AnisotropicSampler, texcoord) * float4(Diffuse, 1.0f);
         diffuse.rgb = GammaDecode(diffuse.rgb);
     }
 	else
 	{
 		diffuse = float4(Diffuse, 1.0f);
-        diffuse.rgb = GammaDecode(diffuse.rgb);
     }
 
 	[branch]	// Metalness
 	if(Bitmask & (1 << 1))
 	{
-		metalness = step(MetallicTexture.Sample(AnisotropicSampler, texcoord), 0.5f);
-	}
+        metalness = step(MetallicTexture.Sample(AnisotropicSampler, texcoord), 0.5f);
+    }
 	else
 	{
 		metalness = step(Metalness, 0.5f);
@@ -94,8 +95,8 @@ void GetTextureSamples(
 	[branch]	// Roughness
 	if(Bitmask & (1 << 2))
 	{
-		roughness = RoughnessTexture.Sample(AnisotropicSampler, texcoord);
-	}
+        roughness = RoughnessTexture.Sample(AnisotropicSampler, texcoord);
+    }
 	else
 	{
 		roughness = Roughness;
@@ -104,8 +105,8 @@ void GetTextureSamples(
 	[branch]	// Occlusion
 	if(Bitmask & (1 << 3))
 	{
-		occlusion = OcclusionTexture.Sample(AnisotropicSampler, texcoord);
-	}
+        occlusion = OcclusionTexture.Sample(AnisotropicSampler, texcoord);
+    }
 	else
 	{
 		occlusion = 1.0f;
@@ -114,8 +115,8 @@ void GetTextureSamples(
 	[branch]	// Emissive
 	if(Bitmask & (1 << 4))
 	{
-		emissive = EmissiveTexture.Sample(AnisotropicSampler, texcoord);
-	}
+        emissive = EmissiveTexture.Sample(AnisotropicSampler, texcoord);
+    }
 	else
 	{
 		emissive = Emissive;
@@ -136,7 +137,7 @@ float GetShadow(float4 fragPosLightSpace, float3 N, float3 L)
 	coords.y = (-fragPosLightSpace.y / fragPosLightSpace.w) * 0.5f + 0.5f;
 
 	float bias = max(0.008f * (1.0f - dot(N, L)), 0.0001f);  
-	const float dim = 4096.0f; // Constant shadow map
+    const float dim = 8192.0f; // Constant shadow map
 
 	const float texelSize = 1.0f / dim;
 	float shadow = 0.0f;
@@ -189,7 +190,7 @@ float3 GetImageBasedLighting(PBRParameters params, float3 diffuse, float roughne
 
 	float3 weakspec = spec * pow(max(dot(V, -reflection), 0.0f), 100.0f) * (1 - roughness);
 
-	spec = lerp(spec, weakspec, clamp(exp(roughness*3.0f - 1.0f),0.0f,1.0f));
+    spec = lerp(spec, weakspec, clamp(exp(roughness * 3.0f - 1.0f), 0.0f, 1.0f));
 
 	return diff + spec;
 }
@@ -211,7 +212,7 @@ float3 GetNormal(
 	in float3x3 tbn)
 {
 
-	float3 sampledNormal = (2.0f * NormalTexture.Sample(AnisotropicSampler, texcoord)) - 1.0f;
+	float3 sampledNormal = (2.0f * NormalTexture.Sample(LinearSampler, texcoord)) - 1.0f;
 	sampledNormal = normalize(mul(sampledNormal, tbn));
 
 	return sampledNormal;
@@ -265,7 +266,7 @@ PsOut main(in In input)
 
 	float3 V = normalize(CameraPosition - input.vPixelWorldPos);	// Camera dir
 	float3 P = input.vPixelWorldPos;								// Pixel pos
-	float3 L = normalize(SunPos);			// Light dir
+    float3 L = normalize(SunPos); // Light dir
 
 	PBRParameters params = ComputePBRParameters(
 		diffuse.xyz,
@@ -275,7 +276,7 @@ PsOut main(in In input)
 
 	float3 suncolor = SunColor * GetDirectionalLightAttenuation();
 
-	float3 color = ComputePBRColor(
+    float3 color = ComputePBRColor(
 		params,
 		V,
 		N,
@@ -283,18 +284,21 @@ PsOut main(in In input)
 		suncolor
 	);
 
-	float3 iblcolor = GetImageBasedLighting(params, diffuse.xyz, roughness, V, N);
-	color += iblcolor;
+	
 
-	PsOut output;
-	output.Color = ToneMap(float4(color,1.0f));
+    float3 iblcolor = GetImageBasedLighting(params, diffuse.xyz, roughness, V, N);
+    color += iblcolor;
+	
+
+    PsOut output;
+    output.Color = ToneMap(float4(color, 1.0f));
     output.Color.rgb = GammaEncode(output.Color.rgb);
 
 	float shadow = GetShadow(input.vPixelLightSpacePos, N, L);
 	
 	// Lift shadows
-	output.Shadow = shadow + IBLIntensity * 2.0f;
-	clamp(output.Shadow,0.0f,1.0f);
+    output.Shadow = shadow + IBLIntensity * 2.0f;
+    clamp(output.Shadow, 0.0f, 1.0f);
 
-	return output;
+    return output;
 }

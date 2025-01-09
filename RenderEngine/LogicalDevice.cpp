@@ -10,71 +10,116 @@ LogicalDevice::LogicalDevice(const std::shared_ptr<DirectX11::DeviceResources>& 
     CreateRasterizerStates();
 }
 
-LogicalDevice::~LogicalDevice()
+void LogicalDevice::SetRenderTarget(const RenderTarget* target)
 {
+    auto viewPort = deviceResources->GetScreenViewport();
+    deviceResources->GetD3DDeviceContext()->OMSetRenderTargets(1, target->GetRTVAddress(), target->GetDSV());
+    deviceResources->GetD3DDeviceContext()->RSSetViewports(1, &viewPort);
+}
 
+void LogicalDevice::SetRenderTargets(const RenderTarget* maintarget, const RenderTarget* second)
+{
+    ID3D11RenderTargetView* views[]{ maintarget->GetRTV(), second->GetRTV() };
+    auto viewPort = deviceResources->GetScreenViewport();
+
+    deviceResources->GetD3DDeviceContext()->OMSetRenderTargets(2, views, maintarget->GetDSV());
+    deviceResources->GetD3DDeviceContext()->RSSetViewports(1, &viewPort);
+}
+
+void LogicalDevice::SetRenderTargetBackbuffer()
+{
+    ID3D11RenderTargetView* views[]{ deviceResources->GetBackBufferRenderTargetView(), nullptr };
+    auto viewPort = deviceResources->GetScreenViewport();
+
+    deviceResources->GetD3DDeviceContext()->OMSetRenderTargets(2, views, deviceResources->GetDepthStencilView());
+    deviceResources->GetD3DDeviceContext()->RSSetViewports(1, &viewPort);
+}
+
+void LogicalDevice::SetRenderTargetNothing()
+{
+    ID3D11RenderTargetView* views[]{ nullptr, nullptr };
+    auto viewPort = deviceResources->GetScreenViewport();
+
+    deviceResources->GetD3DDeviceContext()->OMSetRenderTargets(2, views, nullptr);
+    deviceResources->GetD3DDeviceContext()->RSSetViewports(1, &viewPort);
+}
+
+void LogicalDevice::SetDepthStencil(DepthStencilType type)
+{
+    switch (type)
+    {
+    case DepthStencilType::Less:
+        deviceResources->GetD3DDeviceContext()->OMSetDepthStencilState(_depthStateLess.Get(), 0);
+        return;
+    case DepthStencilType::LessEqual:
+        deviceResources->GetD3DDeviceContext()->OMSetDepthStencilState(_depthStateLessEqual.Get(), 0);
+        return;
+    default:
+        break;
+    }
+}
+
+void LogicalDevice::SetRasterizer(RasterizerType type)
+{
+    switch (type)
+    {
+    case RasterizerType::Solid:
+        deviceResources->GetD3DDeviceContext()->RSSetState(_rasterizerStateSolid.Get());
+        return;
+    case RasterizerType::SolidNoCull:
+        deviceResources->GetD3DDeviceContext()->RSSetState(_rasterizerStateSolidNoCull.Get());
+        return;
+    case RasterizerType::SolidFrontCull:
+        deviceResources->GetD3DDeviceContext()->RSSetState(_rasterizerStateSolidFrontCull.Get());
+        return;
+    case RasterizerType::Wireframe:
+        deviceResources->GetD3DDeviceContext()->RSSetState(_rasterizerStateWireframe.Get());
+        return;
+    case RasterizerType::Conservative:
+        deviceResources->GetD3DDeviceContext()->RSSetState(_rasterizerStateConservative.Get());
+        return;
+    default:
+        break;
+    }
+}
+
+void LogicalDevice::DrawIndexed(const UINT idxCount, const UINT idxStart, const UINT baseVertexLocation) const
+{
+    deviceResources->GetD3DDeviceContext()->DrawIndexed(idxCount, idxStart, baseVertexLocation);
+}
+
+void LogicalDevice::SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+    deviceResources->GetD3DDeviceContext()->IASetPrimitiveTopology(topology);
+}
+
+void LogicalDevice::ClearBackbuffer()
+{
+    deviceResources->GetD3DDeviceContext()->ClearRenderTargetView(deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::Black);
+    deviceResources->GetD3DDeviceContext()->ClearDepthStencilView(deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void LogicalDevice::CreateDepthState()
 {
-
     {
         // Create Depth Stencil
-        D3D11_DEPTH_STENCIL_DESC dsDesc;
-
-        // Depth test parameters
-        dsDesc.DepthEnable = true;
-        dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-        dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-        // Stencil test parameters
-        dsDesc.StencilEnable = true;
-        dsDesc.StencilReadMask = 0xFF;
-        dsDesc.StencilWriteMask = 0xFF;
-
-        // Stencil operations if pixel is front-facing
-        dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-        dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        CD3D11_DEPTH_STENCIL_DESC dsDesc{ CD3D11_DEFAULT() };
+        dsDesc.StencilEnable = TRUE;
         dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-        dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-        // Stencil operations if pixel is back-facing
-        dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-        dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
         dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-        dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
         // Create depth stencil state
         DirectX11::ThrowIfFailed(DX::States::Device->CreateDepthStencilState(&dsDesc, _depthStateLess.ReleaseAndGetAddressOf()));
-
         DirectX::SetName(_depthStateLess.Get(), "Depth Stencil State Less");
     }
 
     {
         // Create Depth Stencil
-        D3D11_DEPTH_STENCIL_DESC dsDesc;
-
-        // Depth test parameters
-        dsDesc.DepthEnable = true;
-        dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+        CD3D11_DEPTH_STENCIL_DESC dsDesc{ CD3D11_DEFAULT() };
         dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-        // Stencil test parameters
-        dsDesc.StencilEnable = true;
-        dsDesc.StencilReadMask = 0xFF;
-        dsDesc.StencilWriteMask = 0xFF;
-
-        // Stencil operations if pixel is front-facing
-        dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-        dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        dsDesc.StencilEnable = TRUE;
         dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-        dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-        // Stencil operations if pixel is back-facing
-        dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-        dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
         dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-        dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
         // Create depth stencil state
         DirectX11::ThrowIfFailed(DX::States::Device->CreateDepthStencilState(&dsDesc, _depthStateLessEqual.ReleaseAndGetAddressOf()));
@@ -87,41 +132,22 @@ void LogicalDevice::CreateDepthState()
 void LogicalDevice::CreateRasterizerStates()
 {
     {
-		// Create Solid Rasterizer
-		D3D11_RASTERIZER_DESC2 rasterDesc;
-		rasterDesc.FillMode = D3D11_FILL_SOLID;
-		rasterDesc.CullMode = D3D11_CULL_BACK;
-		rasterDesc.FrontCounterClockwise = 1;
-		rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-		rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-		rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-		rasterDesc.DepthClipEnable = 1;
-		rasterDesc.ScissorEnable = 0;
-		rasterDesc.MultisampleEnable = 0;
-		rasterDesc.AntialiasedLineEnable = 1;
-		rasterDesc.ForcedSampleCount = 0;
-		rasterDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+        // Create Solid Rasterizer
+        CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
+        rasterDesc.FrontCounterClockwise = TRUE;
+        rasterDesc.AntialiasedLineEnable = TRUE;
 
-		DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateSolid.ReleaseAndGetAddressOf()));
+        DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateSolid.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateSolid.Get(), "Solid Rasterizer");
-	}
+    }
 
 
     {
         // Create No Cull Rasterizer
-        D3D11_RASTERIZER_DESC2 rasterDesc;
-        rasterDesc.FillMode = D3D11_FILL_SOLID;
+        CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
         rasterDesc.CullMode = D3D11_CULL_NONE;
-        rasterDesc.FrontCounterClockwise = 1;
-        rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-        rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-        rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        rasterDesc.DepthClipEnable = 1;
-        rasterDesc.ScissorEnable = 0;
-        rasterDesc.MultisampleEnable = 0;
-        rasterDesc.AntialiasedLineEnable = 1;
-        rasterDesc.ForcedSampleCount = 0;
-        rasterDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+        rasterDesc.FrontCounterClockwise = TRUE;
+        rasterDesc.AntialiasedLineEnable = TRUE;
 
         DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateSolidNoCull.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateSolid.Get(), "Solid No Cull Rasterizer");
@@ -129,66 +155,34 @@ void LogicalDevice::CreateRasterizerStates()
 
     {
         // Create No Cull Rasterizer
-        D3D11_RASTERIZER_DESC2 rasterDesc;
-        rasterDesc.FillMode = D3D11_FILL_SOLID;
+        CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
         rasterDesc.CullMode = D3D11_CULL_FRONT;
-        rasterDesc.FrontCounterClockwise = 1;
-        rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-        rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-        rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        rasterDesc.DepthClipEnable = 1;
-        rasterDesc.ScissorEnable = 0;
-        rasterDesc.MultisampleEnable = 0;
-        rasterDesc.AntialiasedLineEnable = 1;
-        rasterDesc.ForcedSampleCount = 0;
-        rasterDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+        rasterDesc.FrontCounterClockwise = TRUE;
+        rasterDesc.AntialiasedLineEnable = TRUE;
 
         DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateSolidFrontCull.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateSolid.Get(), "Solid Front Cull Rasterizer");
     }
-    
+
     {
         // Create Wireframe Rasterizer
-        D3D11_RASTERIZER_DESC2 rasterDesc;
+        CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
         rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-        rasterDesc.CullMode = D3D11_CULL_BACK;
-        rasterDesc.FrontCounterClockwise = 1;
-        rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-        rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-        rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        rasterDesc.DepthClipEnable = 1;
-        rasterDesc.ScissorEnable = 0;
-        rasterDesc.MultisampleEnable = 0;
-        rasterDesc.AntialiasedLineEnable = 1;
-        rasterDesc.ForcedSampleCount = 0;
-        rasterDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+        rasterDesc.FrontCounterClockwise = TRUE;
+        rasterDesc.AntialiasedLineEnable = TRUE;
 
         DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateWireframe.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateWireframe.Get(), "Wireframe Rasterizer");
     }
 
-
-    // Might not be supported on old GPU's
-    // Supported from Maxwell and Skylake architecture onwards
-    //if (Options::Graphics::ConservativeRasterization)
-    //{
-        // Create Conservative Rasterizer
-        D3D11_RASTERIZER_DESC2 rasterDesc;
-        rasterDesc.FillMode = D3D11_FILL_SOLID;
-        rasterDesc.CullMode = D3D11_CULL_BACK;
-        rasterDesc.FrontCounterClockwise = 1;
-        rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
-        rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
-        rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        rasterDesc.DepthClipEnable = 1;
-        rasterDesc.ScissorEnable = 0;
-        rasterDesc.MultisampleEnable = 0;
-        rasterDesc.AntialiasedLineEnable = 1;
-        rasterDesc.ForcedSampleCount = 0;
+    {
+        CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
+        rasterDesc.FrontCounterClockwise = TRUE;
+        rasterDesc.AntialiasedLineEnable = TRUE;
         rasterDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_ON;
 
         DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateConservative.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateConservative.Get(), "Conservative Rasterizer");
-    //}
+    }
 }
 

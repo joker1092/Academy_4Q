@@ -1,5 +1,5 @@
 #include "ModelLoader.h"
-
+#include "Banchmark.hpp"
 
 void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, std::shared_ptr<Model>* model, std::shared_ptr<AnimModel>* animmodel)
 {
@@ -7,7 +7,6 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 	unsigned int flags = 0;
 	flags |= aiProcess_FlipUVs;
 	
-
 	std::string name = file::path(path.filename()).replace_extension().string();
 
 	const aiScene* scene = importer.ReadFile(path.string(), flags);
@@ -61,35 +60,34 @@ std::shared_ptr<AnimModel> ModelLoader::LoadAnimatedModel(const std::string& nam
 
 void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::vector<Mesh>* meshes)
 {
+	Banchmark banchmark{};
 	for (UINT i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* aimesh = scene->mMeshes[i];
 
-		//if ()
-
 		std::vector<Vertex> vertices = std::vector<Vertex>(aimesh->mNumVertices);
 		std::vector<Index> indices = std::vector<Index>(aimesh->mNumVertices);
-		for (unsigned int i = 0; i < vertices.size(); i++)
+		for (uint32 i = 0; i < vertices.size(); i++)
 		{
-			vertices[i].position = DirectX::XMFLOAT3{
+			vertices[i].position = float3{
 				aimesh->mVertices[i].x,
 				aimesh->mVertices[i].y,
 				aimesh->mVertices[i].z
 			};
 
-			vertices[i].normal = DirectX::XMFLOAT3{
+			vertices[i].normal = float3{
 				aimesh->mNormals[i].x,
 				aimesh->mNormals[i].y,
 				aimesh->mNormals[i].z,
 			};
 
-			vertices[i].tangent = DirectX::XMFLOAT3{
+			vertices[i].tangent = float3{
 				aimesh->mTangents[i].x,
 				aimesh->mTangents[i].y,
 				aimesh->mTangents[i].z,
 			};
 
-			vertices[i].bitangent = DirectX::XMFLOAT3{
+			vertices[i].bitangent = float3{
 				aimesh->mBitangents[i].x,
 				aimesh->mBitangents[i].y,
 				aimesh->mBitangents[i].z,
@@ -97,14 +95,14 @@ void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::v
 
 			if (aimesh->mTextureCoords[0])
 			{
-				vertices[i].texcoord = DirectX::XMFLOAT2{
+				vertices[i].texcoord = float2{
 					aimesh->mTextureCoords[0][i].x,  // Take first texture coord
 					aimesh->mTextureCoords[0][i].y
 				};
 			}
 
 		}
-		for (unsigned int u = 0; u < aimesh->mNumFaces; u++)
+		for (uint32 u = 0; u < aimesh->mNumFaces; u++)
 		{
 			// Heavily assumes that mesh is triangulated
 			indices.push_back(aimesh->mFaces[u].mIndices[0]);
@@ -129,6 +127,12 @@ void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::v
 	{
 		(*meshes)[i].CreateBuffers();
 	}
+
+	for (auto& mesh : *meshes)
+	{
+		mesh.CreateBuffers();
+	}
+	std::cout << "Meshes loaded in ";
 }
 
 std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene)
@@ -195,7 +199,7 @@ std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiM
 			aiReturn ressec = aiReturn_FAILURE;
 			float pOut;
 
-			ressec = aimat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, pOut);
+			ressec = aimat->Get(AI_MATKEY_METALLIC_FACTOR, pOut);
 			if (ressec == aiReturn_SUCCESS)
 				material->properties.metalness = pOut;
 		}
@@ -222,7 +226,7 @@ std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiM
 			aiReturn ressec = aiReturn_FAILURE;
 			float pOut;
 
-			ressec = aimat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, pOut);
+			ressec = aimat->Get(AI_MATKEY_ROUGHNESS_FACTOR, pOut);
 			if (ressec == aiReturn_SUCCESS)
 				material->properties.roughness = pOut;
 		}

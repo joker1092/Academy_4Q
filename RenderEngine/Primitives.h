@@ -55,6 +55,7 @@ class Cube : public Primitive
 {
 public:
 	inline Cube(float size = 1.0f)
+		: Primitive("Cube")
 	{
 		DirectX::ComputeBox(
 			vertices,
@@ -78,6 +79,7 @@ public:
 			0
 		);
 
+		material = std::make_shared<Material>("Cube mat");
 	}
 	DirectX::IndexCollection indices;
 	DirectX::VertexCollection vertices;

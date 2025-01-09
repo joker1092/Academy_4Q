@@ -6,33 +6,24 @@
 class Mesh
 {
 public:
-	inline Mesh() { };
-	inline Mesh(
-		const std::string _name,
-		const std::vector<Index>& _indices,
-		const std::vector<Vertex>& _vertices
-	)
-		: name(_name), indices(_indices), vertices(_vertices){ };
-	inline Mesh(
-		const std::string _name,
-		const std::vector<Index>& _indices,
-		const std::vector<Vertex>& _vertices,
-		const std::shared_ptr<Material>& _material
-	)
-		: name(_name), indices(_indices), vertices(_vertices), material(_material) { };
-	inline ~Mesh() { };
+	Mesh() = default;
+	Mesh(const std::string _name, const std::vector<Index>& _indices,const std::vector<Vertex>& _vertices)
+		: name(_name), indices(_indices), vertices(_vertices)
+	{};
+	Mesh(const std::string _name, const std::vector<Index>& _indices, const std::vector<Vertex>& _vertices, const std::shared_ptr<Material>& _material)
+		: name(_name), indices(_indices), vertices(_vertices), material(_material) 
+	{};
+	~Mesh() = default;
 
 	// Move constructor
 	Mesh(Mesh&& mesh) noexcept
-		: name(mesh.name), indices(std::move(mesh.indices)), vertices(std::move(mesh.vertices)), material(mesh.material) { };
-
+		: name(mesh.name), indices(std::move(mesh.indices)), vertices(std::move(mesh.vertices)), material(mesh.material) {};
 	Mesh& operator=(Mesh&& mesh) = default;
-
-	// No implicit copy
 	Mesh& operator=(const Mesh&) = delete;
 	Mesh(const Mesh&) = delete;
 
-	void CreateBuffers() {
+	void CreateBuffers() 
+	{
 		bindex = Buffer<Index>(
 			indices,
 			D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
@@ -49,17 +40,14 @@ public:
 		bvertex.SetName(name + " Vertex Buffer");
 	}
 
-	std::vector<Index>		indices;
-	std::vector<Vertex>		vertices;
+	std::vector<Index>			indices;
+	std::vector<Vertex>			vertices;
 
-	Buffer<Index>			bindex;
-	Buffer<Vertex>			bvertex;
+	Buffer<Index>				bindex;
+	Buffer<Vertex>				bvertex;
 
 	std::shared_ptr<Material>	material;
-	std::string				name;
-
-private:
-
+	std::string					name;
 };
 
 class AnimMesh

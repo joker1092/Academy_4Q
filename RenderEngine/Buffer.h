@@ -5,16 +5,16 @@
 class IBuffer 
 {
 public:
-	inline IBuffer() {};
-	inline IBuffer(UINT access, D3D11_USAGE usage, D3D11_BIND_FLAG flags)
+	IBuffer() {};
+	IBuffer(UINT access, D3D11_USAGE usage, D3D11_BIND_FLAG flags)
 	: _access(access), _usage(usage), _flags(flags) { };
 	virtual ~IBuffer() = default;
 
-	ComPtr<ID3D11Buffer>	_buffer;
-	UINT									_size;
-	UINT									_access;
-	D3D11_USAGE								_usage;
-	D3D11_BIND_FLAG							_flags;
+	ComPtr<ID3D11Buffer>	_buffer{};
+	uint32					_size{};
+	uint32					_access{};
+	D3D11_USAGE				_usage{};
+	D3D11_BIND_FLAG			_flags{};
 
 	inline void SetName(const char* name)
 	{
@@ -24,18 +24,18 @@ public:
 	{
 		DirectX::SetName(_buffer.Get(), name);
 	}
-	inline D3D11_USAGE GetUsage() {
+	inline D3D11_USAGE GetUsage() 
+	{
 		return _usage;
 	}
-	ID3D11Buffer* Get() const {
+	ID3D11Buffer* Get() const 
+	{
 		return _buffer.Get();
 	}
-	ID3D11Buffer* const* GetAddressOf() const {
+	ID3D11Buffer* const* GetAddressOf() const 
+	{
 		return _buffer.GetAddressOf();
 	}
-
-protected:
-
 };
 
 template <typename T>
@@ -135,6 +135,4 @@ private:
 
 		DX::States::Device->CreateBuffer(&desc, nullptr, this->_buffer.ReleaseAndGetAddressOf());
 	}
-private:
-
 };
