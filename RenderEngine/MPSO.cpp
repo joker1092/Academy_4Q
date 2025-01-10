@@ -173,6 +173,8 @@ void MPSO::FinishShadows()
 
 	DX::States::Context->PSSetShaderResources(6, 1, _skybox->material->textures.diffuse.GetAddressOf());
 	DX::States::Context->PSSetShaderResources(7, 1, _shadowmap.GetAddressOf()); // Bind shadowmap
+	DX::States::Context->PSSetShaderResources(8, 1, IBLSpecular.GetAddressOf());
+	DX::States::Context->PSSetShaderResources(9, 1, IBLBrdf.GetAddressOf());
 }
 
 
@@ -748,4 +750,11 @@ void MPSO::CreateCubeMap(const Texture2D& texture)
 {
 	_skybox = std::make_unique<Cube>( 30);
 	_skybox->material->textures.diffuse = texture;
+}
+
+void MPSO::CreateIBL(const Texture2D& diffuse, const Texture2D& specular, const Texture2D& brdf)
+{
+	IBLDiffuse = diffuse;
+	IBLSpecular = specular;
+	IBLBrdf = brdf;
 }

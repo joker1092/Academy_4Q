@@ -19,11 +19,13 @@ void SceneRenderer::Initialize()
 	_mpso = std::make_unique<MPSO>(_device.get());
 
 	// Load cubemap
-	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\cubemap.dds"));
-
+	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\indoorEnvHDR.dds"));
+	Texture2D tex2 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_DiffuseHDR.dds"));
+	Texture2D tex3 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_SpecularHDR.dds"));
+	Texture2D tex4 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_Brdf.dds"));
 	// Create and set cubemap to that state object
 	_mpso->CreateCubeMap(tex);
-
+	_mpso->CreateIBL(tex2, tex3, tex4);
 }
 
 void SceneRenderer::SetCamera(Camera* camera)
@@ -46,11 +48,12 @@ void SceneRenderer::StagePrepare()
 	float3 pos = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMStoreFloat3(&pos, _camera->GetPosition());
 
-	CameraBuffer cbuff{
+	CameraBuffer cbuff
+	{
 		DirectX::XMMatrixMultiplyTranspose(view, proj),
 		pos,
 		0,
-		float3{0.0,0.0f,0.0f},
+		float3{ 0.0, 0.0f, 0.0f },
 		0
 	};
 	SceneBuffer sbuff{};
@@ -59,7 +62,7 @@ void SceneRenderer::StagePrepare()
 	sbuff.suncolor = _scene->suncolor;
 	sbuff.iblColor = _scene->iblcolor;
 	sbuff.iblIntensity = _scene->iblIntensity;
-	sbuff.ambientcolor = DirectX::XMFLOAT3{ 0.0f,0.0f,0.0f };
+	sbuff.ambientcolor = DirectX::XMFLOAT3{ 0.0f, 0.0f, 0.0f };
 	sbuff.preciseShadows = _scene->moreShadowSamples;
 
 	// Start the pipeline

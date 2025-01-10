@@ -53,7 +53,7 @@ Out main(in Vertex vertex)
 
 	output.vTBN = float3x3(t,bt,n);
 	
-	output.vPixelLightSpacePos = mul(float4(output.vPixelWorldPos,1.0f), LightSpaceMatrix);
+	output.vPixelLightSpacePos = mul(float4(output.vPixelWorldPos, 1.0f), LightSpaceMatrix);
     output.vTexcoord = vertex.texcoord;
 
     return output;

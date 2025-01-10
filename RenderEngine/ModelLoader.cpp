@@ -5,7 +5,7 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 {
 	Assimp::Importer importer = Assimp::Importer();
 	unsigned int flags = 0;
-	flags |= aiProcess_FlipUVs;
+	flags |= aiProcess_FlipUVs | aiProcess_Triangulate;
 	
 	std::string name = file::path(path.filename()).replace_extension().string();
 

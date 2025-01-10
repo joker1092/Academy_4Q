@@ -27,12 +27,14 @@ public:
 	void SetModelConstants(const ModelBuffer* modelbuffer);
 	void Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer);
 	void CreateCubeMap(const Texture2D& texture);
+	void CreateIBL(const Texture2D& diffuse, const Texture2D& specular, const Texture2D& brdf);
 	inline void Resize(UINT width, UINT height) {
 		_target->Resize(width, height);
 		_shadowtarget->Resize(width, height);
 		_blurredShadows.Resize(width, height);
 		CreateComputeResources();
 	}
+
 
 private:
 	void DrawCubemap(CameraBuffer* cameraBuffer);
@@ -109,5 +111,7 @@ private:
 	ComPtr<ID3D11DepthStencilView>	_shadowmapDsv;
 	std::unique_ptr<Cube>	_skybox;
 
-
+	Texture2D IBLDiffuse{};
+	Texture2D IBLSpecular{};
+	Texture2D IBLBrdf{};
 };

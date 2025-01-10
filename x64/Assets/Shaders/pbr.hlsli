@@ -48,6 +48,7 @@ struct PBRParameters
 	float3 SpecEnvR0;
 	float3 SpecEnvR90;
 	float3 DiffuseColor;
+    float3 Fresnel;
 	float AlphaRoughness;
 };
 struct DotProducts
@@ -88,7 +89,7 @@ PBRParameters ComputePBRParameters(float3 diffuse, float metallic, float roughne
 // https://github.com/microsoft/glTF-DXViewer/blob/master/ModelViewer/Assets/Shaders/pbrpixel.hlsl
 // https://github.com/microsoft/MixedRealityToolkit/blob/master/SpatialInput/Libs/Pbr/Shaders/PbrPixelShader.hlsl
 
-float3 ComputePBRColor(PBRParameters params, float3 V, float3 N, float3 L, float3 lightColor)
+float3 ComputePBRColor(inout PBRParameters params, float3 V, float3 N, float3 L, float3 lightColor)
 {
     //V CameraDirection
     //P PixelPosition
@@ -111,6 +112,8 @@ float3 ComputePBRColor(PBRParameters params, float3 V, float3 N, float3 L, float
     float3 F = FresnelReflectance(params.SpecEnvR0, params.SpecEnvR90, HdotV);
     float G = GeometricOcclusion(NdotL, NdotV, params.AlphaRoughness);
     float D = MicrofacetBRDF(NdotH, params.AlphaRoughness);
+    
+    params.Fresnel = F;
 
 	// Lighting contribution
 	float3 diffuseContrib = (1.0 - F) * (params.DiffuseColor / PI);

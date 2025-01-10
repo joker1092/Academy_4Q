@@ -7,7 +7,7 @@ struct Scene
 	DirectX::XMFLOAT3 sunpos{ 3.f, 10.f, 3.f };
 	DirectX::XMFLOAT3 iblcolor{ 1.f, 1.f, 1.f };
 	float iblIntensity{ 0.1f };
-	bool moreShadowSamples{ true };
+	bool moreShadowSamples{ false };
 	bool gaussianShadowBlur{ false };
 
 	bool fxaa{ true };

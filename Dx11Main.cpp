@@ -1,6 +1,7 @@
 #include "Dx11Main.h"
 #include "Utility_Framework/CoreWindow.h"
 #include "InputManager.h"
+#include "RenderEngine/ImGuiRegister.h"
 
 DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceResources)
 	: m_deviceResources(deviceResources)
@@ -39,6 +40,11 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_ground = AssetsSystem->Models["plane"];
 	m_ground->scale = { 20.f, 1.f, 20.f, 0.f };
 	m_ground->meshes[0].material->properties.roughness = 1.0f;
+	ImGui::ContextRegister("Ground material", [&]()
+		{
+			ImGui::SliderFloat("Ground metalness", &m_ground->meshes[0].material->properties.metalness, 0.01f, 1.f);
+			ImGui::SliderFloat("Ground roughnees", &m_ground->meshes[0].material->properties.roughness, 0.01f, 1.f);
+		});
 
 	m_scene = std::make_unique<Scene>();
 	m_sceneRenderer->SetScene(m_scene.get());

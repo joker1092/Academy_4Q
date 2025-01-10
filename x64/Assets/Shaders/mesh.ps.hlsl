@@ -182,17 +182,22 @@ float GetShadow(float4 fragPosLightSpace, float3 N, float3 L)
 // Fudge to get GI from all sources
 // Works from ambient diffuse skybox
 // Change to actual GI later...
-float3 GetImageBasedLighting(PBRParameters params, float3 diffuse, float roughness, float3 V, float3 N)
+float3 GetImageBasedLighting(PBRParameters params, float3 diffuse, float metallic, float roughness, float3 V, float3 N)
 {
-	float3 reflection = reflect(-V,N);
-	float3 diff = IBLColor * IBLIntensity * diffuse * SunColor * roughness;
-	float3 spec = SkyboxTexture.Sample(CubemapSampler, reflection ).xyz * IBLIntensity * IBLColor * SunColor; 
-
-	float3 weakspec = spec * pow(max(dot(V, -reflection), 0.0f), 100.0f) * (1 - roughness);
-
-    spec = lerp(spec, weakspec, clamp(exp(roughness * 3.0f - 1.0f), 0.0f, 1.0f));
-
-	return diff + spec;
+    float3 irradiance = SkyboxTexture.Sample(CubemapSampler, N).rgb;
+	
+    float3 defuse = diffuse * irradiance;
+    float3 prefilteredColor = SkyboxPrefilter.SampleLevel(CubemapSampler, reflect(-V, N), roughness * 4.f).rgb;
+    float2 brdf = brdfLUT.Sample(ClampSampler, float2(max(dot(N, V), 0.f), roughness)).rg;
+    float3 specular = prefilteredColor * (params.Fresnel * brdf.x + brdf.y);
+	
+    float3 Kd = (float3) 1.f - params.Fresnel;
+    Kd *= (1.0f - metallic);
+	
+    float3 ambient = (Kd * defuse) + specular;
+    ambient *= diffuse;
+	
+    return ambient;
 }
 
 bool IsTextureNormalEnabled()
@@ -286,7 +291,7 @@ PsOut main(in In input)
 
 	
 
-    float3 iblcolor = GetImageBasedLighting(params, diffuse.xyz, roughness, V, N);
+    float3 iblcolor = GetImageBasedLighting(params, diffuse.xyz, metalness, roughness, V, N);
     color += iblcolor;
 	
 
