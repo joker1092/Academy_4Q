@@ -16,13 +16,13 @@ void DataSystem::Initialize()
 void DataSystem::RenderForEditer()
 {
 	static std::string selectedModel{};
-	// Å¸ÀÏÀÇ Å©±â¿Í °£°İ ¼³Á¤
+	// íƒ€ì¼ì˜ í¬ê¸°ì™€ ê°„ê²© ì„¤ì •
 
 	ImGui::ContextRegister("Models", [&]()
 	{
-		constexpr float tileSize = 64.0f;  // Å¸ÀÏ Å©±â (¾ÆÀÌÄÜ Å©±â)
-		constexpr float padding = 10.0f;  // Å¸ÀÏ °£ °£°İ
-		constexpr int tilesPerRow = 4;    // ÇÑ ÁÙ¿¡ Ç¥½ÃÇÒ Å¸ÀÏ ¼ö
+		constexpr float tileSize = 64.0f;  // íƒ€ì¼ í¬ê¸° (ì•„ì´ì½˜ í¬ê¸°)
+		constexpr float padding = 10.0f;  // íƒ€ì¼ ê°„ ê°„ê²©
+		constexpr int tilesPerRow = 4;    // í•œ ì¤„ì— í‘œì‹œí•  íƒ€ì¼ ìˆ˜
 		int count = 0;
 
 		for (const auto& [key, model] : Models)
@@ -51,7 +51,7 @@ void DataSystem::RenderForEditer()
 			}
 		}
 	}, ImGuiWindowFlags_NoMove);
-	//ÀÌ°Ç ³ªÁß¿¡ °ÔÀÓ ¿ÀºêÁ§Æ®·Î °¡´øÁö ÇØ¾ßµÊ.
+	//ì´ê±´ ë‚˜ì¤‘ì— ê²Œì„ ì˜¤ë¸Œì íŠ¸ë¡œ ê°€ë˜ì§€ í•´ì•¼ë¨.
 	ImGui::ContextRegister("Models Material properties", [&]()
 		{
 			for (const auto& [key, model] : Models)
@@ -76,6 +76,7 @@ void DataSystem::MonitorFiles()
 {
 	while (true)
 	{
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 		uint32 modelcount = 0;
 		uint32 shadercount = 0;
 		try
@@ -133,7 +134,7 @@ void DataSystem::MonitorFiles()
 			LoadShaders();
 			currShaderFileCount = shadercount;
 		}
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+
 	}
 }
 
