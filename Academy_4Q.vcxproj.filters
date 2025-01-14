@@ -28,6 +28,9 @@
     <Filter Include="GameEntity">
       <UniqueIdentifier>{369fa4f5-3f84-41ff-bcc4-ab9158ed8f6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="리소스 파일\Assets">
+      <UniqueIdentifier>{3f807029-a322-45f0-885e-63ea726decfd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
