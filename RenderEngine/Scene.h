@@ -6,7 +6,7 @@ struct Scene
 	DirectX::XMFLOAT3 suncolor{ 1.f, 1.f, 0.96f };
 	DirectX::XMFLOAT3 sunpos{ 3.f, 10.f, 3.f };
 	DirectX::XMFLOAT3 iblcolor{ 1.f, 1.f, 1.f };
-	float iblIntensity{ 0.1f };
+	float iblIntensity{ 0.22f };
 	bool moreShadowSamples{ false };
 	bool gaussianShadowBlur{ false };
 
@@ -30,6 +30,6 @@ struct Scene
 			ImGui::DragFloat("Bias", &bias, 0.001f, 0.0f, 1.0f);
 			ImGui::DragFloat("Bias Min", &biasMin, 0.001f, 0.0f, 1.0f);
 			ImGui::DragFloat("Span Max", &spanMax, 0.1f, 0.0f, 100.0f);
-		});
+		}, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 	}
 };

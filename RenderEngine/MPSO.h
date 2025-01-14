@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "Primitives.h"
 
-constexpr uint32 SHADOWMAP_RES = 4096;
+constexpr uint32 SHADOWMAP_RES = 8192;
 
 // Mesh based Pipeline State object
 class MPSO : public PSO

@@ -19,10 +19,10 @@ void SceneRenderer::Initialize()
 	_mpso = std::make_unique<MPSO>(_device.get());
 
 	// Load cubemap
-	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\indoorEnvHDR.dds"));
-	Texture2D tex2 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_DiffuseHDR.dds"));
-	Texture2D tex3 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_SpecularHDR.dds"));
-	Texture2D tex4 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\town_Brdf.dds"));
+	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_EnvHDR.dds"));
+	Texture2D tex2 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_DiffuseHDR.dds"));
+	Texture2D tex3 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_SpecularHDR.dds"));
+	Texture2D tex4 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_Brdf.dds"));
 	// Create and set cubemap to that state object
 	_mpso->CreateCubeMap(tex);
 	_mpso->CreateIBL(tex2, tex3, tex4);

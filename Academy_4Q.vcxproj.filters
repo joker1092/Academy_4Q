@@ -51,7 +51,7 @@
     <ClInclude Include="Dependancies\Geometry.h">
       <Filter>vcpkg에 추가할 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GameEntity.h">
+    <ClInclude Include="GameObject.h">
       <Filter>GameEntity</Filter>
     </ClInclude>
   </ItemGroup>

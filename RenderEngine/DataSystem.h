@@ -10,10 +10,10 @@ class DataSystem : public Singleton<DataSystem>
 private:
     friend class Singleton;
 
-public:
-	DataSystem();
+	DataSystem() = default;
 	~DataSystem();
-
+public:
+	void Initialize();
 	void RenderForEditer();
 	void MonitorFiles();
 	void LoadShaders();
@@ -36,6 +36,7 @@ private:
 	void RemoveShaders();
 
 private:
+	Texture2D icon{};
 	uint32 currModelFileCount = 0;
 	uint32 currShaderFileCount = 0;
 	uint32 prevModelFileCount = 0;

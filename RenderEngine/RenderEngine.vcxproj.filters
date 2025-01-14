@@ -31,6 +31,9 @@
     <Filter Include="ImGuiControl">
       <UniqueIdentifier>{3b74fc47-81f8-4f44-aa6b-e2c8dd923284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\ImguiTheme">
+      <UniqueIdentifier>{46b05c5c-2bd5-4b9d-bfda-cc1a884a072e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SceneRenderer.cpp">

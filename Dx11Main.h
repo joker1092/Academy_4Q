@@ -34,6 +34,7 @@ namespace DirectX11
 		std::unique_ptr<Scene> m_scene;
 
         std::shared_ptr<Model> m_model{};
+		std::shared_ptr<Model> m_model2{};
         std::shared_ptr<Model> m_ground{};
 	};
 }

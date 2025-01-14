@@ -7,9 +7,9 @@ static const float EPSILON = 1e-6f;
 
 float4 ToneMap(float4 colorin) 
 {
-	float4 mapped = colorin / (colorin + float4(1.0f, 1.0f, 1.0f, 1.0f));
-	mapped.w = 1.0f;
-	return mapped;
+    float4 mapped = colorin / (colorin + float4(1.0f, 1.0f, 1.0f, 1.0f));
+    mapped.w = 1.0f;
+    return mapped;
 }
 
 float ToneMap1D(float colorin) 
@@ -34,7 +34,7 @@ float3 GammaDecode(float3 color)
 
 float3 GammaEncode(float3 color)
 {
-    color = max(color, 0.0f);
+    color = saturate(color);
     return max(1.055f * pow(color, 0.416666667f) - 0.055f, 0.0f);
 }
 

@@ -1,38 +1,81 @@
 #include "DataSystem.h"
 #include "ImGuiRegister.h"
 
-DataSystem::DataSystem()
+DataSystem::~DataSystem()
+{
+	RemoveShaders();
+}
+
+void DataSystem::Initialize()
 {
 	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
 	m_DataThread.detach();
 	RenderForEditer();
 }
 
-DataSystem::~DataSystem()
-{
-	RemoveShaders();
-}
-
 void DataSystem::RenderForEditer()
 {
-	static std::string selectedModel;
-	ImGui::ContextRegister("Data System", [&]()
+	static std::string selectedModel{};
+	// 타일의 크기와 간격 설정
+
+	ImGui::ContextRegister("Models", [&]()
 	{
+		constexpr float tileSize = 64.0f;  // 타일 크기 (아이콘 크기)
+		constexpr float padding = 10.0f;  // 타일 간 간격
+		constexpr int tilesPerRow = 4;    // 한 줄에 표시할 타일 수
+		int count = 0;
+
 		for (const auto& [key, model] : Models)
 		{
-			if (ImGui::Selectable(key.c_str(), key == selectedModel))
+			ImGui::BeginGroup();
+
+			if (ImGui::ImageButton(key.c_str(), icon.Get(), ImVec2(tileSize, tileSize)))
 			{
+				std::cout << "Selected Model: " << key << std::endl;
 				selectedModel = key;
 			}
+
+			if (selectedModel == key)
+			{
+				ImGui::TextWrapped("[Selected]");
+			}
+
+			ImGui::TextWrapped("%s", key.c_str());
+
+			ImGui::EndGroup();
+
+			count++;
+			if (count % tilesPerRow != 0)
+			{
+				ImGui::SameLine(0.0f, padding);
+			}
 		}
-	});
+	}, ImGuiWindowFlags_NoMove);
+	//이건 나중에 게임 오브젝트로 가던지 해야됨.
+	ImGui::ContextRegister("Models Material properties", [&]()
+		{
+			for (const auto& [key, model] : Models)
+			{
+				if (selectedModel == key)
+				{
+					float* diffuse[3]
+					{ 
+						&model->meshes[0].material->properties.diffuse.x, 
+						&model->meshes[0].material->properties.diffuse.y, 
+						&model->meshes[0].material->properties.diffuse.z 
+					};
+					ImGui::ColorEdit3("Diffuse", diffuse[0]);
+					ImGui::SliderFloat("Roughness", &model->meshes[0].material->properties.roughness, 0.3f, 1.0f);
+					ImGui::SliderFloat("Metalness", &model->meshes[0].material->properties.metalness, 0.3f, 1.0f);
+				}
+			}
+		});
 }
 
 void DataSystem::MonitorFiles()
 {
 	while (true)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 		uint32 modelcount = 0;
 		uint32 shadercount = 0;
 		try
@@ -90,11 +133,14 @@ void DataSystem::MonitorFiles()
 			LoadShaders();
 			currShaderFileCount = shadercount;
 		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
 void DataSystem::LoadShaders()
 {
+	icon = TextureLoader::LoadFromFile(PathFinder::Relative("Icon\\Model.png"));
+
 	try
 	{
 		file::path shaderpath = PathFinder::Relative("Shaders\\");

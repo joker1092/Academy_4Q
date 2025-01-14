@@ -179,22 +179,28 @@ float GetShadow(float4 fragPosLightSpace, float3 N, float3 L)
 
 }
 
-// Fudge to get GI from all sources
-// Works from ambient diffuse skybox
-// Change to actual GI later...
+uint GetMipMapLevel(TextureCube tex)
+{
+    uint mipLevel = 0;
+    uint width, height;
+    tex.GetDimensions(0, width, height, mipLevel);
+    return mipLevel;
+}
+
 float3 GetImageBasedLighting(PBRParameters params, float3 diffuse, float metallic, float roughness, float3 V, float3 N)
 {
     float3 irradiance = SkyboxTexture.Sample(CubemapSampler, N).rgb;
 	
-    float3 defuse = diffuse * irradiance;
-    float3 prefilteredColor = SkyboxPrefilter.SampleLevel(CubemapSampler, reflect(-V, N), roughness * 4.f).rgb;
-    float2 brdf = brdfLUT.Sample(ClampSampler, float2(max(dot(N, V), 0.f), roughness)).rg;
-    float3 specular = prefilteredColor * (params.Fresnel * brdf.x + brdf.y);
+    float3 diff = diffuse * irradiance;
+    float3 prefilteredColor = SkyboxPrefilter.SampleLevel(CubemapSampler, reflect(-V, N), roughness * GetMipMapLevel(SkyboxTexture)).rgb;
+    float2 brdf = brdfLUT.Sample(ClampSampler, float2(max(dot(N, V), 0.f), roughness)).xy;
+
+    float3 specular = prefilteredColor * (params.Fresnel /** brdf.x + brdf.y*/);
 	
     float3 Kd = (float3) 1.f - params.Fresnel;
     Kd *= (1.0f - metallic);
 	
-    float3 ambient = (Kd * defuse) + specular;
+    float3 ambient = (Kd * diff) + specular;
     ambient *= diffuse;
 	
     return ambient;
@@ -222,23 +228,6 @@ float3 GetNormal(
 
 	return sampledNormal;
 }
-
-// Christian Schuler, "Normal Mapping without Precomputed Tangents", ShaderX 5, Chapter 2.6, pp. 131-140
-// See also follow-up blog post: http://www.thetenthplanet.de/archives/1180
-float3x3 CalculateTBN(float3 p, float3 n, float2 tex)
-{
-    float3 dp1 = ddx(p);
-    float3 dp2 = ddy(p);
-    float2 duv1 = ddx(tex);
-    float2 duv2 = ddy(tex);
-
-    float3x3 M = float3x3(dp1, dp2, cross(dp1, dp2));
-    float2x3 inverseM = float2x3(cross(M[1], M[2]), cross(M[2], M[0]));
-    float3 t = normalize(mul(float2(duv1.x, duv2.x), inverseM));
-    float3 b = normalize(mul(float2(duv1.y, duv2.y), inverseM));
-    return float3x3(t, b, n);
-}
-
 
 PsOut main(in In input)
 {
@@ -289,16 +278,13 @@ PsOut main(in In input)
 		suncolor
 	);
 
-	
-
     float3 iblcolor = GetImageBasedLighting(params, diffuse.xyz, metalness, roughness, V, N);
     color += iblcolor;
-	
 
     PsOut output;
     output.Color = ToneMap(float4(color, 1.0f));
-    output.Color.rgb = GammaEncode(output.Color.rgb);
-
+	output.Color.rgb = GammaEncode(output.Color.rgb);
+	
 	float shadow = GetShadow(input.vPixelLightSpacePos, N, L);
 	
 	// Lift shadows

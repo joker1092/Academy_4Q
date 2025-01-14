@@ -217,6 +217,7 @@ void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 
 	// Combine shadows and rendered mesh
 	Blend(blurShadows);
+	//DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _blendOutput.Get());
 
 	// Do simplistic fxaa
 	if (fxaabuffer != nullptr)
@@ -451,7 +452,7 @@ void MPSO::CreateTextures()
 
 	{
 		_target = std::make_unique<RenderTarget>(
-			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+			DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT,
 			_device->GetDeviceResources()->GetLogicalSize().width,
             _device->GetDeviceResources()->GetLogicalSize().height
 		);

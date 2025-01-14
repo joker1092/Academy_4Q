@@ -180,8 +180,10 @@ void DirectX11::DeviceResources::ResizeResources()
 	{
 		return;
 	}
-	int outputWidth = std::max<int>(static_cast<int>(m_logicalSize.width * m_effectiveDpi / DisplayMetrics::DpiThreshold), 1);
-	int outputHeight = std::max<int>(static_cast<int>(m_logicalSize.height * m_effectiveDpi / DisplayMetrics::DpiThreshold), 1);
+	int outputWidth = std::max<int>(
+        static_cast<int>(m_logicalSize.width * m_effectiveDpi / DisplayMetrics::DpiThreshold), 1);
+	int outputHeight = std::max<int>(
+        static_cast<int>(m_logicalSize.height * m_effectiveDpi / DisplayMetrics::DpiThreshold), 1);
 	// 크기가 변경되지 않았으면 중지합니다.
 	if (m_d3dRenderTargetSize.width == outputWidth && m_d3dRenderTargetSize.height == outputHeight)
 	{

@@ -155,6 +155,60 @@ namespace DirectX
         return CreateShaderResourceView(pDevice, image.GetImages(), image.GetImageCount(), metadata, ppTexture);
     }
 
+    inline HRESULT CreateTGATextureFormFileEx(_In_ ID3D11Device* d3dDevice,
+        _In_z_ const wchar_t* szFileName,
+        _In_ size_t maxsize,
+        _In_ D3D11_USAGE usage,
+        _In_ unsigned int bindFlags,
+        _In_ unsigned int cpuAccessFlags,
+        _In_ unsigned int miscFlags,
+        _In_ CREATETEX_FLAGS loadFlags,
+        _Outptr_opt_ ID3D11Resource** texture,
+        _Outptr_opt_ ID3D11ShaderResourceView** textureView) noexcept
+    {
+		if(!textureView)
+        {
+            return E_INVALIDARG;
+        }
+		if (!texture)
+		{
+			return E_INVALIDARG;
+		}
+		if (!szFileName)
+		{
+			return E_INVALIDARG;
+		}
+		if (!d3dDevice)
+		{
+			return E_INVALIDARG;
+		}
+		HRESULT hr = S_OK;
+		// Create texture
+		ScratchImage image;
+		TexMetadata metadata;
+		hr = LoadFromTGAFile(szFileName, &metadata, image);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+		hr = CreateTextureEx(d3dDevice, image.GetImages(), image.GetImageCount(), metadata, usage, bindFlags, cpuAccessFlags, miscFlags, loadFlags, texture);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+		hr = CreateShaderResourceView(d3dDevice, image.GetImages(), image.GetImageCount(), metadata, textureView);
+		if (FAILED(hr))
+		{
+			if (texture)
+			{
+				(*texture)->Release();
+				*texture = nullptr;
+			}
+			return hr;
+		}
+		return hr;
+    }
+
     inline HRESULT CreateTextureFromFile(ID3D11Device* pDevice, const file::path& fileName, ID3D11ShaderResourceView** ppTextureView)
     {
         HRESULT hResult = S_OK;

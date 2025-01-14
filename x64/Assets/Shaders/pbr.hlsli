@@ -41,7 +41,6 @@ float MicrofacetBRDF(float NdotH, float alphaRoughness)
     return nom / denom;
 }
 
-
 static const float3 F0 = float3(0.04f, 0.04f, 0.04f);
 struct PBRParameters
 {
@@ -51,23 +50,7 @@ struct PBRParameters
     float3 Fresnel;
 	float AlphaRoughness;
 };
-struct DotProducts
-{
-    float NdotL; 				// cos angle between normal and light direction
-    float NdotV; 				// cos angle between normal and view direction
-    float NdotH; 				// cos angle between normal and half vector
-    float LdotH; 				// cos angle between light direction and half vector
-    float VdotH; 				// cos angle between view direction and half vector
-};
 
-// Raytraces through 3D voxelized lightmap 
-
-float3 RaytraceLightmap(float3 raydir)
-{
-	return float3(0.0f, 0.0f, 0.0f);
-}
-
-// Computes common PBR paramters for all light sources
 PBRParameters ComputePBRParameters(float3 diffuse, float metallic, float roughness)
 {
 	PBRParameters params;
@@ -84,11 +67,6 @@ PBRParameters ComputePBRParameters(float3 diffuse, float metallic, float roughne
 	return params;
 }
 
-// Computes PBR Color for generalized light source (Point, Directional, ...)
-// See Ref:
-// https://github.com/microsoft/glTF-DXViewer/blob/master/ModelViewer/Assets/Shaders/pbrpixel.hlsl
-// https://github.com/microsoft/MixedRealityToolkit/blob/master/SpatialInput/Libs/Pbr/Shaders/PbrPixelShader.hlsl
-
 float3 ComputePBRColor(inout PBRParameters params, float3 V, float3 N, float3 L, float3 lightColor)
 {
     //V CameraDirection
@@ -101,14 +79,12 @@ float3 ComputePBRColor(inout PBRParameters params, float3 V, float3 N, float3 L,
 	const float3 reflection = -normalize(reflect(V,N));
 
 	// Dot products
-	const float NdotL = max(dot(N,L), 0.001f);
-	const float NdotV = abs(dot(N,V)) + 0.01;
-    const float NdotH = max(dot(N, H), 0.0f);
-    const float LdotH = max(dot(L, H), 0.0f);
-    const float HdotV = max(dot(H, V), 0.0f);
+	const float NdotL = max(dot(N, L), 0.001f);
+	const float NdotV = abs(dot(N, V)) + 0.01;
+    const float NdotH = clamp(dot(N, H), 0.0f, 1.f);
+    const float LdotH = clamp(dot(L, H), 0.0f, 1.f);
+    const float HdotV = clamp(dot(H, V), 0.0f, 1.f);
     
-
-	// Calculate the shading terms for the microfacet specular shading model
     float3 F = FresnelReflectance(params.SpecEnvR0, params.SpecEnvR90, HdotV);
     float G = GeometricOcclusion(NdotL, NdotV, params.AlphaRoughness);
     float D = MicrofacetBRDF(NdotH, params.AlphaRoughness);

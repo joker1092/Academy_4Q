@@ -5,7 +5,7 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 {
 	Assimp::Importer importer = Assimp::Importer();
 	unsigned int flags = 0;
-	flags |= aiProcess_FlipUVs | aiProcess_Triangulate;
+	flags |= aiProcess_FlipUVs;
 	
 	std::string name = file::path(path.filename()).replace_extension().string();
 
@@ -138,7 +138,6 @@ void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::v
 std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene)
 {
 	std::shared_ptr<Material> material = std::make_shared<Material>();
-
 
 	UINT idx = aimesh->mMaterialIndex;
 	float fOut = 0.0f;

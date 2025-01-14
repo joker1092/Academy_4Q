@@ -11,8 +11,9 @@ DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceReso
 	//아래 렌더러	초기화 코드를 여기에 추가합니다.
 	m_sceneRenderer = std::make_unique<SceneRenderer>(m_deviceResources);
 	m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_deviceResources);
-    AssetsSystem->LoadModels();
+    //AssetsSystem->LoadModels();
     AssetsSystem->LoadShaders();
+	AssetsSystem->Initialize();
 
 	m_sceneRenderer->Initialize();
 
@@ -34,17 +35,17 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_sceneRenderer->SetCamera(m_camera.get());
 
 	m_model = AssetsSystem->Models["sphere"];
-	m_model->position = { 0.f, 3.f, 0.f, 0.f };
-	m_model->scale = { 0.02f, 0.02f, 0.02f, 0.f };
+	m_model->position = { 0.f, 3.f, 2.f, 1.f };
+	m_model->scale = { 0.02f, 0.02f, 0.02f, 1.f };
+
+	m_model2 = AssetsSystem->Models["bangboo"];
+	m_model2->position = { 5.f, 3.f, 0.f, 1.f };
+	m_model2->scale = { 0.2f, 0.2f, 0.2f, 1.f };
 
 	m_ground = AssetsSystem->Models["plane"];
-	m_ground->scale = { 20.f, 1.f, 20.f, 0.f };
-	m_ground->meshes[0].material->properties.roughness = 1.0f;
-	ImGui::ContextRegister("Ground material", [&]()
-		{
-			ImGui::SliderFloat("Ground metalness", &m_ground->meshes[0].material->properties.metalness, 0.01f, 1.f);
-			ImGui::SliderFloat("Ground roughnees", &m_ground->meshes[0].material->properties.roughness, 0.01f, 1.f);
-		});
+	m_ground->scale = { 20.f, 1.f, 20.f, 1.f };
+	m_ground->meshes[0].material->properties.metalness = 1.0f;
+	m_ground->meshes[0].material->properties.roughness = 0.3f;
 
 	m_scene = std::make_unique<Scene>();
 	m_sceneRenderer->SetScene(m_scene.get());
@@ -64,7 +65,7 @@ void DirectX11::Dx11Main::Update()
 		//렌더러의 업데이트 코드를 여기에 추가합니다.
 		std::wostringstream woss;
 		woss.precision(6);
-		woss << L"4Q Graphics Application"
+		woss << L"4Q Graphics Application - "
 			<< L"Width: "
 			<< m_deviceResources->GetOutputSize().width
 			<< L" Height: "
@@ -93,6 +94,7 @@ bool DirectX11::Dx11Main::Render()
 
 	m_sceneRenderer->AddDrawModel(m_ground);
 	m_sceneRenderer->AddDrawModel(m_model);
+	m_sceneRenderer->AddDrawModel(m_model2);
 
 	m_sceneRenderer->StageDrawModels();
     m_sceneRenderer->EndStage();
