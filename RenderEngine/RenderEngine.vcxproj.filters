@@ -143,5 +143,8 @@
     <ClInclude Include="ImGUiRegisterClass.h">
       <Filter>ImGuiControl</Filter>
     </ClInclude>
+    <ClInclude Include="InstancedModel.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

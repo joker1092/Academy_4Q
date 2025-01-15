@@ -24,7 +24,7 @@ DirectX11::Dx11Main::~Dx11Main()
 {
 	m_deviceResources->RegisterDeviceNotify(nullptr);
 }
-
+//test code
 void DirectX11::Dx11Main::SceneInitialize()
 {
 	m_camera = std::make_unique<Camera>(m_deviceResources);
@@ -32,23 +32,21 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_camera->pitch = -30.f;
 	m_camera->yaw = 320.f;
 
-	m_sceneRenderer->SetCamera(m_camera.get());
-
-	m_model = AssetsSystem->Models["sphere"];
-	m_model->position = { 0.f, 3.f, 2.f, 1.f };
-	m_model->scale = { 0.02f, 0.02f, 0.02f, 1.f };
-
-	m_model2 = AssetsSystem->Models["bangboo"];
-	m_model2->position = { 5.f, 3.f, 0.f, 1.f };
-	m_model2->scale = { 0.2f, 0.2f, 0.2f, 1.f };
-
-	m_ground = AssetsSystem->Models["plane"];
-	m_ground->scale = { 20.f, 1.f, 20.f, 1.f };
-	m_ground->meshes[0].material->properties.metalness = 1.0f;
-	m_ground->meshes[0].material->properties.roughness = 0.3f;
-
 	m_scene = std::make_unique<Scene>();
 	m_sceneRenderer->SetScene(m_scene.get());
+
+	m_sceneRenderer->SetCamera(m_camera.get());
+
+	m_pGround = m_scene->AddModel
+	(
+		"plane", 
+		AssetsSystem->Models["plane"],
+		Mathf::xVector{ 20.f, 1.f, 20.f, 1.f },
+		Mathf::xVector{ DirectX::XMQuaternionIdentity() },
+		Mathf::xVector{ 0.f, 0.f, 0.f, 1.f }
+	);
+	m_pGround->model->meshes[0].material->properties.metalness = 1.0f;
+	m_pGround->model->meshes[0].material->properties.roughness = 0.3f;
 }
 
 void DirectX11::Dx11Main::CreateWindowSizeDependentResources()
@@ -78,7 +76,6 @@ void DirectX11::Dx11Main::Update()
 		SetWindowText(m_deviceResources->GetWindow()->GetHandle(), woss.str().c_str());
 		//렌더러의 업데이트 코드를 여기에 추가합니다.
         m_camera->Update(m_timeSystem.GetElapsedSeconds());
-		InputManagement->Update();
 	});
 }
 
@@ -91,15 +88,14 @@ bool DirectX11::Dx11Main::Render()
 	}
 
 	m_sceneRenderer->StagePrepare();
-
-	m_sceneRenderer->AddDrawModel(m_ground);
-	m_sceneRenderer->AddDrawModel(m_model);
-	m_sceneRenderer->AddDrawModel(m_model2);
+	m_sceneRenderer->UpdateDrawModel();
 
 	m_sceneRenderer->StageDrawModels();
     m_sceneRenderer->EndStage();
 
 	m_imguiRenderer->Render();
+
+	InputManagement->Update();
 
 	return true;
 }

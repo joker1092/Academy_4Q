@@ -1,6 +1,10 @@
 #include "InputManager.h"
 #include "hidsdi.h"
 
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
+#include <imgui_impl_win32.h>
+
 void InputManager::Initialize(HWND hwnd)
 {
     _hWnd = hwnd;
@@ -20,6 +24,7 @@ void InputManager::Update()
 	memcpy(_prevKeyState, _keyState, sizeof(bool) * 256);
 	memcpy(_prevMouseState, _mouseState, sizeof(bool) * 3);
 	ResetMouseDelta();
+
     // _mouseDelta = { 0, 0 };
 }
 
@@ -159,6 +164,14 @@ void InputManager::ProcessRawInput(LPARAM lParam)
         if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
         {
             _mouseState[1] = 0;  // Right button up
+        }
+		if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+		{
+			_mouseState[2] = 1;  // Middle button down
+		}
+        if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+        {
+			_mouseState[2] = 0;  // Middle button up
         }
 
         // 마우스 휠 처리

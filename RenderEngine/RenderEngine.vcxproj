@@ -45,6 +45,7 @@
     <ClInclude Include="ImGuiRegister.h" />
     <ClInclude Include="ImGUiRegisterClass.h" />
     <ClInclude Include="ImGuiRenderer.h" />
+    <ClInclude Include="InstancedModel.h" />
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />

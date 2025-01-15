@@ -74,14 +74,14 @@ void SceneRenderer::StagePrepare()
 void SceneRenderer::StageDrawModels()
 {
 	// Compute shadow map from Sun view
-	foreach(drop(_drawmodels, 1), [this](auto&& model) 
+	foreach(drop(_drawmodels, 1), [this](auto&& ins_model) 
 	{
 		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
+		modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
 
 		_mpso->SetModelConstants(&modelBuff);
 
-		for (auto&& mesh : model->meshes) 
+		for (auto&& mesh : ins_model.model->meshes)
 		{
 			_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
 		}
@@ -89,14 +89,14 @@ void SceneRenderer::StageDrawModels()
 
 	_mpso->FinishShadows();
 
-	foreach(_drawmodels, [this](auto&& model) 
+	foreach(_drawmodels, [this](auto&& ins_model)
 	{
 		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
+		modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
 
 		_mpso->SetModelConstants(&modelBuff);
 
-		for (auto&& mesh : model->meshes) 
+		for (auto&& mesh : ins_model.model->meshes)
 		{
 			_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
 		}
@@ -130,9 +130,19 @@ void SceneRenderer::EndStage()
 	_device->SetRenderTargetBackbuffer();
 }
 
-void SceneRenderer::AddDrawModel(const std::shared_ptr<Model>& model)
+void SceneRenderer::AddDrawModel(const InstancedModel& model)
 {
 	_drawmodels.push_back(model);
 	_modelcount += 1;
+}
+
+void SceneRenderer::UpdateDrawModel()
+{
+	foreach(_scene->ModelsData, [this](auto&& ins_model)
+	{
+		//TODO : 시간이 된다면 여기서 컬링을 하고, 렌더링할 모델을 정합니다.(안될거 같습니다.)
+		_drawmodels.push_back(ins_model);
+		_modelcount += 1;
+	});
 }
 

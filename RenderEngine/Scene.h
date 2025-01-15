@@ -1,5 +1,8 @@
 #pragma once
 #include "ImGuiRegister.h"
+#include "InstancedModel.h"
+#include "DataSystem.h"
+#include "../InputManager.h"
 
 struct Scene
 {
@@ -14,6 +17,10 @@ struct Scene
 	float bias{ 0.688f };
 	float biasMin{ 0.021f };
 	float spanMax{ 8.0f };
+
+	std::unordered_map<std::string, uint32> instancedKeys;
+	std::vector<InstancedModel> ModelsData;
+	std::string selectedModel;
 
 	Scene()
 	{
@@ -30,6 +37,122 @@ struct Scene
 			ImGui::DragFloat("Bias", &bias, 0.001f, 0.0f, 1.0f);
 			ImGui::DragFloat("Bias Min", &biasMin, 0.001f, 0.0f, 1.0f);
 			ImGui::DragFloat("Span Max", &spanMax, 0.1f, 0.0f, 100.0f);
-		}, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+
+		}, /*ImGuiWindowFlags_NoMove | */ImGuiWindowFlags_AlwaysAutoResize);
+
+		ImGui::ContextRegister("Models", [&]()
+		{
+			auto model = AssetsSystem->GetPayloadModel();
+			if (model && InputManagement->IsMouseButtonReleased(MouseKey::LEFT))
+			{
+				std::cout << "Dropped Model : " << model->name << std::endl;
+				static uint32 id;
+
+				std::string name = model->name + std::to_string(id);
+				AddModel(model->name + std::to_string(++id), model);
+				AssetsSystem->ClearPayloadModel();
+			}
+
+		}, ImGuiWindowFlags_NoMove);
+
+		ImGui::ContextRegister("Scene Models List", [&]()
+		{
+			for (auto& [name, index] : instancedKeys)
+			{
+				if ("plane" == name)
+					continue;
+
+				if (ImGui::Selectable(name.c_str(), false))
+				{
+					std::cout << "Selected Model: " << name << std::endl;
+					selectedModel = name.c_str();
+				}
+				ImGui::SameLine();
+				ImGui::Text("ID : %d", index);
+			}
+
+			if (ImGui::BeginPopupContextItem("R_ClickMenu"))
+			{
+				if (ImGui::MenuItem("Delete"))
+				{
+					std::cout << "Delete Model" << std::endl;
+					if (!selectedModel.empty())
+					{
+						RemoveModel(selectedModel);
+						selectedModel.clear();
+					}
+				}
+				ImGui::EndPopup();
+			}
+
+		}, ImGuiWindowFlags_None);
+
+		ImGui::ContextRegister("Inspector", [&]()
+		{
+			if (selectedModel.empty())
+				return;
+
+			uint32 index = instancedKeys[selectedModel];
+			auto model = std::ranges::find_if(ModelsData, [&](auto& model) 
+			{
+				return model.instancedID == index; 
+			});
+
+			ImGui::Text("Model Name : %s", selectedModel.c_str());
+
+			Mathf::Vector3 pos = model->position;
+			Mathf::Vector3 rot = { model->rotationX, model->rotationY, model->rotationZ };
+			Mathf::Vector3 scale = model->scale;
+
+			ImGui::DragFloat3("Position", &pos.x, 0.01f);
+			ImGui::DragFloat3("Rotation", &rot.x, 0.01f);
+			ImGui::DragFloat3("Scale", &scale.x, 0.01f);
+
+			model->position = pos;
+			model->SetRotation(rot.x, rot.y, rot.z);
+			model->scale = scale;
+
+		}, ImGuiWindowFlags_None);
+	}
+	~Scene() = default;
+	//TODO : 끙... 지금은 인스턴스 아이디로 관리하는데 이게 인덱스값이 되는 것이 현명해보인다.
+	InstancedModel* AddModel(const std::string_view& name, const std::shared_ptr<Model>& model)
+	{
+		ModelsData.emplace_back(model);
+		instancedKeys[name.data()] = ModelsData.back().instancedID;
+		return &ModelsData.back();
+	}
+
+	InstancedModel* AddModel(
+		const std::string_view& name, 
+		const std::shared_ptr<Model>& model, 
+		Mathf::xVector _scale,
+		Mathf::xVector _rotation,
+		Mathf::xVector _position)
+	{
+		ModelsData.emplace_back(model, _position, _rotation, _scale);
+		instancedKeys[name.data()] = ModelsData.back().instancedID;
+		return &ModelsData.back();
+	}
+
+	void RemoveModel(const std::string_view& name)
+	{
+		auto it = instancedKeys.find(name.data());
+		if (it != instancedKeys.end())
+		{
+			std::erase_if(ModelsData, [&](auto& model) 
+			{ 
+				return model.instancedID == it->second;
+			});
+			instancedKeys.erase(it);
+		}
+	}
+
+	InstancedModel& GetModel(const std::string_view& name)
+	{
+		return *std::ranges::find_if(ModelsData, [&](auto& model) 
+		{ 
+			return model.instancedID == instancedKeys[name.data()]; 
+		});
 	}
 };

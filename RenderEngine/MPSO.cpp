@@ -55,8 +55,8 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	DX::States::Context->PSSetShader(_shadowps.Get(), nullptr, 0);
 
 
-	float near_plane = 5.0f, far_plane = 30.0f;
-	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(32.f, 32.f, near_plane, far_plane);
+	float near_plane = 5.f, far_plane = 100.0f;
+	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(24.f, 24.f, near_plane, far_plane);
 
 	DirectX::XMMATRIX lookdir = DirectX::XMMatrixLookAtRH(
 		DirectX::XMLoadFloat3(&sceneBuffer->sunpos),

@@ -14,5 +14,4 @@ struct Material
 	std::string			name;
 	MaterialProperties	properties;
 	MaterialTextures	textures;
-
 };

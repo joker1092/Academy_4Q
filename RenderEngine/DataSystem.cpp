@@ -11,6 +11,7 @@ void DataSystem::Initialize()
 	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
 	m_DataThread.detach();
 	RenderForEditer();
+	AddModel(PathFinder::Relative("Models\\plane\\plane.fbx"), PathFinder::Relative("Models\\plane"));
 }
 
 void DataSystem::RenderForEditer()
@@ -35,6 +36,12 @@ void DataSystem::RenderForEditer()
 				selectedModel = key;
 			}
 
+			// È£¹ö »óÅÂ¸¦ °¨Áö
+			if (ImGui::IsItemHovered()) 
+			{
+				selectedModel = key;
+			}
+
 			if (selectedModel == key)
 			{
 				ImGui::TextWrapped("[Selected]");
@@ -49,27 +56,44 @@ void DataSystem::RenderForEditer()
 			{
 				ImGui::SameLine(0.0f, padding);
 			}
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				//¸¸¾à¿¡ ½Ã°£ÀÌ ³²¾Æµ¹¾Æ¼­ Guizmo¸¦ ¾´´Ù¸é ¿©±â¼­ ¸ðµ¨À» µå·¡±×¾Øµå·ÓÇØ¼­ ¾ÀÀ¸·Î º¸³¾ ¼ö ÀÖ°Ô ÇØ¾ßÇÔ.
+				//ImGui::SetDragDropPayload("MODEL_PAYLOAD", selectedModel.c_str(), selectedModel.length());
+				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
+				if (Models[selectedModel] != dragDropModel)
+				{
+					dragDropModel = Models[selectedModel];
+				}
+				ImGui::EndDragDropSource();
+			}
 		}
+
+
 	}, ImGuiWindowFlags_NoMove);
 	//ì´ê±´ ë‚˜ì¤‘ì— ê²Œìž„ ì˜¤ë¸Œì íŠ¸ë¡œ ê°€ë˜ì§€ í•´ì•¼ë¨.
 	ImGui::ContextRegister("Models Material properties", [&]()
+	{
+		for (const auto& [key, model] : Models)
 		{
-			for (const auto& [key, model] : Models)
+			if(!model)
+				continue;
+
+			if (selectedModel == key)
 			{
-				if (selectedModel == key)
-				{
-					float* diffuse[3]
-					{ 
-						&model->meshes[0].material->properties.diffuse.x, 
-						&model->meshes[0].material->properties.diffuse.y, 
-						&model->meshes[0].material->properties.diffuse.z 
-					};
-					ImGui::ColorEdit3("Diffuse", diffuse[0]);
-					ImGui::SliderFloat("Roughness", &model->meshes[0].material->properties.roughness, 0.3f, 1.0f);
-					ImGui::SliderFloat("Metalness", &model->meshes[0].material->properties.metalness, 0.3f, 1.0f);
-				}
+				float* diffuse[3]
+				{ 
+					&model->meshes[0].material->properties.diffuse.x, 
+					&model->meshes[0].material->properties.diffuse.y, 
+					&model->meshes[0].material->properties.diffuse.z 
+				};
+				ImGui::ColorEdit3("Diffuse", diffuse[0]);
+				ImGui::SliderFloat("Roughness", &model->meshes[0].material->properties.roughness, 0.3f, 1.0f);
+				ImGui::SliderFloat("Metalness", &model->meshes[0].material->properties.metalness, 0.3f, 1.0f);
 			}
-		});
+		}
+	});
 }
 
 void DataSystem::MonitorFiles()

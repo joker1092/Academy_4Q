@@ -29,13 +29,13 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 	{
 		*model = LoadModel(name, scene, path, dir);
 		*animmodel = nullptr;
+		(*model)->isLoaded = true;
 	}
 	else
 	{
 		*animmodel = LoadAnimatedModel(name, scene, path, dir);
 		*model = nullptr;
 	}
-
 }
 
 std::shared_ptr<Model> ModelLoader::LoadModel(const std::string& name, const aiScene* scene, const file::path& path, const file::path& dir)
@@ -142,7 +142,6 @@ std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiM
 	UINT idx = aimesh->mMaterialIndex;
 	float fOut = 0.0f;
 	aiMaterial* aimat = scene->mMaterials[idx];
-
 
 	aiString matname = aimat->GetName();
 	material->name = std::string(matname.C_Str());
