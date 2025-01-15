@@ -17,13 +17,12 @@ void DataSystem::Initialize()
 void DataSystem::RenderForEditer()
 {
 	static std::string selectedModel{};
-	// ?€?¼ì˜ ?¬ê¸°?€ ê°„ê²© ?¤ì •
 
 	ImGui::ContextRegister("Models", [&]()
 	{
-		constexpr float tileSize = 64.0f;  // ?€???¬ê¸° (?„ì´ì½??¬ê¸°)
-		constexpr float padding = 10.0f;  // ?€??ê°?ê°„ê²©
-		constexpr int tilesPerRow = 4;    // ??ì¤„ì— ?œì‹œ???€????
+		constexpr float tileSize = 64.0f;
+		constexpr float padding = 10.0f;
+		constexpr int tilesPerRow = 4;
 		int count = 0;
 
 		for (const auto& [key, model] : Models)
@@ -36,7 +35,7 @@ void DataSystem::RenderForEditer()
 				selectedModel = key;
 			}
 
-			// È£¹ö »óÅÂ¸¦ °¨Áö
+			// í˜¸ë²„ ìƒíƒœë¥¼ ê°ì§€
 			if (ImGui::IsItemHovered()) 
 			{
 				selectedModel = key;
@@ -59,7 +58,7 @@ void DataSystem::RenderForEditer()
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{
-				//¸¸¾à¿¡ ½Ã°£ÀÌ ³²¾Æµ¹¾Æ¼­ Guizmo¸¦ ¾´´Ù¸é ¿©±â¼­ ¸ğµ¨À» µå·¡±×¾Øµå·ÓÇØ¼­ ¾ÀÀ¸·Î º¸³¾ ¼ö ÀÖ°Ô ÇØ¾ßÇÔ.
+				//ë§Œì•½ì— ì‹œê°„ì´ ë‚¨ì•„ëŒì•„ì„œ Guizmoë¥¼ ì“´ë‹¤ë©´ ì—¬ê¸°ì„œ ëª¨ë¸ì„ ë“œë˜ê·¸ì•¤ë“œë¡­í•´ì„œ ì”¬ìœ¼ë¡œ ë³´ë‚¼ ìˆ˜ ìˆê²Œ í•´ì•¼í•¨.
 				//ImGui::SetDragDropPayload("MODEL_PAYLOAD", selectedModel.c_str(), selectedModel.length());
 				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
 				if (Models[selectedModel] != dragDropModel)
@@ -72,7 +71,7 @@ void DataSystem::RenderForEditer()
 
 
 	}, ImGuiWindowFlags_NoMove);
-	//?´ê±´ ?˜ì¤‘??ê²Œì„ ?¤ë¸Œ?íŠ¸ë¡?ê°€?˜ì? ?´ì•¼??
+	//?ë‹¿êµ” ?ì„ì¨·??å¯ƒëš¯ì—« ?ã…»íˆ•?ì•ºë“ƒæ¿¡?åª›Â€?ì„? ?ëŒë¹??
 	ImGui::ContextRegister("Models Material properties", [&]()
 	{
 		for (const auto& [key, model] : Models)
