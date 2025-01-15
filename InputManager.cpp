@@ -126,7 +126,7 @@ void InputManager::ProcessRawInput(LPARAM lParam)
     UINT dwSize = 0;
     GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &dwSize, sizeof(RAWINPUTHEADER));
 
-    // std::vector<BYTE> »ç¿ë
+    // std::vector<BYTE> ì‚¬ìš©
     std::vector<BYTE> lpb(dwSize);
 
     if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, lpb.data(), &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
@@ -138,17 +138,17 @@ void InputManager::ProcessRawInput(LPARAM lParam)
 
     if (raw->header.dwType == RIM_TYPEKEYBOARD)
     {
-        // Å°º¸µå ÀÔ·Â Ã³¸®
+        // í‚¤ë³´ë“œ ìž…ë ¥ ì²˜ë¦¬
         _keyState[raw->data.keyboard.VKey] = (raw->data.keyboard.Flags & RI_KEY_BREAK) ? 0 : 1;
     }
 
     if (raw->header.dwType == RIM_TYPEMOUSE)
     {
-        // ¸¶¿ì½º ÀÌµ¿ Ã³¸®
+        // ë§ˆìš°ìŠ¤ ì´ë™ ì²˜ë¦¬
         _mousePos.x += raw->data.mouse.lLastX;
         _mousePos.y += raw->data.mouse.lLastY;
 
-        // ¸¶¿ì½º ¹öÆ° Ã³¸®
+        // ë§ˆìš°ìŠ¤ ë²„íŠ¼ ì²˜ë¦¬
         if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
         {
             _mouseState[0] = 1;  // Left button down
@@ -174,7 +174,7 @@ void InputManager::ProcessRawInput(LPARAM lParam)
 			_mouseState[2] = 0;  // Middle button up
         }
 
-        // ¸¶¿ì½º ÈÙ Ã³¸®
+        // ë§ˆìš°ìŠ¤ íœ  ì²˜ë¦¬
         if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
         {
             _mouseWheelDelta = static_cast<SHORT>(raw->data.mouse.usButtonData);
@@ -190,12 +190,12 @@ void InputManager::RegisterRawInputDevices()
 {
     _rawInputDevices[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
     _rawInputDevices[0].usUsage = HID_USAGE_GENERIC_KEYBOARD;
-    _rawInputDevices[0].dwFlags = RIDEV_INPUTSINK;
+    _rawInputDevices[0].dwFlags = RIDEV_EXINPUTSINK;
     _rawInputDevices[0].hwndTarget = _hWnd;
 
     _rawInputDevices[1].usUsagePage = HID_USAGE_PAGE_GENERIC;
     _rawInputDevices[1].usUsage = HID_USAGE_GENERIC_MOUSE;
-    _rawInputDevices[1].dwFlags = RIDEV_INPUTSINK;
+    _rawInputDevices[1].dwFlags = RIDEV_EXINPUTSINK;
     _rawInputDevices[1].hwndTarget = _hWnd;
 
     if (!::RegisterRawInputDevices(_rawInputDevices, 2, sizeof(RAWINPUTDEVICE)))

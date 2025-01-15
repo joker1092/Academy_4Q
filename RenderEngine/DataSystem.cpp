@@ -71,7 +71,7 @@ void DataSystem::RenderForEditer()
 
 
 	}, ImGuiWindowFlags_NoMove);
-	//?닿굔 ?섏쨷??寃뚯엫 ?ㅻ툕?앺듃濡?媛?섏? ?댁빞??
+
 	ImGui::ContextRegister("Models Material properties", [&]()
 	{
 		for (const auto& [key, model] : Models)
