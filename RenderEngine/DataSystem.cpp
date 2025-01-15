@@ -17,13 +17,13 @@ void DataSystem::Initialize()
 void DataSystem::RenderForEditer()
 {
 	static std::string selectedModel{};
-	// 타일의 크기와 간격 설정
+	// ?�?�의 ?�기?� 간격 ?�정
 
 	ImGui::ContextRegister("Models", [&]()
 	{
-		constexpr float tileSize = 64.0f;  // 타일 크기 (아이콘 크기)
-		constexpr float padding = 10.0f;  // 타일 간 간격
-		constexpr int tilesPerRow = 4;    // 한 줄에 표시할 타일 수
+		constexpr float tileSize = 64.0f;  // ?�???�기 (?�이�??�기)
+		constexpr float padding = 10.0f;  // ?�??�?간격
+		constexpr int tilesPerRow = 4;    // ??줄에 ?�시???�????
 		int count = 0;
 
 		for (const auto& [key, model] : Models)
@@ -72,7 +72,7 @@ void DataSystem::RenderForEditer()
 
 
 	}, ImGuiWindowFlags_NoMove);
-	//이건 나중에 게임 오브젝트로 가던지 해야됨.
+	//?�건 ?�중??게임 ?�브?�트�?가?��? ?�야??
 	ImGui::ContextRegister("Models Material properties", [&]()
 	{
 		for (const auto& [key, model] : Models)
@@ -100,7 +100,6 @@ void DataSystem::MonitorFiles()
 {
 	while (true)
 	{
-        std::this_thread::sleep_for(std::chrono::seconds(1));
 		uint32 modelcount = 0;
 		uint32 shadercount = 0;
 		try
@@ -159,6 +158,7 @@ void DataSystem::MonitorFiles()
 			currShaderFileCount = shadercount;
 		}
 
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
