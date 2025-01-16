@@ -470,7 +470,7 @@ void MPSO::CreateTextures()
 		// Create ImGui texture
 		ImGui::ContextRegister("Shadow Map", [&]()
 			{
-				ImGui::Image(_shadowtarget->GetSRV(), ImVec2(300, 300));
+				ImGui::Image((ImTextureID)_shadowtarget->GetSRV(), ImVec2(300, 300));
 			});
 
 		_shadowtarget->color = DirectX::XMVECTORF32{ 1.0f, 1.0f, 1.0f, 1.0f };

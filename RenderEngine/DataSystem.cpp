@@ -29,7 +29,7 @@ void DataSystem::RenderForEditer()
 		{
 			ImGui::BeginGroup();
 
-			if (ImGui::ImageButton(key.c_str(), icon.Get(), ImVec2(tileSize, tileSize)))
+			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
 			{
 				std::cout << "Selected Model: " << key << std::endl;
 				selectedModel = key;
