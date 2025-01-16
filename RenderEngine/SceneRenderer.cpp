@@ -76,14 +76,33 @@ void SceneRenderer::StageDrawModels()
 	// Compute shadow map from Sun view
 	foreach(drop(_drawmodels, 1), [this](auto&& ins_model) 
 	{
-		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
-
-		_mpso->SetModelConstants(&modelBuff);
-
-		for (auto&& mesh : ins_model.model->meshes)
+		if(ins_model.model)
 		{
-			_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.model->meshes)
+			{
+				_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			}
+		}
+	});
+
+	_mpso->SetAnimeShadowsShader();
+
+	foreach(drop(_drawmodels, 1), [this](auto&& ins_model)
+	{
+		if (ins_model.animModel)
+		{
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.animModel->meshes)
+			{
+				_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			}
 		}
 	});
 
@@ -91,16 +110,35 @@ void SceneRenderer::StageDrawModels()
 
 	foreach(_drawmodels, [this](auto&& ins_model)
 	{
-		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
-
-		_mpso->SetModelConstants(&modelBuff);
-
-		for (auto&& mesh : ins_model.model->meshes)
+		if (ins_model.model)
 		{
-			_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.model->meshes)
+			{
+				_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+			}
 		}
 	});
+
+	_mpso->SetAnimeShader();
+
+	foreach(_drawmodels, [this](auto&& ins_model)
+		{
+			if (ins_model.animModel)
+			{
+				ModelBuffer modelBuff{};
+				modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+				_mpso->SetModelConstants(&modelBuff);
+
+				for (auto&& mesh : ins_model.animModel->meshes)
+				{
+					_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+				}
+			}
+		});
 }
 
 void SceneRenderer::EndStage()

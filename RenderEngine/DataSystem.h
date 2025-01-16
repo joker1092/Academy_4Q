@@ -21,6 +21,8 @@ public:
 
 	std::shared_ptr<Model> GetPayloadModel() { return dragDropModel; }
 	void ClearPayloadModel() { dragDropModel = nullptr; }
+	std::shared_ptr<AnimModel> GetPayloadAnimModel() { return dragDropAnimModel; }
+	void ClearPayloadAnimModel() { dragDropAnimModel = nullptr; }
 
 	std::unordered_map<std::string, VertexShader>	VertexShaders;
 	std::unordered_map<std::string, HullShader>		HullShaders;
@@ -47,6 +49,7 @@ private:
 	uint32 prevShaderFileCount = 0;
 	std::thread m_DataThread{};
 	std::shared_ptr<Model> dragDropModel{};
+	std::shared_ptr<AnimModel> dragDropAnimModel{};
 };
 
 static inline auto& AssetsSystem = DataSystem::GetInstance();

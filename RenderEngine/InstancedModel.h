@@ -11,7 +11,11 @@ namespace InstancedModelID
 		if (2500u == globalID)
 		{
 			WARN("InstancedModelID::GetFreeID() : globalID reached MAX(2500)");
-			std::terminate();
+			//std::terminate();
+			if (freeIDs.empty())
+			{
+				return globalID++;
+			}
 		}
 		else
 		{
@@ -31,6 +35,7 @@ struct InstancedModel
 {
 	uint32 instancedID{};
 	std::shared_ptr<Model> model;
+	std::shared_ptr<AnimModel> animModel;
 
 	DirectX::XMVECTOR		position{ Mathf::xVectorZero };
 	DirectX::XMVECTOR		rotation{ DirectX::XMQuaternionIdentity() };
@@ -69,6 +74,20 @@ struct InstancedModel
 		DirectX::XMVECTOR _pos, DirectX::XMVECTOR _rot, DirectX::XMVECTOR _scale) :
 		instancedID(InstancedModelID::globalID++),
 		model(_model),
+		position(_pos),
+		rotation(_rot),
+		scale(_scale)
+	{
+	};
+	inline InstancedModel(const std::shared_ptr<AnimModel>& _model) :
+		instancedID(InstancedModelID::globalID++),
+		animModel(_model)
+	{
+	};
+	inline InstancedModel(const std::shared_ptr<AnimModel>& _model,
+		DirectX::XMVECTOR _pos, DirectX::XMVECTOR _rot, DirectX::XMVECTOR _scale) :
+		instancedID(InstancedModelID::globalID++),
+		animModel(_model),
 		position(_pos),
 		rotation(_rot),
 		scale(_scale)

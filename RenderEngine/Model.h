@@ -15,11 +15,14 @@ public:
 class AnimModel
 {
 public:
+	AnimModel() = default;
+	~AnimModel() = default;
+
 	std::string				name;
 	std::vector<AnimMesh>	meshes;
-
-	DirectX::XMMATRIX GetMatrix()
-	{
-		return DirectX::XMMatrixIdentity();
-	}
+	std::shared_ptr<Animator> animator;
+	std::unordered_map<std::string, BoneInfo> _boneInfoMap;
+	float					_distance{ 0.0f };
+	int						_numBones{ 0 };
+	bool					isLoaded = false;
 };

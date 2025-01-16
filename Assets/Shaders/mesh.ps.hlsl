@@ -11,6 +11,7 @@ cbuffer CameraBuffer                     : register(b0)
 	float3	            ViewDir;
 	float 				_placeholder4;
 };
+
 cbuffer SceneBuffer                     : register(b1)          
 {
 	float3	            AmbientColor;

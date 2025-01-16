@@ -1,5 +1,6 @@
 #include "DataSystem.h"
 #include "ImGuiRegister.h"
+#include "Model.h"	
 
 DataSystem::~DataSystem()
 {
@@ -18,6 +19,7 @@ void DataSystem::RenderForEditer()
 {
 	static std::string selectedModel{};
 
+
 	ImGui::ContextRegister("Models", [&]()
 	{
 		constexpr float tileSize = 64.0f;
@@ -29,13 +31,13 @@ void DataSystem::RenderForEditer()
 		{
 			ImGui::BeginGroup();
 
-			if (ImGui::ImageButton(key.c_str(), icon.Get(), ImVec2(tileSize, tileSize)))
+			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
 			{
 				std::cout << "Selected Model: " << key << std::endl;
 				selectedModel = key;
 			}
 
-			// 호버 상태를 감지
+			// ȣ�� ���¸� ����
 			if (ImGui::IsItemHovered()) 
 			{
 				selectedModel = key;
@@ -58,12 +60,19 @@ void DataSystem::RenderForEditer()
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{
-				//만약에 시간이 남아돌아서 Guizmo를 쓴다면 여기서 모델을 드래그앤드롭해서 씬으로 보낼 수 있게 해야함.
+				//���࿡ �ð��� ���Ƶ��Ƽ� Guizmo�� ���ٸ� ���⼭ ���� �巡�׾ص���ؼ� ������ ���� �� �ְ� �ؾ���.
 				//ImGui::SetDragDropPayload("MODEL_PAYLOAD", selectedModel.c_str(), selectedModel.length());
 				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
 				if (Models[selectedModel] != dragDropModel)
 				{
 					dragDropModel = Models[selectedModel];
+					std::cout << "Dragged Model : " << selectedModel << std::endl;
+				}
+
+				if (AnimatedModels[selectedModel] != dragDropAnimModel)
+				{
+					dragDropAnimModel = AnimatedModels[selectedModel];
+					std::cout << "Dragged Model : " << selectedModel << std::endl;
 				}
 				ImGui::EndDragDropSource();
 			}
@@ -233,6 +242,10 @@ void DataSystem::AddModel(const file::path& filepath, const file::path& dir)
 	if (model)
 	{
 		Models[model->name] = model;
+	}
+	if (animmodel)
+	{
+		AnimatedModels[animmodel->name] = animmodel;
 	}
 }
 

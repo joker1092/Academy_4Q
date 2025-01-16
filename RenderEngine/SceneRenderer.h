@@ -28,11 +28,11 @@ private:
     std::shared_ptr<DirectX11::DeviceResources> deviceResources;
 
 	std::vector<InstancedModel>		_drawmodels;
-	uint32							_modelcount;
+	uint32							_modelcount{};
 
-	Camera*							_camera;
-	Scene*							_scene;
+	Camera*							_camera{};
+	Scene*							_scene{};
 
-	std::unique_ptr<LogicalDevice>	_device;
-	std::unique_ptr<MPSO>			_mpso;
+	std::unique_ptr<LogicalDevice>	_device{};
+	std::unique_ptr<MPSO>			_mpso{};
 };

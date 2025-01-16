@@ -128,5 +128,11 @@
     <FxCompile Include="x64\Assets\Shaders\shadowblur-y.cs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\mesh-anime.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadow-anime.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -1,14 +1,7 @@
 #pragma once
 #include "TypeDefinition.h"
 
-constexpr uint32 MAX_JOINTS = 24;
 typedef uint32 Index;
-
-struct JointBuffer
-{
-	//joint
-	DirectX::XMMATRIX transforms[MAX_JOINTS];
-};
 
 alstruct CameraBuffer
 {
@@ -97,8 +90,23 @@ struct AnimVertex
 {
 	float3	position;
 	float3	normal;
+	float3	tangent;
+	float3	bitangent;
 	float2	texcoord;
-	int3	jointid;
-	float3	weight;
+	int		boneIndex[4]{ -1,-1,-1,-1 };
+	float	boneWeight[4]{};
+
+	void SetBoneData(int index, float weight)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (boneIndex[i] < 0)
+			{
+				boneIndex[i] = index;
+				boneWeight[i] = weight;
+				break;
+			}
+		}
+	}
 };
 

@@ -21,15 +21,30 @@ struct Scene
 	std::unordered_map<std::string, uint32> instancedKeys;
 	std::vector<InstancedModel> ModelsData;
 	std::string selectedModel;
+	InstancedModel* m_pGround;
 
 	Scene()
 	{
+		//기본 지형 생성
+		m_pGround = AddModel
+		(
+			"plane",
+			AssetsSystem->Models["plane"],
+			Mathf::xVector{ 20.f, 1.f, 20.f, 1.f },
+			Mathf::xVector{ DirectX::XMQuaternionIdentity() },
+			Mathf::xVector{ 0.f, 0.f, 0.f, 1.f }
+		);
+		m_pGround->model->meshes[0].material->properties.metalness = 1.0f;
+		m_pGround->model->meshes[0].material->properties.roughness = 0.3f;
+
 		ImGui::ContextRegister("Scene Settings", [&]() 
 		{
 			ImGui::ColorEdit3("Sun Color", &suncolor.x);
 			ImGui::DragFloat3("Sun Position", &sunpos.x, 0.1f);
+			ImGui::Separator();
 			ImGui::ColorEdit3("IBL Color", &iblcolor.x);
 			ImGui::DragFloat("IBL Intensity", &iblIntensity, 0.01f, 0.0f, 1.0f);
+			ImGui::Separator();
 			ImGui::Checkbox("More Shadow Samples", &moreShadowSamples);
 			ImGui::Checkbox("Gaussian Shadow Blur", &gaussianShadowBlur);
 			ImGui::Separator();
@@ -43,6 +58,7 @@ struct Scene
 		ImGui::ContextRegister("Models", [&]()
 		{
 			auto model = AssetsSystem->GetPayloadModel();
+			auto animModel = AssetsSystem->GetPayloadAnimModel();
 			if (model && InputManagement->IsMouseButtonReleased(MouseKey::LEFT))
 			{
 				std::cout << "Dropped Model : " << model->name << std::endl;
@@ -51,6 +67,15 @@ struct Scene
 				std::string name = model->name + std::to_string(id);
 				AddModel(model->name + std::to_string(++id), model);
 				AssetsSystem->ClearPayloadModel();
+			}
+
+			if (animModel && InputManagement->IsMouseButtonReleased(MouseKey::LEFT))
+			{
+				std::cout << "Dropped Model : " << animModel->name << std::endl;
+				static uint32 id;
+				std::string name = animModel->name + std::to_string(id);
+				AddModel(animModel->name + std::to_string(++id), animModel);
+				AssetsSystem->ClearPayloadAnimModel();
 			}
 
 		}, ImGuiWindowFlags_NoMove);
@@ -126,6 +151,25 @@ struct Scene
 	InstancedModel* AddModel(
 		const std::string_view& name, 
 		const std::shared_ptr<Model>& model, 
+		Mathf::xVector _scale,
+		Mathf::xVector _rotation,
+		Mathf::xVector _position)
+	{
+		ModelsData.emplace_back(model, _position, _rotation, _scale);
+		instancedKeys[name.data()] = ModelsData.back().instancedID;
+		return &ModelsData.back();
+	}
+
+	InstancedModel* AddModel(const std::string_view& name, const std::shared_ptr<AnimModel>& model)
+	{
+		ModelsData.emplace_back(model);
+		instancedKeys[name.data()] = ModelsData.back().instancedID;
+		return &ModelsData.back();
+	}
+
+	InstancedModel* AddModel(
+		const std::string_view& name,
+		const std::shared_ptr<AnimModel>& model,
 		Mathf::xVector _scale,
 		Mathf::xVector _rotation,
 		Mathf::xVector _position)

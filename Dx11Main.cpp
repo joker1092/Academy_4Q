@@ -34,19 +34,7 @@ void DirectX11::Dx11Main::SceneInitialize()
 
 	m_scene = std::make_unique<Scene>();
 	m_sceneRenderer->SetScene(m_scene.get());
-
 	m_sceneRenderer->SetCamera(m_camera.get());
-
-	m_pGround = m_scene->AddModel
-	(
-		"plane", 
-		AssetsSystem->Models["plane"],
-		Mathf::xVector{ 20.f, 1.f, 20.f, 1.f },
-		Mathf::xVector{ DirectX::XMQuaternionIdentity() },
-		Mathf::xVector{ 0.f, 0.f, 0.f, 1.f }
-	);
-	m_pGround->model->meshes[0].material->properties.metalness = 1.0f;
-	m_pGround->model->meshes[0].material->properties.roughness = 0.3f;
 }
 
 void DirectX11::Dx11Main::CreateWindowSizeDependentResources()
@@ -89,12 +77,11 @@ bool DirectX11::Dx11Main::Render()
 
 	m_sceneRenderer->StagePrepare();
 	m_sceneRenderer->UpdateDrawModel();
-
-	m_sceneRenderer->StageDrawModels();
-    m_sceneRenderer->EndStage();
+	m_sceneRenderer->StageDrawModels();    
+	m_sceneRenderer->EndStage();
 
 	m_imguiRenderer->Render();
-
+	
 	InputManagement->Update();
 
 	return true;

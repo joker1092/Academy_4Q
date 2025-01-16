@@ -1,6 +1,10 @@
 #pragma once
 #include "Core.Definition.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 using namespace DirectX;
 
 namespace Mathf
@@ -51,6 +55,76 @@ namespace Mathf
         return _val;
     }
 
+    inline Vector3 Lerp(const Vector3& a, const Vector3& b, float t) noexcept
+    {
+        return Vector3::Lerp(a, b, t);
+    }
+
+    inline Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t) noexcept
+    {
+        return Quaternion::Slerp(a, b, t);
+    }
+
     constexpr float Deg2Rad = XM_PI / 180.0f;
     constexpr float Rad2Deg = 180.0f / XM_PI;
+
+    inline Vector3 ExtractScale(const Matrix& matrix)
+    {
+        // 첫 번째 열 벡터 (X축)
+        float scaleX = matrix.Right().Length();
+
+        // 두 번째 열 벡터 (Y축)
+        float scaleY = matrix.Up().Length();
+
+        // 세 번째 열 벡터 (Z축)
+        float scaleZ = matrix.Forward().Length();
+
+        // 스케일 벡터 반환
+        return Vector3(scaleX, scaleY, scaleZ);
+    }
+
+    static inline Vector3 ConvertToDistance(const Mathf::Vector4& vector) noexcept
+    {
+        return Vector3(vector.x, vector.y, vector.z);
+    }
+
+
+    inline XMUINT4 CreateBoneIndex(aiBone* bone) noexcept
+    {
+        constexpr uint32 MAX_BONE_COUNT = 4;
+        XMUINT4 result{};
+        uint32 tempIndexInfo[4]{ 0, 0, 0, 0 };
+
+        for (uint32 i = 0; i < MAX_BONE_COUNT; i++)
+        {
+            tempIndexInfo[i] = bone->mWeights[i].mVertexId;
+        }
+
+        result.x = tempIndexInfo[0];
+        result.y = tempIndexInfo[1];
+        result.z = tempIndexInfo[2];
+        result.w = tempIndexInfo[3];
+
+        return result;
+    }
+
+    inline XMFLOAT4 CreateBoneWeight(aiBone* bone) noexcept
+    {
+        constexpr uint32 MAX_BONE_COUNT = 4;
+        XMFLOAT4 result{};
+        float tempWeightInfo[4]{ 0.0f, 0.0f, 0.0f, 0.0f };
+        for (uint32 i = 0; i < MAX_BONE_COUNT; i++)
+        {
+            tempWeightInfo[i] = bone->mWeights[i].mWeight;
+        }
+
+        result.x = tempWeightInfo[0];
+        result.y = tempWeightInfo[1];
+        result.z = tempWeightInfo[2];
+        result.w = tempWeightInfo[3];
+
+        return result;
+    }
+
+
 }

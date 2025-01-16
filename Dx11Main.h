@@ -33,9 +33,5 @@ namespace DirectX11
 
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<Scene> m_scene;
-
-		InstancedModel* m_pModel{};
-		InstancedModel* m_pModel2{};
-		InstancedModel* m_pGround{};
 	};
 }
