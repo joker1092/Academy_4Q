@@ -23,7 +23,7 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	_target->ClearView();
 	_shadowtarget->ClearView();
 
-	_device->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_device->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw cubemap first
 	DrawCubemap(cameraBuffer);

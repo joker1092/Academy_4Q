@@ -16,7 +16,11 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
 
 	unsigned int flags = 0;
-	flags |= aiProcess_FlipUVs;
+	flags |= aiProcess_Triangulate
+		  | aiProcess_PreTransformVertices
+		  | aiProcess_TransformUVCoords 
+		  | aiProcess_FlipUVs 
+		  | aiProcess_GenNormals;
 	
 	std::string name = file::path(path.filename()).replace_extension().string();
 	std::string utf8Path = ConvertToUtf8(path);
