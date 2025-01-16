@@ -28,17 +28,14 @@
     <Filter Include="GameEntity">
       <UniqueIdentifier>{369fa4f5-3f84-41ff-bcc4-ab9158ed8f6a}</UniqueIdentifier>
     </Filter>
-
-    <Filter Include="World">
-      <UniqueIdentifier>{52e98b76-14bb-49a5-bffd-44b0f5175502}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Object">
-      <UniqueIdentifier>{7fdab4ce-177b-4d50-80bd-4d0c2328866e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Component">
-      <UniqueIdentifier>{c52ff0c6-dfe4-4539-93d4-b46bbd03547f}</UniqueIdentifier>
     <Filter Include="리소스 파일\Assets">
       <UniqueIdentifier>{3f807029-a322-45f0-885e-63ea726decfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{42edb744-1cea-4370-a9ab-72718c228651}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component">
+      <UniqueIdentifier>{fc2dbd22-3b0c-4c7e-8568-e2191847c1bd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -111,11 +108,11 @@
     <ClCompile Include="Dependancies\Geometry.cpp">
       <Filter>vcpkg에 추가할 파일</Filter>
     </ClCompile>
-    <ClCompile Include="TestWorld.cpp">
-      <Filter>World</Filter>
-    </ClCompile>
     <ClCompile Include="Component.cpp">
       <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="TestWorld.cpp">
+      <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

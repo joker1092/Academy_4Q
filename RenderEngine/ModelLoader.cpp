@@ -24,7 +24,7 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 	
 	std::string name = file::path(path.filename()).replace_extension().string();
 	std::string utf8Path = ConvertToUtf8(path);
-
+ 
 	const aiScene* scene = importer.ReadFile(utf8Path, flags);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
