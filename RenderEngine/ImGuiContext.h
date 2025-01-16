@@ -1,8 +1,7 @@
 ﻿#pragma once
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
-
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx11.h>
 #include "Core.Definition.h"
 
 class ImGuiRenderContext
@@ -10,6 +9,7 @@ class ImGuiRenderContext
 public:
     ImGuiRenderContext() = default;
     ImGuiRenderContext(const std::string_view& name) : m_name(name) {}
+	ImGuiRenderContext(const std::string_view& name, ImGuiWindowFlags flags) : m_name(name), m_flags(flags) {}
 
     void AddContext(std::function<void()> function)
     {
@@ -37,7 +37,7 @@ public:
     
     void Render()
     {
-        if (ImGui::Begin(m_name.data(), 0, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::Begin(m_name.data(), 0, m_flags))
         {
             for (auto& context : m_contexts)
             {
@@ -60,4 +60,5 @@ private:
     std::string m_name;
     std::vector<std::function<void()>> m_contexts;
     std::unordered_map<std::string, std::function<void()>> m_subContexts;
+	ImGuiWindowFlags m_flags = ImGuiWindowFlags_AlwaysAutoResize;
 };

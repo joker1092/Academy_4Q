@@ -10,14 +10,19 @@ class DataSystem : public Singleton<DataSystem>
 private:
     friend class Singleton;
 
-public:
-	DataSystem();
+	DataSystem() = default;
 	~DataSystem();
-
+public:
+	void Initialize();
 	void RenderForEditer();
 	void MonitorFiles();
 	void LoadShaders();
 	void LoadModels();
+
+	std::shared_ptr<Model> GetPayloadModel() { return dragDropModel; }
+	void ClearPayloadModel() { dragDropModel = nullptr; }
+	std::shared_ptr<AnimModel> GetPayloadAnimModel() { return dragDropAnimModel; }
+	void ClearPayloadAnimModel() { dragDropAnimModel = nullptr; }
 
 	std::unordered_map<std::string, VertexShader>	VertexShaders;
 	std::unordered_map<std::string, HullShader>		HullShaders;
@@ -28,6 +33,7 @@ public:
 
 	std::unordered_map<std::string, std::shared_ptr<Model>>		Models;
 	std::unordered_map<std::string, std::shared_ptr<AnimModel>>	AnimatedModels;
+	std::unordered_map<std::string, std::shared_ptr<Material>>  Materials;
 
 private:
 	void AddShaderFromPath(const file::path& filepath);
@@ -36,11 +42,14 @@ private:
 	void RemoveShaders();
 
 private:
+	Texture2D icon{};
 	uint32 currModelFileCount = 0;
 	uint32 currShaderFileCount = 0;
 	uint32 prevModelFileCount = 0;
 	uint32 prevShaderFileCount = 0;
 	std::thread m_DataThread{};
+	std::shared_ptr<Model> dragDropModel{};
+	std::shared_ptr<AnimModel> dragDropAnimModel{};
 };
 
 static inline auto& AssetsSystem = DataSystem::GetInstance();

@@ -1,28 +1,104 @@
 #include "DataSystem.h"
 #include "ImGuiRegister.h"
-
-DataSystem::DataSystem()
-{
-	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
-	m_DataThread.detach();
-	RenderForEditer();
-}
+#include "Model.h"	
 
 DataSystem::~DataSystem()
 {
 	RemoveShaders();
 }
 
+void DataSystem::Initialize()
+{
+	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
+	m_DataThread.detach();
+	RenderForEditer();
+	AddModel(PathFinder::Relative("Models\\plane\\plane.fbx"), PathFinder::Relative("Models\\plane"));
+}
+
 void DataSystem::RenderForEditer()
 {
-	static std::string selectedModel;
-	ImGui::ContextRegister("Data System", [&]()
+	static std::string selectedModel{};
+
+
+	ImGui::ContextRegister("Models", [&]()
+	{
+		constexpr float tileSize = 64.0f;
+		constexpr float padding = 10.0f;
+		constexpr int tilesPerRow = 4;
+		int count = 0;
+
+		for (const auto& [key, model] : Models)
+		{
+			ImGui::BeginGroup();
+
+			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
+			{
+				std::cout << "Selected Model: " << key << std::endl;
+				selectedModel = key;
+			}
+
+			// ȣ�� ���¸� ����
+			if (ImGui::IsItemHovered()) 
+			{
+				selectedModel = key;
+			}
+
+			if (selectedModel == key)
+			{
+				ImGui::TextWrapped("[Selected]");
+			}
+
+			ImGui::TextWrapped("%s", key.c_str());
+
+			ImGui::EndGroup();
+
+			count++;
+			if (count % tilesPerRow != 0)
+			{
+				ImGui::SameLine(0.0f, padding);
+			}
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				//���࿡ �ð��� ���Ƶ��Ƽ� Guizmo�� ���ٸ� ���⼭ ���� �巡�׾ص���ؼ� ������ ���� �� �ְ� �ؾ���.
+				//ImGui::SetDragDropPayload("MODEL_PAYLOAD", selectedModel.c_str(), selectedModel.length());
+				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
+				if (Models[selectedModel] != dragDropModel)
+				{
+					dragDropModel = Models[selectedModel];
+					std::cout << "Dragged Model : " << selectedModel << std::endl;
+				}
+
+				if (AnimatedModels[selectedModel] != dragDropAnimModel)
+				{
+					dragDropAnimModel = AnimatedModels[selectedModel];
+					std::cout << "Dragged Model : " << selectedModel << std::endl;
+				}
+				ImGui::EndDragDropSource();
+			}
+		}
+
+
+	}, ImGuiWindowFlags_NoMove);
+
+	ImGui::ContextRegister("Models Material properties", [&]()
 	{
 		for (const auto& [key, model] : Models)
 		{
-			if (ImGui::Selectable(key.c_str(), key == selectedModel))
+			if(!model)
+				continue;
+
+			if (selectedModel == key)
 			{
-				selectedModel = key;
+				float* diffuse[3]
+				{ 
+					&model->meshes[0].material->properties.diffuse.x, 
+					&model->meshes[0].material->properties.diffuse.y, 
+					&model->meshes[0].material->properties.diffuse.z 
+				};
+				ImGui::ColorEdit3("Diffuse", diffuse[0]);
+				ImGui::SliderFloat("Roughness", &model->meshes[0].material->properties.roughness, 0.3f, 1.0f);
+				ImGui::SliderFloat("Metalness", &model->meshes[0].material->properties.metalness, 0.3f, 1.0f);
 			}
 		}
 	});
@@ -32,7 +108,6 @@ void DataSystem::MonitorFiles()
 {
 	while (true)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 		uint32 modelcount = 0;
 		uint32 shadercount = 0;
 		try
@@ -90,11 +165,15 @@ void DataSystem::MonitorFiles()
 			LoadShaders();
 			currShaderFileCount = shadercount;
 		}
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
 void DataSystem::LoadShaders()
 {
+	icon = TextureLoader::LoadFromFile(PathFinder::Relative("Icon\\Model.png"));
+
 	try
 	{
 		file::path shaderpath = PathFinder::Relative("Shaders\\");
@@ -163,6 +242,10 @@ void DataSystem::AddModel(const file::path& filepath, const file::path& dir)
 	if (model)
 	{
 		Models[model->name] = model;
+	}
+	if (animmodel)
+	{
+		AnimatedModels[animmodel->name] = animmodel;
 	}
 }
 

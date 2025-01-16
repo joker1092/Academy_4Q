@@ -2,7 +2,6 @@
 #include "InputManager.h"
 #include "Utility_Framework/PathFinder.h"
 #include "Utility_Framework/Core.Console.hpp"
-#include <concrt.h>
 
 #ifdef _DEBUG
 #ifdef UNICODE
@@ -17,34 +16,14 @@ MAIN_ENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 	PathFinder::Initialize();
 	//시작
 	Core::App app;
-	app.Initialize(hInstance, L"HeroP Editor", 1920, 1080);
+	app.Initialize(hInstance, L"4Q Editor", 1920, 1080);
 
 	return 0;
 }
 
 void Core::App::Initialize(HINSTANCE hInstance, const wchar_t* title, int width, int height)
 {
-	CoreWindow coreWindow(hInstance, L"HeroP Editor", width, height);
-
-	Concurrency::SchedulerPolicy policy
-	{
-		3,
-		Concurrency::MinConcurrency,
-		6,
-		Concurrency::MaxConcurrency,
-		8,
-		Concurrency::ContextPriority,
-		THREAD_PRIORITY_HIGHEST
-	};
-
-	Concurrency::Scheduler::SetDefaultSchedulerPolicy(policy);
-	Concurrency::task init = concurrency::create_task([]()
-	{
-		return std::string("SUCCESS");
-	});
-	std::string initResult = init.get();
-
-	Console.WriteLine("Multithreaded initialization: {}", initResult);
+	CoreWindow coreWindow(hInstance, title, width, height);
 
 	m_deviceResources = std::make_shared<DirectX11::DeviceResources>();
 	SetWindow(coreWindow);

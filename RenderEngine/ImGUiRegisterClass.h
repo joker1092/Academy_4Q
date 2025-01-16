@@ -18,6 +18,15 @@ public:
         m_contexts[name.data()].AddContext(function);
     }
 
+	void Register(const std::string_view& name, std::function<void()> function, ImGuiWindowFlags flags)
+	{
+		if (m_contexts.find(name.data()) == m_contexts.end())
+		{
+			m_contexts.emplace(name, ImGuiRenderContext(name, flags));
+		}
+		m_contexts[name.data()].AddContext(function);
+	}
+
     void Register(const std::string_view& name, const std::string_view& subName, std::function<void()> function)
     {
         if (m_contexts.find(name.data()) == m_contexts.end())
@@ -26,6 +35,15 @@ public:
         }
         m_contexts[name.data()].AddSubContext(subName.data(), function);
     }
+
+	void Register(const std::string_view& name, const std::string_view& subName, std::function<void()> function, ImGuiWindowFlags flags)
+	{
+		if (m_contexts.find(name.data()) == m_contexts.end())
+		{
+			m_contexts.emplace(name, ImGuiRenderContext(name, flags));
+		}
+		m_contexts[name.data()].AddSubContext(subName.data(), function);
+	}
 
     void Unregister(const std::string_view& name)
     {

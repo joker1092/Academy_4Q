@@ -19,11 +19,13 @@ void SceneRenderer::Initialize()
 	_mpso = std::make_unique<MPSO>(_device.get());
 
 	// Load cubemap
-	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\cubemap.dds"));
-
+	Texture2D tex = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_EnvHDR.dds"));
+	Texture2D tex2 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_DiffuseHDR.dds"));
+	Texture2D tex3 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_SpecularHDR.dds"));
+	Texture2D tex4 = TextureLoader::LoadCubemapFromFile(PathFinder::Relative("IBL\\puresky_Brdf.dds"));
 	// Create and set cubemap to that state object
 	_mpso->CreateCubeMap(tex);
-
+	_mpso->CreateIBL(tex2, tex3, tex4);
 }
 
 void SceneRenderer::SetCamera(Camera* camera)
@@ -46,11 +48,12 @@ void SceneRenderer::StagePrepare()
 	float3 pos = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMStoreFloat3(&pos, _camera->GetPosition());
 
-	CameraBuffer cbuff{
+	CameraBuffer cbuff
+	{
 		DirectX::XMMatrixMultiplyTranspose(view, proj),
 		pos,
 		0,
-		float3{0.0,0.0f,0.0f},
+		float3{ 0.0, 0.0f, 0.0f },
 		0
 	};
 	SceneBuffer sbuff{};
@@ -59,7 +62,7 @@ void SceneRenderer::StagePrepare()
 	sbuff.suncolor = _scene->suncolor;
 	sbuff.iblColor = _scene->iblcolor;
 	sbuff.iblIntensity = _scene->iblIntensity;
-	sbuff.ambientcolor = DirectX::XMFLOAT3{ 0.0f,0.0f,0.0f };
+	sbuff.ambientcolor = DirectX::XMFLOAT3{ 0.0f, 0.0f, 0.0f };
 	sbuff.preciseShadows = _scene->moreShadowSamples;
 
 	// Start the pipeline
@@ -71,33 +74,71 @@ void SceneRenderer::StagePrepare()
 void SceneRenderer::StageDrawModels()
 {
 	// Compute shadow map from Sun view
-	foreach(drop(_drawmodels, 1), [this](auto&& model) 
+	foreach(drop(_drawmodels, 1), [this](auto&& ins_model) 
 	{
-		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
-
-		_mpso->SetModelConstants(&modelBuff);
-
-		for (auto&& mesh : model->meshes) 
+		if(ins_model.model)
 		{
-			_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.model->meshes)
+			{
+				_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			}
+		}
+	});
+
+	_mpso->SetAnimeShadowsShader();
+
+	foreach(drop(_drawmodels, 1), [this](auto&& ins_model)
+	{
+		if (ins_model.animModel)
+		{
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.animModel->meshes)
+			{
+				_mpso->DrawMeshShadows(mesh.bindex, mesh.bvertex);
+			}
 		}
 	});
 
 	_mpso->FinishShadows();
 
-	foreach(_drawmodels, [this](auto&& model) 
+	foreach(_drawmodels, [this](auto&& ins_model)
 	{
-		ModelBuffer modelBuff{};
-		modelBuff.modelmatrix = XMMatrixTranspose(model->GetMatrix());
-
-		_mpso->SetModelConstants(&modelBuff);
-
-		for (auto&& mesh : model->meshes) 
+		if (ins_model.model)
 		{
-			_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+			ModelBuffer modelBuff{};
+			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+			_mpso->SetModelConstants(&modelBuff);
+
+			for (auto&& mesh : ins_model.model->meshes)
+			{
+				_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+			}
 		}
 	});
+
+	_mpso->SetAnimeShader();
+
+	foreach(_drawmodels, [this](auto&& ins_model)
+		{
+			if (ins_model.animModel)
+			{
+				ModelBuffer modelBuff{};
+				modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
+				_mpso->SetModelConstants(&modelBuff);
+
+				for (auto&& mesh : ins_model.animModel->meshes)
+				{
+					_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
+				}
+			}
+		});
 }
 
 void SceneRenderer::EndStage()
@@ -127,9 +168,19 @@ void SceneRenderer::EndStage()
 	_device->SetRenderTargetBackbuffer();
 }
 
-void SceneRenderer::AddDrawModel(const std::shared_ptr<Model>& model)
+void SceneRenderer::AddDrawModel(const InstancedModel& model)
 {
 	_drawmodels.push_back(model);
 	_modelcount += 1;
+}
+
+void SceneRenderer::UpdateDrawModel()
+{
+	foreach(_scene->ModelsData, [this](auto&& ins_model)
+	{
+		//TODO : 시간이 된다면 여기서 컬링을 하고, 렌더링할 모델을 정합니다.(안될거 같습니다.)
+		_drawmodels.push_back(ins_model);
+		_modelcount += 1;
+	});
 }
 

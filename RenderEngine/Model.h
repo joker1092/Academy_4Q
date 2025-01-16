@@ -9,28 +9,20 @@ public:
 
 	std::string				name{};
 	std::vector<Mesh>		meshes{};
-
-	DirectX::XMVECTOR		position{ Mathf::xVectorZero };
-	DirectX::XMVECTOR		rotation{ DirectX::XMQuaternionIdentity() };
-	DirectX::XMVECTOR		scale{ 1.f, 1.f, 1.f, 0.f };
-
-	DirectX::XMMATRIX GetMatrix() const
-	{
-		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(scale);
-		trans *= DirectX::XMMatrixTranslationFromVector(position);
-		trans *= DirectX::XMMatrixRotationQuaternion(rotation);
-		return trans;
-	}
+	bool					isLoaded = false;
 };
 
 class AnimModel
 {
 public:
+	AnimModel() = default;
+	~AnimModel() = default;
+
 	std::string				name;
 	std::vector<AnimMesh>	meshes;
-
-	DirectX::XMMATRIX GetMatrix()
-	{
-		return DirectX::XMMatrixIdentity();
-	}
+	std::shared_ptr<Animator> animator;
+	std::unordered_map<std::string, BoneInfo> _boneInfoMap;
+	float					_distance{ 0.0f };
+	int						_numBones{ 0 };
+	bool					isLoaded = false;
 };

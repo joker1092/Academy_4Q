@@ -135,7 +135,7 @@ void LogicalDevice::CreateRasterizerStates()
         // Create Solid Rasterizer
         CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
         rasterDesc.FrontCounterClockwise = TRUE;
-        rasterDesc.AntialiasedLineEnable = TRUE;
+        rasterDesc.AntialiasedLineEnable = FALSE;
 
         DirectX11::ThrowIfFailed(DX::States::Device->CreateRasterizerState2(&rasterDesc, _rasterizerStateSolid.ReleaseAndGetAddressOf()));
         DirectX::SetName(_rasterizerStateSolid.Get(), "Solid Rasterizer");

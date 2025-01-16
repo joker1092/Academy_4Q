@@ -3,7 +3,7 @@
 
 constexpr int KEY_COUNT = 256;
 constexpr int MOUSE_BUTTON_COUNT = 3;
-//얘 이제 수정해야할 필요가 있겠네
+
 class InputManager : public Singleton<InputManager>
 {
 private:

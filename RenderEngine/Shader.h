@@ -23,7 +23,7 @@ public:
 	}
 
 protected:
-	BOOL								_iscompiled;
+	BOOL				_iscompiled{ 0 };
 	ComPtr<ID3DBlob>	_blob;
 };
 

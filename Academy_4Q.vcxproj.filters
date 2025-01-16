@@ -28,6 +28,7 @@
     <Filter Include="GameEntity">
       <UniqueIdentifier>{369fa4f5-3f84-41ff-bcc4-ab9158ed8f6a}</UniqueIdentifier>
     </Filter>
+
     <Filter Include="World">
       <UniqueIdentifier>{52e98b76-14bb-49a5-bffd-44b0f5175502}</UniqueIdentifier>
     </Filter>
@@ -36,6 +37,8 @@
     </Filter>
     <Filter Include="Component">
       <UniqueIdentifier>{c52ff0c6-dfe4-4539-93d4-b46bbd03547f}</UniqueIdentifier>
+    <Filter Include="리소스 파일\Assets">
+      <UniqueIdentifier>{3f807029-a322-45f0-885e-63ea726decfd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,7 +63,7 @@
     <ClInclude Include="Dependancies\Geometry.h">
       <Filter>vcpkg에 추가할 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GameEntity.h">
+    <ClInclude Include="GameObject.h">
       <Filter>GameEntity</Filter>
     </ClInclude>
     <ClInclude Include="TestWorld.h">
@@ -144,6 +147,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="x64\Assets\Shaders\shadowblur-y.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\mesh-anime.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="x64\Assets\Shaders\shadow-anime.vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

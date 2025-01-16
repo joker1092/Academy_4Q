@@ -7,13 +7,13 @@ Texture2D TextureLoader::LoadFromFile(const file::path& filepath)
 	{
 		return LoadDDSFromFile(filepath);
 	}
-	else if (filepath.extension() == ".png")
+	else if (filepath.extension() == ".png" || filepath.extension() == ".jpg" || filepath.extension() == ".jpeg")
 	{
 		return LoadPNGFromFile(filepath);
 	}
-	else if (filepath.extension() == ".jpg")
+	else if (filepath.extension() == ".tga")
 	{
-		return LoadPNGFromFile(filepath);
+		return LoadTGAFromFile(filepath);
 	}
 	else 
 	{
@@ -111,6 +111,38 @@ Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
 	Texture2D texture = CreateTexture(filename, res, srv);
 	m_textures[filename] = texture;
 
+	return texture;
+}
+
+Texture2D TextureLoader::LoadTGAFromFile(const file::path& filepath)
+{
+	if (!file::exists(filepath))
+	{
+		WARN("File does not exist \"" + filepath.string() + "\"");
+		return Texture2D();
+	}
+	file::path file = filepath.filename();
+	std::string filename = file.replace_extension().string();
+	if (m_textures.find(filename) != m_textures.end())
+	{
+		return m_textures[filename];
+	}
+	ComPtr<ID3D11Resource> res;
+	ComPtr<ID3D11ShaderResourceView> srv;
+	DirectX11::ThrowIfFailed(DirectX::CreateTGATextureFormFileEx(
+		DX::States::Device,
+		filepath.wstring().c_str(),
+		0,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE,
+		0,
+		0,
+		CREATETEX_FORCE_SRGB,
+		res.ReleaseAndGetAddressOf(),
+		srv.ReleaseAndGetAddressOf()
+	));
+	Texture2D texture = CreateTexture(filename, res, srv);
+	m_textures[filename] = texture;
 	return texture;
 }
 

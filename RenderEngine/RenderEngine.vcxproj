@@ -24,6 +24,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationInfo.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DataSystem.cpp" />
     <ClCompile Include="DXStates.cpp" />
@@ -36,6 +38,8 @@
     <ClCompile Include="TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationInfo.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
@@ -45,6 +49,7 @@
     <ClInclude Include="ImGuiRegister.h" />
     <ClInclude Include="ImGUiRegisterClass.h" />
     <ClInclude Include="ImGuiRenderer.h" />
+    <ClInclude Include="InstancedModel.h" />
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialTextures.h" />

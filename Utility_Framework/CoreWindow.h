@@ -155,7 +155,7 @@ private:
 
         if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
         {
-            return true;
+			return true;
         }
 
         if (message == WM_NCCREATE)

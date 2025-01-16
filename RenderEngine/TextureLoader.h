@@ -10,6 +10,7 @@ public:
 private:
 	static Texture2D LoadDDSFromFile(const file::path& filepath);
 	unsafe static Texture2D LoadPNGFromFile(const file::path& filepath);
+	static Texture2D LoadTGAFromFile(const file::path& filepath);
 	static Texture2D LoadCubemapDDSFromFile(const file::path& filepath);
 	static Texture2D CreateTexture(const std::string& name, const ComPtr<ID3D11Resource>& res, const ComPtr<ID3D11ShaderResourceView>& srv);
 

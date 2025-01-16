@@ -1,6 +1,8 @@
 #include "MPSO.h"
 #include "ImGuiRegister.h"
 
+constexpr uint32 AUTO_ALIGNED = 0xffffffff;
+
 MPSO::MPSO(LogicalDevice* device) : _device(device)
 {
 	InitializeShaders();
@@ -21,7 +23,7 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	_target->ClearView();
 	_shadowtarget->ClearView();
 
-	_device->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_device->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw cubemap first
 	DrawCubemap(cameraBuffer);
@@ -55,8 +57,8 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	DX::States::Context->PSSetShader(_shadowps.Get(), nullptr, 0);
 
 
-	float near_plane = 5.0f, far_plane = 30.0f;
-	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(32.f, 32.f, near_plane, far_plane);
+	float near_plane = 5.f, far_plane = 100.0f;
+	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(24.f, 24.f, near_plane, far_plane);
 
 	DirectX::XMMATRIX lookdir = DirectX::XMMatrixLookAtRH(
 		DirectX::XMLoadFloat3(&sceneBuffer->sunpos),
@@ -120,6 +122,15 @@ void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
 	DX::States::Context->DrawIndexed(_skybox->bindex.Size(), 0, 0);
 }
 
+void MPSO::SetAnimeConstants(const JointBuffer* modelbuffer)
+{
+	DX::States::Context->VSSetConstantBuffers(2, 1, _jointbuffer.GetAddressOf());
+	// Copy per model constants
+	D3D11_MAPPED_SUBRESOURCE mat = _jointbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(modelbuffer), sizeof(JointBuffer));
+	_jointbuffer.Unmap();
+}
+
 void MPSO::SetModelConstants(const ModelBuffer* modelbuffer)
 {
 	DX::States::Context->VSSetConstantBuffers(1, 1, _modelbuffer.GetAddressOf());
@@ -141,11 +152,23 @@ void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<Vertex>& v
 	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
 }
 
+void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<AnimVertex>& vertices)
+{
+	// Draw shadows
+	uint32 stride = vertices.Stride();
+	const uint32 offset = 0;
+	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
+}
+
 void MPSO::FinishShadows()
 {
 	_device->SetRenderTargets(_target.get(), _shadowtarget.get());
 
 	_device->SetRasterizer(RasterizerType::Solid);
+
+	DX::States::Context->IASetInputLayout(_meshInputLayout.Get());
 
 	DX::States::Context->PSSetShader(_ps.Get(), NULL, 0);
 	DX::States::Context->VSSetShader(_vs.Get(), NULL, 0);
@@ -173,8 +196,23 @@ void MPSO::FinishShadows()
 
 	DX::States::Context->PSSetShaderResources(6, 1, _skybox->material->textures.diffuse.GetAddressOf());
 	DX::States::Context->PSSetShaderResources(7, 1, _shadowmap.GetAddressOf()); // Bind shadowmap
+	DX::States::Context->PSSetShaderResources(8, 1, IBLSpecular.GetAddressOf());
+	DX::States::Context->PSSetShaderResources(9, 1, IBLBrdf.GetAddressOf());
 }
 
+void MPSO::SetAnimeShader()
+{
+	DX::States::Context->IASetInputLayout(_animInputLayout.Get());
+	DX::States::Context->VSSetShader(_animvs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_ps.Get(), nullptr, 0);
+}
+
+void MPSO::SetAnimeShadowsShader()
+{
+	DX::States::Context->IASetInputLayout(_animInputLayout.Get());
+	DX::States::Context->VSSetShader(_shadowmapvs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_shadowps.Get(), nullptr, 0);
+}
 
 void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices, const std::shared_ptr<Material>& material)
 {
@@ -204,6 +242,33 @@ void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices
 	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
 }
 
+void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<AnimVertex>& vertices, const std::shared_ptr<Material>& material)
+{
+	DX::States::Context->PSSetConstantBuffers(2, 1, _materialbuffer.GetAddressOf());
+
+	D3D11_MAPPED_SUBRESOURCE mat = _materialbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(&material->properties), sizeof(MaterialProperties));
+	_materialbuffer.Unmap();
+
+	UINT stride = vertices.Stride();
+	const UINT offset = 0;
+
+	ID3D11ShaderResourceView* views[]
+	{
+		material->textures.diffuse.Get(),
+		material->textures.metallic.Get(),
+		material->textures.roughness.Get(),
+		material->textures.occlusion.Get(),
+		material->textures.emissive.Get(),
+		material->textures.normal.Get(),
+	};
+
+	DX::States::Context->PSSetShaderResources(0, ARRAYSIZE(views), views);
+	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
+}
+
 void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 {
 	// Finish up shadows
@@ -215,6 +280,7 @@ void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 
 	// Combine shadows and rendered mesh
 	Blend(blurShadows);
+	//DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _blendOutput.Get());
 
 	// Do simplistic fxaa
 	if (fxaabuffer != nullptr)
@@ -230,16 +296,15 @@ void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 
 void MPSO::CreateInputLayout()
 {
-
 	{
 		// Mesh
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
-			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TANGENT",   1, DXGI_FORMAT_R32G32B32_FLOAT,	0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   1, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
@@ -253,12 +318,40 @@ void MPSO::CreateInputLayout()
 	}
 
 	{
+		const D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   1, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEINDICES", 0, DXGI_FORMAT_R32_SINT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEINDICES", 1, DXGI_FORMAT_R32_SINT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEINDICES", 2, DXGI_FORMAT_R32_SINT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEINDICES", 3, DXGI_FORMAT_R32_SINT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHTS", 0, DXGI_FORMAT_R32_FLOAT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHTS", 1, DXGI_FORMAT_R32_FLOAT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHTS", 2, DXGI_FORMAT_R32_FLOAT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHTS", 3, DXGI_FORMAT_R32_FLOAT,		0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
+			&layout[0],
+			ARRAYSIZE(layout),
+			_animvs.GetBufferPointer(),
+			_animvs.GetBufferSize(),
+			&_animInputLayout));
+
+		DirectX::SetName(_animInputLayout.Get(), "Anim IA layout");
+	}
+
+	{
 		// Cubemap
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
-			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
@@ -281,6 +374,14 @@ void MPSO::InitializeShaders()
 	if (_vs.Get() == nullptr || _ps.Get() == nullptr)
 	{
 		ERR("Unable to load mesh shaders in MPSO");
+	}
+
+	_animvs = AssetsSystem->VertexShaders["mesh-anime"];
+	_shadowmapvs = AssetsSystem->VertexShaders["shadow-anime"];
+
+	if (_animvs.Get() == nullptr || _shadowmapvs.Get() == nullptr)
+	{
+		ERR("Unable to load animated mesh shaders in MPSO");
 	}
 
 	_cubemapvs = AssetsSystem->VertexShaders["cubemap"];
@@ -321,6 +422,12 @@ void MPSO::CreateBuffers()
 
 	// Updated multiple times per frame
 	_modelbuffer = Buffer<ModelBuffer>(
+		D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
+		D3D11_CPU_ACCESS_WRITE
+	);
+
+	_jointbuffer = Buffer<JointBuffer>(
 		D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_WRITE
@@ -449,7 +556,7 @@ void MPSO::CreateTextures()
 
 	{
 		_target = std::make_unique<RenderTarget>(
-			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+			DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT,
 			_device->GetDeviceResources()->GetLogicalSize().width,
             _device->GetDeviceResources()->GetLogicalSize().height
 		);
@@ -466,9 +573,9 @@ void MPSO::CreateTextures()
 
 		// Create ImGui texture
 		ImGui::ContextRegister("Shadow Map", [&]()
-			{
-				ImGui::Image(_shadowtarget->GetSRV(), ImVec2(300, 300));
-			});
+		{
+			ImGui::Image((ImTextureID)_shadowtarget->GetSRV(), ImVec2(300, 300));
+		});
 
 		_shadowtarget->color = DirectX::XMVECTORF32{ 1.0f, 1.0f, 1.0f, 1.0f };
 	}
@@ -748,4 +855,11 @@ void MPSO::CreateCubeMap(const Texture2D& texture)
 {
 	_skybox = std::make_unique<Cube>( 30);
 	_skybox->material->textures.diffuse = texture;
+}
+
+void MPSO::CreateIBL(const Texture2D& diffuse, const Texture2D& specular, const Texture2D& brdf)
+{
+	IBLDiffuse = diffuse;
+	IBLSpecular = specular;
+	IBLBrdf = brdf;
 }

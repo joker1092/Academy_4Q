@@ -1,17 +1,37 @@
 #include "ModelLoader.h"
 #include "Banchmark.hpp"
 
+std::string ConvertToUtf8(const std::wstring& wideStr) 
+{
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	std::string utf8Str(size_needed, 0);
+	WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), -1, &utf8Str[0], size_needed, nullptr, nullptr);
+	return utf8Str;
+}
+
 void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, std::shared_ptr<Model>* model, std::shared_ptr<AnimModel>* animmodel)
 {
 	Assimp::Importer importer = Assimp::Importer();
+	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+	importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
+
 	unsigned int flags = 0;
-	flags |= aiProcess_FlipUVs;
+	flags |= aiProcess_Triangulate
+		  | aiProcess_PreTransformVertices
+		  | aiProcess_TransformUVCoords 
+		  | aiProcess_FlipUVs 
+		  | aiProcess_GenNormals;
 	
 	std::string name = file::path(path.filename()).replace_extension().string();
+	std::string utf8Path = ConvertToUtf8(path);
 
-	const aiScene* scene = importer.ReadFile(path.string(), flags);
+	const aiScene* scene = importer.ReadFile(utf8Path, flags);
 
-	const char* error = importer.GetErrorString();
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		return;
+	}
 
 	if (scene->mNumMeshes > 0)
 	{
@@ -24,18 +44,18 @@ void ModelLoader::LoadFromFile(const file::path& path, const file::path& dir, st
 		}
 	}
 
-
 	if (scene->mNumAnimations == 0)
 	{
 		*model = LoadModel(name, scene, path, dir);
 		*animmodel = nullptr;
+		(*model)->isLoaded = true;
 	}
 	else
 	{
 		*animmodel = LoadAnimatedModel(name, scene, path, dir);
 		*model = nullptr;
+		(*animmodel)->isLoaded = true;
 	}
-
 }
 
 std::shared_ptr<Model> ModelLoader::LoadModel(const std::string& name, const aiScene* scene, const file::path& path, const file::path& dir)
@@ -49,11 +69,14 @@ std::shared_ptr<Model> ModelLoader::LoadModel(const std::string& name, const aiS
 std::shared_ptr<AnimModel> ModelLoader::LoadAnimatedModel(const std::string& name, const aiScene* scene, const file::path& path, const file::path& dir)
 {
 	std::shared_ptr<AnimModel> model = std::make_shared<AnimModel>();
-	model->name = name;
 
+	model->animator = std::make_shared<Animator>();
+	model->name = name;
+	std::cout << "Loading Animated Model: " << name << std::endl;
 	// Load Animated mesh
-	// To be implemented...
+	LoadMeshes(model.get(), scene, dir, &model->meshes);
 	// Load Animations
+	LoadAnimations(model.get(), path);
 	// To be implemented...
 	return model;
 }
@@ -102,6 +125,7 @@ void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::v
 			}
 
 		}
+
 		for (uint32 u = 0; u < aimesh->mNumFaces; u++)
 		{
 			// Heavily assumes that mesh is triangulated
@@ -135,15 +159,140 @@ void ModelLoader::LoadMeshes(const aiScene* scene, const file::path& dir, std::v
 	std::cout << "Meshes loaded in ";
 }
 
+void ModelLoader::LoadMeshes(AnimModel* owner, const aiScene* scene, const file::path& dir, std::vector<AnimMesh>* meshes)
+{
+	Banchmark banchmark{};
+	for (UINT i = 0; i < scene->mNumMeshes; i++)
+	{
+		aiMesh* aimesh = scene->mMeshes[i];
+
+		std::vector<AnimVertex> vertices = std::vector<AnimVertex>(aimesh->mNumVertices);
+		std::vector<Index> indices = std::vector<Index>(aimesh->mNumVertices);
+		for (uint32 i = 0; i < vertices.size(); i++)
+		{
+			vertices[i].position = float3{
+				aimesh->mVertices[i].x,
+				aimesh->mVertices[i].y,
+				aimesh->mVertices[i].z
+			};
+
+			vertices[i].normal = float3{
+				aimesh->mNormals[i].x,
+				aimesh->mNormals[i].y,
+				aimesh->mNormals[i].z,
+			};
+
+			vertices[i].tangent = float3{
+				aimesh->mTangents[i].x,
+				aimesh->mTangents[i].y,
+				aimesh->mTangents[i].z,
+			};
+
+			vertices[i].bitangent = float3{
+				aimesh->mBitangents[i].x,
+				aimesh->mBitangents[i].y,
+				aimesh->mBitangents[i].z,
+			};
+
+			if (aimesh->mTextureCoords[0])
+			{
+				vertices[i].texcoord = float2{
+					aimesh->mTextureCoords[0][i].x,  // Take first texture coord
+					aimesh->mTextureCoords[0][i].y
+				};
+			}
+
+		}
+
+		for (uint32 u = 0; u < aimesh->mNumFaces; u++)
+		{
+			// Heavily assumes that mesh is triangulated
+			indices.push_back(aimesh->mFaces[u].mIndices[0]);
+			indices.push_back(aimesh->mFaces[u].mIndices[1]);
+			indices.push_back(aimesh->mFaces[u].mIndices[2]);
+		}
+
+		for (uint32 boneIndex = 0; boneIndex < aimesh->mNumBones; ++boneIndex)
+		{
+			aiBone* currBone = aimesh->mBones[boneIndex];
+
+			int boneID = -1;
+			std::string boneName{ currBone->mName.C_Str() };
+
+			if (owner->_boneInfoMap.find(boneName) == owner->_boneInfoMap.end())
+			{
+				BoneInfo boneInfo;
+				boneInfo.id = owner->_numBones;
+				boneInfo.offset = XMMatrixTranspose(XMMATRIX(&currBone->mOffsetMatrix.a1));
+				owner->_boneInfoMap[boneName] = boneInfo;
+				boneID = owner->_numBones;
+				owner->_numBones++;
+			}
+			else
+			{
+				boneID = owner->_boneInfoMap[boneName].id;
+			}
+
+			auto weights = currBone->mWeights;
+			int numWeights = currBone->mNumWeights;
+			//가중치를 정점에 할당
+			for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+			{
+				int vertexId = weights[weightIndex].mVertexId;
+				float weight = weights[weightIndex].mWeight;
+				vertices[vertexId].SetBoneData(boneID, weight);
+			}
+		}
+
+		// Add in materials at the same time
+		std::string name = std::string(scene->mMeshes[i]->mName.C_Str());
+		std::shared_ptr<Material> mat = CreateMaterial(dir, aimesh, scene);
+
+		meshes->emplace_back(
+			name,
+			indices,
+			vertices,
+			mat,
+			owner->animator
+		);
+	}
+
+	for (UINT i = 0; i < meshes->size(); i++)
+	{
+		(*meshes)[i].CreateBuffers();
+	}
+
+	for (auto& mesh : *meshes)
+	{
+		mesh.CreateBuffers();
+	}
+	std::cout << "Meshes loaded in ";
+}
+
+void ModelLoader::LoadAnimations(AnimModel* owner, const file::path& dir)
+{
+	Assimp::Importer importer;
+	const aiScene* _scene{};
+	_scene = importer.ReadFile(dir.string().c_str(), aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+	if (!_scene || _scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !_scene->mRootNode)
+	{
+		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		return;
+	}
+
+	for (uint32 i = 0; i < _scene->mNumAnimations; i++)
+	{
+		owner->animator->_animations.push_back(new Animation(_scene, owner, i));
+	}
+}
+
 std::shared_ptr<Material> ModelLoader::CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene)
 {
 	std::shared_ptr<Material> material = std::make_shared<Material>();
 
-
 	UINT idx = aimesh->mMaterialIndex;
 	float fOut = 0.0f;
 	aiMaterial* aimat = scene->mMaterials[idx];
-
 
 	aiString matname = aimat->GetName();
 	material->name = std::string(matname.C_Str());

@@ -1,14 +1,9 @@
 #pragma once
 #include "Core.Minimal.h"
+#include "Model.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "Model.h"
 #include "TextureLoader.h"
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h> 
-#include <assimp/material.h>
 
 class ModelLoader
 {
@@ -29,6 +24,8 @@ private:
 	static std::shared_ptr<Model> LoadModel(const std::string& name, const aiScene*	scene, const file::path& path, const file::path& dir);
 	static std::shared_ptr<AnimModel> LoadAnimatedModel(const std::string& name, const aiScene*	scene, const file::path& path, const file::path& dir);
 	static void	LoadMeshes(const aiScene* scene, const file::path&	dir, std::vector<Mesh>* meshes);
+	static void LoadMeshes(AnimModel* owner, const aiScene* scene, const file::path& dir, std::vector<AnimMesh>* meshes);
+	static void LoadAnimations(AnimModel* owner, const file::path& dir);
 	static std::shared_ptr<Material> CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene);
 
 };

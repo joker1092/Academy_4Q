@@ -1,17 +1,19 @@
 #include "Dx11Main.h"
 #include "Utility_Framework/CoreWindow.h"
 #include "InputManager.h"
+#include "RenderEngine/ImGuiRegister.h"
 
 DirectX11::Dx11Main::Dx11Main(const std::shared_ptr<DeviceResources>& deviceResources)
 	: m_deviceResources(deviceResources)
 {
 	m_deviceResources->RegisterDeviceNotify(this);
 
-	//¾Æ·¡ ·»´õ·¯	ÃÊ±âÈ­ ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	//ì•„ë˜ ë Œë”ëŸ¬	ì´ˆê¸°í™” ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 	m_sceneRenderer = std::make_unique<SceneRenderer>(m_deviceResources);
 	m_imguiRenderer = std::make_unique<ImGuiRenderer>(m_deviceResources);
-    AssetsSystem->LoadModels();
+    //AssetsSystem->LoadModels();
     AssetsSystem->LoadShaders();
+	AssetsSystem->Initialize();
 
 	m_sceneRenderer->Initialize();
 
@@ -22,7 +24,7 @@ DirectX11::Dx11Main::~Dx11Main()
 {
 	m_deviceResources->RegisterDeviceNotify(nullptr);
 }
-
+//test code
 void DirectX11::Dx11Main::SceneInitialize()
 {
 	m_camera = std::make_unique<Camera>(m_deviceResources);
@@ -30,35 +32,26 @@ void DirectX11::Dx11Main::SceneInitialize()
 	m_camera->pitch = -30.f;
 	m_camera->yaw = 320.f;
 
-	m_sceneRenderer->SetCamera(m_camera.get());
-
-	m_model = AssetsSystem->Models["sphere"];
-	m_model->position = { 0.f, 3.f, 0.f, 0.f };
-	m_model->scale = { 0.02f, 0.02f, 0.02f, 0.f };
-
-	m_ground = AssetsSystem->Models["plane"];
-	m_ground->scale = { 20.f, 1.f, 20.f, 0.f };
-	m_ground->meshes[0].material->properties.roughness = 1.0f;
-
 	m_scene = std::make_unique<Scene>();
 	m_sceneRenderer->SetScene(m_scene.get());
+	m_sceneRenderer->SetCamera(m_camera.get());
 }
 
 void DirectX11::Dx11Main::CreateWindowSizeDependentResources()
 {
-	//·»´õ·¯ÀÇ Ã¢ Å©±â¿¡ µû¶ó ¸®¼Ò½º¸¦ ´Ù½Ã ¸¸µå´Â ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	//ë Œë”ëŸ¬ì˜ ì°½ í¬ê¸°ì— ë”°ë¼ ë¦¬ì†ŒìŠ¤ë¥¼ ë‹¤ì‹œ ë§Œë“œëŠ” ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 	m_deviceResources->ResizeResources();
 }
 
 void DirectX11::Dx11Main::Update()
 {
-	//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 	m_timeSystem.Tick([&]
 	{
-		//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+		//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 		std::wostringstream woss;
 		woss.precision(6);
-		woss << L"4Q Graphics Application"
+		woss << L"4Q Graphics Application - "
 			<< L"Width: "
 			<< m_deviceResources->GetOutputSize().width
 			<< L" Height: "
@@ -69,39 +62,37 @@ void DirectX11::Dx11Main::Update()
 			<< m_timeSystem.GetFrameCount();
 
 		SetWindowText(m_deviceResources->GetWindow()->GetHandle(), woss.str().c_str());
-		//·»´õ·¯ÀÇ ¾÷µ¥ÀÌÆ® ÄÚµå¸¦ ¿©±â¿¡ Ãß°¡ÇÕ´Ï´Ù.
+		//ë Œë”ëŸ¬ì˜ ì—…ë°ì´íŠ¸ ì½”ë“œë¥¼ ì—¬ê¸°ì— ì¶”ê°€í•©ë‹ˆë‹¤.
         m_camera->Update(m_timeSystem.GetElapsedSeconds());
-		InputManagement->Update();
 	});
 }
 
 bool DirectX11::Dx11Main::Render()
 {
-	// Ã³À½ ¾÷µ¥ÀÌÆ®ÇÏ±â Àü¿¡ ¾Æ¹« °Íµµ ·»´õ¸µÇÏÁö ¸¶¼¼¿ä.
+	// ì²˜ìŒ ì—…ë°ì´íŠ¸í•˜ê¸° ì „ì— ì•„ë¬´ ê²ƒë„ ë Œë”ë§í•˜ì§€ ë§ˆì„¸ìš”.
 	if (m_timeSystem.GetFrameCount() == 0)
 	{
 		return false;
 	}
 
 	m_sceneRenderer->StagePrepare();
-
-	m_sceneRenderer->AddDrawModel(m_ground);
-	m_sceneRenderer->AddDrawModel(m_model);
-
-	m_sceneRenderer->StageDrawModels();
-    m_sceneRenderer->EndStage();
+	m_sceneRenderer->UpdateDrawModel();
+	m_sceneRenderer->StageDrawModels();    
+	m_sceneRenderer->EndStage();
 
 	m_imguiRenderer->Render();
+	
+	InputManagement->Update();
 
 	return true;
 }
-// ¸±¸®½º°¡ ÇÊ¿äÇÑ µğ¹ÙÀÌ½º ¸®¼Ò½º¸¦ ·»´õ·¯¿¡ ¾Ë¸³´Ï´Ù.
+// ë¦´ë¦¬ìŠ¤ê°€ í•„ìš”í•œ ë””ë°”ì´ìŠ¤ ë¦¬ì†ŒìŠ¤ë¥¼ ë Œë”ëŸ¬ì— ì•Œë¦½ë‹ˆë‹¤.
 void DirectX11::Dx11Main::OnDeviceLost()
 {
 
 }
 
-// µğ¹ÙÀÌ½º ¸®¼Ò½º°¡ ÀÌÁ¦ ´Ù½Ã ¸¸µé¾îÁú ¼ö ÀÖÀ½À» ·»´õ·¯¿¡ ¾Ë¸³´Ï´Ù.
+// ë””ë°”ì´ìŠ¤ ë¦¬ì†ŒìŠ¤ê°€ ì´ì œ ë‹¤ì‹œ ë§Œë“¤ì–´ì§ˆ ìˆ˜ ìˆìŒì„ ë Œë”ëŸ¬ì— ì•Œë¦½ë‹ˆë‹¤.
 void DirectX11::Dx11Main::OnDeviceRestored()
 {
 	CreateWindowSizeDependentResources();

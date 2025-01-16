@@ -69,7 +69,7 @@ void Camera::Update(float deltaSeconds)
 			_position
 		);
 	}
-	if (InputManagement->IsMouseButtonDown(MouseKey::RIGHT))
+	if (InputManagement->IsMouseButtonDown(MouseKey::MIDDLE))
 	{
 		float mousesens = _mouseSensitivity * deltaSeconds;
 		float2 delta = InputManagement->GetMouseDelta();

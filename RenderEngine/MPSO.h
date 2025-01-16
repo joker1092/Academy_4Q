@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "Primitives.h"
 
-constexpr uint32 SHADOWMAP_RES = 4096;
+constexpr uint32 SHADOWMAP_RES = 8192;
 
 // Mesh based Pipeline State object
 class MPSO : public PSO
@@ -20,19 +20,26 @@ public:
 	//void Bind();
 	void Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer);
 	void DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices, const std::shared_ptr<Material>& material);
+	void DrawMesh(const Buffer<Index>& indices, const Buffer<AnimVertex>& vertices, const std::shared_ptr<Material>& material);
 	void DrawMeshShadows(const Buffer<Index>& indices, const Buffer<Vertex>& vertices);
+	void DrawMeshShadows(const Buffer<Index>& indices, const Buffer<AnimVertex>& vertices);
 
 	void FinishShadows();
+	void SetAnimeShader();
+	void SetAnimeShadowsShader();
 	
+	void SetAnimeConstants(const JointBuffer* modelbuffer);
 	void SetModelConstants(const ModelBuffer* modelbuffer);
 	void Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer);
 	void CreateCubeMap(const Texture2D& texture);
+	void CreateIBL(const Texture2D& diffuse, const Texture2D& specular, const Texture2D& brdf);
 	inline void Resize(UINT width, UINT height) {
 		_target->Resize(width, height);
 		_shadowtarget->Resize(width, height);
 		_blurredShadows.Resize(width, height);
 		CreateComputeResources();
 	}
+
 
 private:
 	void DrawCubemap(CameraBuffer* cameraBuffer);
@@ -49,11 +56,15 @@ private:
 private:
 	LogicalDevice* _device;
 	ComPtr<ID3D11InputLayout> _meshInputLayout;
+	ComPtr<ID3D11InputLayout> _animInputLayout;
 	ComPtr<ID3D11InputLayout> _cubemapInputLayout;
 
 
 	VertexShader	_vs;
 	PixelShader		_ps;
+
+	VertexShader    _animvs;
+	VertexShader	_shadowmapvs;
 
 	VertexShader	_cubemapvs;
 	PixelShader		_cubemapps;
@@ -61,12 +72,14 @@ private:
 	VertexShader	_shadowvs;
 	PixelShader		_shadowps;
 
+
 	ComputeShader	_shadowblurcsX;
 	ComputeShader	_shadowblurcsY;
 	ComputeShader	_blendcs;
 	ComputeShader	_fxaacs;
 
 	Buffer<MaterialProperties>	_materialbuffer;
+	Buffer<JointBuffer>			_jointbuffer;
 	Buffer<ModelBuffer>		_modelbuffer;
 	Buffer<LightSpaceBuffer>_lightspacebuffer;
 	Buffer<CameraBuffer>	_camerabuffer;
@@ -109,5 +122,7 @@ private:
 	ComPtr<ID3D11DepthStencilView>	_shadowmapDsv;
 	std::unique_ptr<Cube>	_skybox;
 
-
+	Texture2D IBLDiffuse{};
+	Texture2D IBLSpecular{};
+	Texture2D IBLBrdf{};
 };

@@ -6,6 +6,7 @@
 #include "RenderEngine/Camera.h"
 #include "RenderEngine/Scene.h"
 #include "RenderEngine/ImGuiRenderer.h"
+#include "RenderEngine/InstancedModel.h"
 #include <memory>
 
 namespace DirectX11
@@ -32,8 +33,5 @@ namespace DirectX11
 
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<Scene> m_scene;
-
-        std::shared_ptr<Model> m_model{};
-        std::shared_ptr<Model> m_ground{};
 	};
 }
