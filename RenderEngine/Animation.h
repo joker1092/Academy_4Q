@@ -39,8 +39,8 @@ public:
 		return &(*it);
 	}
 
-	float GetTicksPerSecond() { return static_cast<float>(_ticksPerSecond); }
-	float GetDuration() { return _duration; }
+	float GetTicksPerSecond() const { return static_cast<float>(_ticksPerSecond); }
+	float GetDuration() const { return _duration; }
 	const AnimationNode& GetRootNode() { return *_rootNode; }
 	const std::unordered_map<std::string, BoneInfo>& GetBoneInfoMap()
 	{
@@ -56,26 +56,14 @@ private:
 class Animator
 {
 public:
-	std::vector<XMMATRIX> _finalBoneTransforms;
-	Animation* _currentAnimation;
-	std::vector<Animation*> _animations;
-	float _currentTime;
-	float _deltaSeconds;
+    std::vector<XMMATRIX> _finalBoneTransforms{};
+    Animation* _currentAnimation{};
+    std::vector<Animation*> _animations{};
+    float _currentTime{};
+    float _deltaSeconds{};
 
 	Animator() = default;
 	~Animator() = default;
-	Animator(Animation* animation) : _currentAnimation{ animation }
-	{
-		_currentTime = 0.f;
-		_deltaSeconds = 0.f;
-
-		_finalBoneTransforms.reserve(MAX_JOINTS);
-
-		for (int i = 0; i < MAX_JOINTS; ++i)
-		{
-			_finalBoneTransforms.push_back(XMMatrixIdentity());
-		}
-	}
 
 	void InitializedAnimation()
 	{
@@ -135,6 +123,7 @@ public:
 			int index = boneInfo.id;
 			XMMATRIX offset = boneInfo.offset;
 			_finalBoneTransforms[index] = XMMatrixTranspose(offset * globalTransform);
+            //_finalBoneTransforms[index] = offset * globalTransform;
 		}
 
 		for (int i = 0; i < node.numChildren; ++i)

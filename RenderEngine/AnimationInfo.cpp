@@ -20,8 +20,8 @@ BoneReference::BoneReference(const std::string& name, int ID, const aiNodeAnim* 
 		aiVector3D aiPosition = channel->mPositionKeys[positionIndex].mValue;
 		float timeStamp = static_cast<float>(channel->mPositionKeys[positionIndex].mTime);
 
-		KeyPosition data;
-		data.position = XMVECTOR{ aiPosition.x, aiPosition.y, aiPosition.z, 0.f };
+        KeyPosition data{};
+		data.position = XMVECTOR{ aiPosition.x, aiPosition.y, aiPosition.z, 1.f };
 		data.timeStamp = timeStamp;
 		_positions[positionIndex] = data;
 	}
@@ -33,7 +33,7 @@ BoneReference::BoneReference(const std::string& name, int ID, const aiNodeAnim* 
 		aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
 		float timeStamp = static_cast<float>(channel->mRotationKeys[rotationIndex].mTime);
 
-		KeyRotation data;
+		KeyRotation data{};
 		data.orientation = XMVECTOR{ aiOrientation.x, aiOrientation.y, aiOrientation.z, aiOrientation.w };
 		data.orientation = XMQuaternionNormalize(data.orientation);
 		data.timeStamp = timeStamp;
@@ -47,7 +47,7 @@ BoneReference::BoneReference(const std::string& name, int ID, const aiNodeAnim* 
 		aiVector3D aiScale = channel->mScalingKeys[scaleIndex].mValue;
 		float timeStamp = static_cast<float>(channel->mScalingKeys[scaleIndex].mTime);
 
-		KeyScale data;
+		KeyScale data{};
 		data.scale = XMVECTOR{ aiScale.x, aiScale.y, aiScale.z, 0.f };
 		data.timeStamp = timeStamp;
 		_scales[scaleIndex] = data;

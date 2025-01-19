@@ -5,7 +5,7 @@ void TestWorld::Initialize()
 
 }
 
-void TestWorld::Update()
+void TestWorld::Update(float tick)
 {
 }
 

@@ -25,7 +25,7 @@ struct Scene
 
 	Scene()
 	{
-		//±âº» ÁöÇü »ı¼º
+		//ê¸°ë³¸ ì§€í˜• ìƒì„±
 		m_pGround = AddModel
 		(
 			"plane",
@@ -140,7 +140,7 @@ struct Scene
 		}, ImGuiWindowFlags_None);
 	}
 	~Scene() = default;
-	//TODO : ²ş... Áö±İÀº ÀÎ½ºÅÏ½º ¾ÆÀÌµğ·Î °ü¸®ÇÏ´Âµ¥ ÀÌ°Ô ÀÎµ¦½º°ªÀÌ µÇ´Â °ÍÀÌ Çö¸íÇØº¸ÀÎ´Ù.
+	//TODO : ë™... ì§€ê¸ˆì€ ì¸ìŠ¤í„´ìŠ¤ ì•„ì´ë””ë¡œ ê´€ë¦¬í•˜ëŠ”ë° ì´ê²Œ ì¸ë±ìŠ¤ê°’ì´ ë˜ëŠ” ê²ƒì´ í˜„ëª…í•´ë³´ì¸ë‹¤.
 	InstancedModel* AddModel(const std::string_view& name, const std::shared_ptr<Model>& model)
 	{
 		ModelsData.emplace_back(model);
@@ -199,4 +199,15 @@ struct Scene
 			return model.instancedID == instancedKeys[name.data()]; 
 		});
 	}
+
+    void Update(float deltaSeconds)
+    {
+        foreach(ModelsData, [&](auto& model)
+        {
+            if (model.animModel)
+            {
+                model.animModel->animator->UpdateAnimation(deltaSeconds, model.GetMatrix());
+            }
+        });
+    }
 };

@@ -38,7 +38,7 @@ void SceneRenderer::StagePrepare()
 #ifdef _DEBUG
 	assert(_camera != nullptr);
 #endif
-	//©╘╠Б╪╜ дц╦╣го╟М, ╥╩╢У╦╣гр ╦П╣╗ю╩ а╓гу╢о╢ы.
+	//Л≈╛Й╦╟Л└° Л╩╛К╖│М∙≤ЙЁ═, К═▄К█■К╖│М∙═ К╙╗К█╦Л²└ Л═∙М∙╘К▀┬К▀╓.
 	_device->ClearBackbuffer();
 
 	// Craete camera and scene buffers
@@ -95,9 +95,8 @@ void SceneRenderer::StageDrawModels()
 	{
 		if (ins_model.animModel)
 		{
-			ModelBuffer modelBuff{};
-			modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
-			_mpso->SetModelConstants(&modelBuff);
+            JointBuffer jointBuff{ ins_model.animModel->GetFinalBoneTransforms() };
+			_mpso->SetAnimeConstants(&jointBuff);
 
 			for (auto&& mesh : ins_model.animModel->meshes)
 			{
@@ -126,19 +125,18 @@ void SceneRenderer::StageDrawModels()
 	_mpso->SetAnimeShader();
 
 	foreach(_drawmodels, [this](auto&& ins_model)
+	{
+		if (ins_model.animModel)
 		{
-			if (ins_model.animModel)
-			{
-				ModelBuffer modelBuff{};
-				modelBuff.modelmatrix = XMMatrixTranspose(ins_model.GetMatrix());
-				_mpso->SetModelConstants(&modelBuff);
+            JointBuffer jointBuff{ ins_model.animModel->GetFinalBoneTransforms() };
+            _mpso->SetAnimeConstants(&jointBuff);
 
-				for (auto&& mesh : ins_model.animModel->meshes)
-				{
-					_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
-				}
+			for (auto&& mesh : ins_model.animModel->meshes)
+			{
+				_mpso->DrawMesh(mesh.bindex, mesh.bvertex, mesh.material);
 			}
-		});
+		}
+	});
 }
 
 void SceneRenderer::EndStage()
@@ -178,7 +176,7 @@ void SceneRenderer::UpdateDrawModel()
 {
 	foreach(_scene->ModelsData, [this](auto&& ins_model)
 	{
-		//TODO : ╫ц╟ёюл ╣х╢ы╦И ©╘╠Б╪╜ дц╦╣ю╩ го╟М, ╥╩╢У╦╣гр ╦П╣╗ю╩ а╓гу╢о╢ы.(╬х╣и╟е ╟╟╫ю╢о╢ы.)
+		//TODO : Л▀°Й╟└Л²╢ К░°К▀╓К╘╢ Л≈╛Й╦╟Л└° Л╩╛К╖│Л²└ М∙≤ЙЁ═, К═▄К█■К╖│М∙═ К╙╗К█╦Л²└ Л═∙М∙╘К▀┬К▀╓.(Л∙┬К░═Й╠╟ Й╟≥Л┼╣К▀┬К▀╓.)
 		_drawmodels.push_back(ins_model);
 		_modelcount += 1;
 	});

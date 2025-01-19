@@ -79,20 +79,20 @@ struct BlurParameters
 
 struct Vertex
 {
-	float3	position;
-	float3	normal;
-	float3	tangent;
-	float3	bitangent;
-	float2	texcoord;
+	float3	position{};
+	float3	normal{};
+	float3	tangent{};
+	float3	bitangent{};
+	float2	texcoord{};
 };
 
 struct AnimVertex
 {
-	float3	position;
-	float3	normal;
-	float3	tangent;
-	float3	bitangent;
-	float2	texcoord;
+    float3	position{};
+	float3	normal{};
+	float3	tangent{};
+	float3	bitangent{};
+	float2	texcoord{};
 	int		boneIndex[4]{ -1,-1,-1,-1 };
 	float	boneWeight[4]{};
 

@@ -25,4 +25,9 @@ public:
 	float					_distance{ 0.0f };
 	int						_numBones{ 0 };
 	bool					isLoaded = false;
+
+    const Mathf::xMatrix* GetFinalBoneTransforms() const
+    {
+        return animator->GetFinalBoneTransforms().data();
+    }
 };

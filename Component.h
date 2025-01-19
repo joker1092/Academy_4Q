@@ -7,8 +7,8 @@ class Component : public IComponent
 public:
 	Component() = default;
 	virtual ~Component() = default;
-	virtual void Update() =0 ;
-	void SetOwner(Object* owner) {_owner = owner};
+	virtual void Update() = 0;
+	void SetOwner(Object* owner) {_owner = owner; }
 	Object* GetOwner() const { return _owner; }
 private:
 	Object* _owner;

@@ -56,8 +56,8 @@ struct InstancedModel
 	DirectX::XMMATRIX GetMatrix() const
 	{
 		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(scale);
-		trans *= DirectX::XMMatrixTranslationFromVector(position);
 		trans *= DirectX::XMMatrixRotationQuaternion(rotation);
+		trans *= DirectX::XMMatrixTranslationFromVector(position);
 		return trans;
 	}
 

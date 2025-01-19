@@ -60,8 +60,6 @@ void DataSystem::RenderForEditer()
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{
-				//���࿡ �ð��� ���Ƶ��Ƽ� Guizmo�� ���ٸ� ���⼭ ���� �巡�׾ص���ؼ� ������ ���� �� �ְ� �ؾ���.
-				//ImGui::SetDragDropPayload("MODEL_PAYLOAD", selectedModel.c_str(), selectedModel.length());
 				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
 				if (Models[selectedModel] != dragDropModel)
 				{

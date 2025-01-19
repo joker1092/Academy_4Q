@@ -124,7 +124,7 @@ void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
 
 void MPSO::SetAnimeConstants(const JointBuffer* modelbuffer)
 {
-	DX::States::Context->VSSetConstantBuffers(2, 1, _jointbuffer.GetAddressOf());
+	DX::States::Context->VSSetConstantBuffers(3, 1, _jointbuffer.GetAddressOf());
 	// Copy per model constants
 	D3D11_MAPPED_SUBRESOURCE mat = _jointbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
 	memcpy(mat.pData, static_cast<const void*>(modelbuffer), sizeof(JointBuffer));

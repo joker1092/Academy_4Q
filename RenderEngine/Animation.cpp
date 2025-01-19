@@ -4,12 +4,14 @@
 Animation::Animation(const std::string& animationPath, AnimModel* model)
 {
 	Assimp::Importer importer;
-	_scene = importer.ReadFile(animationPath, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
+	_scene = importer.ReadFile(animationPath, aiProcess_FlipUVs);
 	if (!_scene || _scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !_scene->mRootNode)
 	{
 		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
+
+    _boneInfoMap = model->_boneInfoMap;
 	_globalInverseTransform = DirectX::XMMatrixIdentity();
 	_rootNode = new AnimationNode();
 	_duration = static_cast<float>(_scene->mAnimations[0]->mDuration);
@@ -21,6 +23,7 @@ Animation::Animation(const std::string& animationPath, AnimModel* model)
 
 Animation::Animation(const aiScene* _scene, AnimModel* model, uint32 index)
 {
+    _boneInfoMap = model->_boneInfoMap;
 	_globalInverseTransform = DirectX::XMMatrixIdentity();
 	_rootNode = new AnimationNode();
 	_duration = static_cast<float>(_scene->mAnimations[index]->mDuration);
@@ -34,10 +37,12 @@ void Animation::ReadHierarchyData(AnimationNode* dest, const aiNode* src)
 	if (_boneInfoMap.find(src->mName.C_Str()) != _boneInfoMap.end())
 	{
 		dest->name = src->mName.C_Str();
-		dest->transform = XMMatrixTranspose(XMMATRIX(&src->mTransformation.a1));
+		//dest->transform = XMMATRIX(&src->mTransformation.a1);
+        dest->transform = Mathf::aiToXMMATRIX(src->mTransformation);
 		dest->numChildren = src->mNumChildren;
 
-		auto it = std::find_if(_bones.begin(), _bones.end(), [&](const BoneReference& bone) { return bone.GetBoneName() == dest->name; });
+		auto it = std::ranges::find_if(_bones,
+            [&](const BoneReference& bone) { return bone.GetBoneName() == dest->name; });
 
 		if (it == _bones.end())
 		{
@@ -81,10 +86,5 @@ void Animation::ReadAnimationData(const aiAnimation* animation, AnimModel* model
 		_bones.push_back(BoneReference{ boneName, boneInfoMap[boneName].id, channel });
 	}
 
-	boneInfoMap = _boneInfoMap;
+    boneInfoMap = _boneInfoMap;
 }
-//
-//void Animation::ReadHierarchyData(AnimationNode* dest, const aiNode* src)
-
-//
-//void Animation::ReadAnimationData(const aiAnimation* animation, AnimModel* model)

@@ -63,6 +63,7 @@ void DirectX11::Dx11Main::Update()
 
 		SetWindowText(m_deviceResources->GetWindow()->GetHandle(), woss.str().c_str());
 		//렌더러의 업데이트 코드를 여기에 추가합니다.
+       m_scene->Update(m_timeSystem.GetElapsedSeconds());
         m_camera->Update(m_timeSystem.GetElapsedSeconds());
 	});
 }

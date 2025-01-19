@@ -13,6 +13,11 @@ struct JointBuffer
 {
 	//joint
 	DirectX::XMMATRIX transforms[MAX_JOINTS];
+
+    JointBuffer(const DirectX::XMMATRIX* transforms)
+    {
+        std::memcpy(this->transforms, transforms, sizeof(DirectX::XMMATRIX) * MAX_JOINTS);
+    }
 };
 
 struct BoneInfo

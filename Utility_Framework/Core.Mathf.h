@@ -70,16 +70,16 @@ namespace Mathf
 
     inline Vector3 ExtractScale(const Matrix& matrix)
     {
-        // Ã¹ ¹øÂ° ¿­ º¤ÅÍ (XÃà)
+        // ì²« ë²ˆì§¸ ì—´ ë²¡í„° (Xì¶•)
         float scaleX = matrix.Right().Length();
 
-        // µÎ ¹øÂ° ¿­ º¤ÅÍ (YÃà)
+        // ë‘ ë²ˆì§¸ ì—´ ë²¡í„° (Yì¶•)
         float scaleY = matrix.Up().Length();
 
-        // ¼¼ ¹øÂ° ¿­ º¤ÅÍ (ZÃà)
+        // ì„¸ ë²ˆì§¸ ì—´ ë²¡í„° (Zì¶•)
         float scaleZ = matrix.Forward().Length();
 
-        // ½ºÄÉÀÏ º¤ÅÍ ¹İÈ¯
+        // ìŠ¤ì¼€ì¼ ë²¡í„° ë°˜í™˜
         return Vector3(scaleX, scaleY, scaleZ);
     }
 
@@ -124,6 +124,25 @@ namespace Mathf
         result.w = tempWeightInfo[3];
 
         return result;
+    }
+
+    inline DirectX::XMMATRIX aiToXMMATRIX(aiMatrix4x4 in)
+    {
+        // aiMatrix is row major and so is directx
+        return DirectX::XMMATRIX(in.a1, in.a2, in.a3, in.a4,
+                                 in.b1, in.b2, in.b3, in.b4,
+                                 in.c1, in.c2, in.c3, in.c4,
+                                 in.d1, in.d2, in.d3, in.d4);
+    }
+
+    inline float3 aiToFloat3(aiVector3D in)
+    {
+        return float3(in.x, in.y, in.z);
+    }
+
+    inline float2 aiToFloat2(aiVector3D in)
+    {
+        return float2(in.x, in.y);
     }
 
 

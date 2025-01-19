@@ -24,8 +24,10 @@ private:
 	static std::shared_ptr<Model> LoadModel(const std::string& name, const aiScene*	scene, const file::path& path, const file::path& dir);
 	static std::shared_ptr<AnimModel> LoadAnimatedModel(const std::string& name, const aiScene*	scene, const file::path& path, const file::path& dir);
 	static void	LoadMeshes(const aiScene* scene, const file::path&	dir, std::vector<Mesh>* meshes);
-	static void LoadMeshes(AnimModel* owner, const aiScene* scene, const file::path& dir, std::vector<AnimMesh>* meshes);
-	static void LoadAnimations(AnimModel* owner, const file::path& dir);
+    static void LoadMeshes(std::shared_ptr<AnimModel>* model, const aiScene* scene, const file::path& dir, std::vector<AnimMesh>* meshes);
+	static void LoadAnimations(std::shared_ptr<AnimModel>* model, const file::path& dir);
 	static std::shared_ptr<Material> CreateMaterial(const file::path& dir, aiMesh* aimesh, const aiScene* scene);
 
+
+    static void ProcessNode(aiNode* node, const aiScene* scene, const file::path& dir, std::vector<Mesh>* meshes);
 };

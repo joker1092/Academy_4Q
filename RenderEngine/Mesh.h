@@ -56,7 +56,6 @@ class AnimMesh
 public:
 	std::vector<Index>			indices;
 	std::vector<AnimVertex>		vertices;
-	JointBuffer					joints{};
 
 	Buffer<Index>				bindex;
 	Buffer<AnimVertex>			bvertex;
@@ -99,14 +98,5 @@ public:
 		);
 		bindex.SetName(name + " Index Buffer");
 		bvertex.SetName(name + " Vertex Buffer");
-	}
-
-	void UpdateJointBuffer()
-	{
-		std::memcpy(
-			joints.transforms, 
-			animator->GetFinalBoneTransforms().data(), 
-			sizeof(Mathf::Matrix) * MAX_JOINTS
-		);
 	}
 };
