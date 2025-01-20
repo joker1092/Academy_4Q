@@ -1,5 +1,5 @@
 #pragma once
-#include "../Academy_4Q/Utility_Framework/Core.Mathf.h"
+#include "../Utility_Framework/Core.Mathf.h"
 
 using namespace Mathf;
 class D2DObjScene

@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utility_Framework", "Utilit
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderEngine", "RenderEngine\RenderEngine.vcxproj", "{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D2DLib", "D2DLib\D2DLib.vcxproj", "{0AB369F9-BED8-4900-9ABB-EED94C8116CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}.Release|x64.Build.0 = Release|x64
 		{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}.Release|x86.ActiveCfg = Release|Win32
 		{C35C923D-4B29-4E62-BBBF-19DFFEA2C8B6}.Release|x86.Build.0 = Release|Win32
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Debug|x64.ActiveCfg = Debug|x64
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Debug|x64.Build.0 = Debug|x64
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Debug|x86.ActiveCfg = Debug|Win32
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Debug|x86.Build.0 = Debug|Win32
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Release|x64.ActiveCfg = Release|x64
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Release|x64.Build.0 = Release|x64
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Release|x86.ActiveCfg = Release|Win32
+		{0AB369F9-BED8-4900-9ABB-EED94C8116CB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
