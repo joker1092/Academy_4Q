@@ -13,18 +13,26 @@ namespace DirectX11 {
 		D2DRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources);
 
 	private:
-		std::vector<D2DObjScene>			m_D2DObjVec;
-		std::shared_ptr<DeviceResources>					m_DeviceResources;
-
+		std::vector<D2DObjScene>				m_D2DObjVec;
+		std::shared_ptr<DeviceResources>		m_DeviceResources;
+		
 	};
 
-	class D2DImageLoader {
+	class D2DLoader {
 	public:
-		HRESULT LoadBitmapFormFile(ID2D1RenderTarget* pRenderTarget, IWICImagingFactory2* pIWICFactory,
-			PCWSTR uri, std::wstring _name, ID2D1Bitmap** ppBitmap);
+		D2DLoader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources);
+
+		HRESULT LoadBitmapFromFile(
+			ID2D1RenderTarget* pRenderTarget,
+			IWICImagingFactory2* pIWICFactory,
+			PCWSTR uri,
+			std::wstring _name,
+			ID2D1Bitmap** ppBitmap
+		);
 
 	private:
-		std::map<std::wstring, ID2D1Bitmap*> m_LoadedImage;
+		std::shared_ptr<DeviceResources>		m_DeviceResources;
+		std::map<std::wstring, ID2D1Bitmap*>	m_D2DImage;
 	};
 }
 

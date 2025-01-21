@@ -6,7 +6,12 @@ D2DObjScene::D2DObjScene()
 	m_RelativeTransform = m_WorldTransform = D2D1::Matrix3x2F::Identity();
 }
 
-Vector2 D2DObjScene::GetWorldLocation()
+D2DObjScene::~D2DObjScene()
+{
+
+}
+
+Vector2 D2DObjScene::GetWorldLocation() const
 {
 	
 	Vector2 out;
@@ -55,4 +60,9 @@ void D2DObjScene::AddRelativePos(float x, float y)
 void D2DObjScene::SetRelativeScale(float x, float y)
 {
 	m_RelativeScale = Vector2(x, y);
+}
+
+void D2DObjScene::Update(float deltaTime)
+{
+	UpdateTransform();
 }

@@ -4,7 +4,7 @@
 using namespace Mathf;
 class D2DObjScene
 {
-private:
+protected:
 	D2DObjScene*		m_pParentObjScene = nullptr;
 	Vector2				m_RelativeScale = { 1.0f,1.0f };
 	float				m_RelativeRotation = 0.f;
@@ -15,8 +15,9 @@ private:
 
 public:
 	D2DObjScene();
+	virtual ~D2DObjScene();
 
-	Vector2 GetWorldLocation();
+	Vector2 GetWorldLocation() const;
 	void UpdateTransform();
 
 	void SetRelativeRoation(float _Rotation);
@@ -30,6 +31,6 @@ public:
 	void SetRelativeScale(float x, float y);
 	Vector2 GetRelativeScale(){ return m_RelativeScale; }
 	
-
+	virtual void Update(float deltaTime);
 };
 
