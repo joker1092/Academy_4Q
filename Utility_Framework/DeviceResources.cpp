@@ -230,14 +230,14 @@ void DirectX11::DeviceResources::CreateDeviceIndependentResources()
     );
 
     // WIC(Windows Imaging Component) 팩터리를 초기화합니다. //이거 왜 터지냐? ㅋㅋㅋ
-    //DirectX11::ThrowIfFailed(
-    //	CoCreateInstance(
-    //		CLSID_WICImagingFactory2,
-    //		nullptr,
-    //		CLSCTX_INPROC_SERVER,
-    //		IID_PPV_ARGS(&m_wicFactory)
-    //	)
-    //);
+    DirectX11::ThrowIfFailed(
+    	CoCreateInstance(
+    		CLSID_WICImagingFactory2,
+    		nullptr,
+    		CLSCTX_INPROC_SERVER,
+    		IID_PPV_ARGS(&m_wicFactory)
+    	)
+    );
 }
 
 void DirectX11::DeviceResources::CreateDeviceResources()

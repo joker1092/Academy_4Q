@@ -160,7 +160,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Academy_4Q\Utility_Framework\Utility_Framework.vcxproj">
+    <ProjectReference Include="..\Utility_Framework\Utility_Framework.vcxproj">
       <Project>{9cec19f4-03b4-4563-8d42-6e4bfb0059bb}</Project>
     </ProjectReference>
   </ItemGroup>

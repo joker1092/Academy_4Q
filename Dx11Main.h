@@ -7,14 +7,11 @@
 #include "RenderEngine/Scene.h"
 #include "RenderEngine/ImGuiRenderer.h"
 #include "RenderEngine/InstancedModel.h"
-
+#include "D2DLib/D2DRenderer.h"
 #include <memory>
 
 //TO DO include D2DRenderer and 참조 추가 D2DLib
 
-
-class D2DRenderer; //TO DO 나중에 위에 D2DRenderer들여오면 지울것.
-class D2DLoader; //TO DO 나중에 위에 D2DRenderer들여오면 지울것.
 namespace DirectX11
 {
 	class Dx11Main : public IDeviceNotify
@@ -37,7 +34,7 @@ namespace DirectX11
 		std::unique_ptr<SceneRenderer>		m_sceneRenderer;
 		std::unique_ptr<ImGuiRenderer>		m_imguiRenderer;
 		std::unique_ptr<D2DRenderer>		m_D2DRenderer;
-		std::unique_ptr<D2DLoader>			m_D2DLoader;
+
 
 		std::unique_ptr<Camera>				m_camera;
 		std::unique_ptr<Scene>				m_scene;

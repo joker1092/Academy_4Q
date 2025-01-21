@@ -174,6 +174,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="D2DLib\D2DLib.vcxproj">
+      <Project>{0ab369f9-bed8-4900-9abb-eed94c8116cb}</Project>
+    </ProjectReference>
     <ProjectReference Include="RenderEngine\RenderEngine.vcxproj">
       <Project>{c35c923d-4b29-4e62-bbbf-19dffea2c8b6}</Project>
     </ProjectReference>

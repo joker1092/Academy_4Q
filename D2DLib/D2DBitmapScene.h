@@ -1,6 +1,9 @@
 #pragma once
 #include "D2DRenderScene.h"
-
+namespace DirectX11
+{
+	class D2DRenderer;
+}
 class D2DBitmapScene : public D2DRenderScene
 {
 	
@@ -14,6 +17,7 @@ public:
 	D2DBitmapScene();
 	D2DBitmapScene(std::wstring strFilePath);
 	virtual ~D2DBitmapScene();
-	void LoadD2DBitmap(const std::wstring strFilePath, const DirectX11::D2DLoader _Loader);
+	bool LoadD2DBitmap(const std::wstring strFilePath, DirectX11::D2DRenderer& _Render);
+	
 };
 

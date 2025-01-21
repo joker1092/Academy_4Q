@@ -1,17 +1,33 @@
 #include "pch.h"
 #include "D2DRenderer.h"
+#include <memory>
+#include "../Utility_Framework/CoreWindow.h"
 
-bool DirectX11::D2DRenderer::shouldInit = true;
-bool DirectX11::D2DLoader::shouldInit	= true;
 
-void DirectX11::D2DRenderer::InitD2DRender(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+
+
+DirectX11::D2DRenderer::D2DRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
 {
 	m_DeviceResources = deviceResources;
+	ID2D1Factory* D2DFac = deviceResources.get()->GetD2DFactory();
+	CoreWindow* CoreWindo = deviceResources.get()->GetWindow();
+	HWND hWnd = CoreWindo->GetHandle();
+	D2D1_SIZE_U size = D2D1::SizeU(CoreWindo->GetWidth(), CoreWindo->GetHeight());
+	D2DFac->CreateHwndRenderTarget(
+		D2D1::RenderTargetProperties(),
+		D2D1::HwndRenderTargetProperties(hWnd, size),
+		&m_D2DRenderTarget
+	);
+}
+
+DirectX11::D2DRenderer::~D2DRenderer()
+{
+	m_DeviceResources.reset();
 }
 
 
 
-HRESULT DirectX11::D2DLoader::LoadBitmapFromFile(ID2D1RenderTarget* pRenderTarget, IWICImagingFactory2* pIWICFactory, PCWSTR uri, std::wstring _name, ID2D1Bitmap** ppBitmap)
+HRESULT DirectX11::D2DRenderer::LoadBitmapFromFile(ID2D1HwndRenderTarget* pRenderTarget, IWICImagingFactory2* pIWICFactory, PCWSTR uri, std::wstring _name, ID2D1Bitmap** ppBitmap)
 {
 	//decode wic 불러온것을 다 풀어버리것
 	IWICBitmapDecoder* pDecoder = NULL;
@@ -88,8 +104,23 @@ HRESULT DirectX11::D2DLoader::LoadBitmapFromFile(ID2D1RenderTarget* pRenderTarge
 
 	return hr;
 }
-
-void DirectX11::D2DLoader::InitD2DLoader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
-{
-	m_DeviceResources = deviceResources;
-}
+//
+//HRESULT DirectX11::D2DRenderer::InitD2DRender(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+//{	
+//	m_DeviceResources = deviceResources;
+//
+//	HRESULT hr = S_OK;
+//
+//
+//	ID2D1Factory* D2DFac = deviceResources.get()->GetD2DFactory();
+//	CoreWindow* CoreWindo = deviceResources.get()->GetWindow();
+//	HWND hWnd = CoreWindo->GetHandle();
+//	D2D1_SIZE_U size = D2D1::SizeU(CoreWindo->GetWidth(), CoreWindo->GetHeight());
+//	hr = D2DFac->CreateHwndRenderTarget(
+//		D2D1::RenderTargetProperties(),
+//		D2D1::HwndRenderTargetProperties(hWnd, size),
+//		&m_D2DRenderTarget
+//	);
+//
+//	return hr;
+//}
