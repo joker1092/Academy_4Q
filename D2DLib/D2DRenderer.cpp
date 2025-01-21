@@ -1,16 +1,15 @@
 #include "pch.h"
 #include "D2DRenderer.h"
 
-DirectX11::D2DRenderer::D2DRenderer(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
-	: m_DeviceResources(deviceResources)
-{
+bool DirectX11::D2DRenderer::shouldInit = true;
+bool DirectX11::D2DLoader::shouldInit	= true;
 
+void DirectX11::D2DRenderer::InitD2DRender(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+{
+	m_DeviceResources = deviceResources;
 }
 
-DirectX11::D2DLoader::D2DLoader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
-	: m_DeviceResources(deviceResources)
-{
-}
+
 
 HRESULT DirectX11::D2DLoader::LoadBitmapFromFile(ID2D1RenderTarget* pRenderTarget, IWICImagingFactory2* pIWICFactory, PCWSTR uri, std::wstring _name, ID2D1Bitmap** ppBitmap)
 {
@@ -88,4 +87,9 @@ HRESULT DirectX11::D2DLoader::LoadBitmapFromFile(ID2D1RenderTarget* pRenderTarge
 
 
 	return hr;
+}
+
+void DirectX11::D2DLoader::InitD2DLoader(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources)
+{
+	m_DeviceResources = deviceResources;
 }
