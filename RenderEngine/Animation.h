@@ -22,6 +22,7 @@ class Animation
 	const aiScene* _scene{};
 
 public:
+	std::string _clipName{};
 	XMMATRIX _globalInverseTransform{};
 
 	Animation() = delete;
@@ -38,7 +39,7 @@ public:
 
 		return &(*it);
 	}
-
+	float GetDurationSeconds() const { return _duration/ static_cast<float>(_ticksPerSecond); }
 	float GetTicksPerSecond() const { return static_cast<float>(_ticksPerSecond); }
 	float GetDuration() const { return _duration; }
 	const AnimationNode& GetRootNode() { return *_rootNode; }
@@ -61,6 +62,7 @@ public:
     std::vector<Animation*> _animations{};
     float _currentTime{};
     float _deltaSeconds{};
+	int _currIndex{};
 
 	Animator() = default;
 	~Animator() = default;
@@ -93,11 +95,16 @@ public:
 	{
 		if (index >= _animations.size())
 		{
-			std::cout << "Invalid animation index" << std::endl;
+			Log::Warning("Invalid animation index");
+			return;
+		}
+		else if (index == _currIndex)
+		{
 			return;
 		}
 
-		_currentAnimation = _animations[index];
+		_currIndex = index;
+		_currentAnimation = _animations[_currIndex];
 		_currentTime = 0.f;
 	}
 
@@ -123,10 +130,10 @@ public:
 			int index = boneInfo.id;
 			XMMATRIX offset = boneInfo.offset;
 			_finalBoneTransforms[index] = XMMatrixTranspose(offset * globalTransform);
-            //_finalBoneTransforms[index] = offset * globalTransform;
+			//_finalBoneTransforms[index] = offset * globalTransform;
 		}
 
-		for (int i = 0; i < node.numChildren; ++i)
+		for (uint32 i = 0; i < node.numChildren; ++i)
 		{
 			CalculateBoneTransform(*node.children[i], globalTransform);
 		}

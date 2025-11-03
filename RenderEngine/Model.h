@@ -8,7 +8,9 @@ public:
 	~Model() = default;
 
 	std::string				name{};
+	file::path				path{};
 	std::vector<Mesh>		meshes{};
+
 	bool					isLoaded = false;
 };
 
@@ -18,10 +20,12 @@ public:
 	AnimModel() = default;
 	~AnimModel() = default;
 
-	std::string				name;
+	std::string				name{};
+	file::path				path{};
 	std::vector<AnimMesh>	meshes;
 	std::shared_ptr<Animator> animator;
 	std::unordered_map<std::string, BoneInfo> _boneInfoMap;
+
 	float					_distance{ 0.0f };
 	int						_numBones{ 0 };
 	bool					isLoaded = false;

@@ -31,6 +31,9 @@
     <Filter Include="ImGuiControl">
       <UniqueIdentifier>{3b74fc47-81f8-4f44-aa6b-e2c8dd923284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ImGuiControl\ImGui">
+      <UniqueIdentifier>{57eeb2dc-84f3-43fe-8ea2-87e40ce050ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SceneRenderer.cpp">
@@ -69,6 +72,27 @@
     <ClCompile Include="AnimationInfo.cpp">
       <Filter>Resource</Filter>
     </ClCompile>
+    <ClCompile Include="UI_DataSystem.cpp">
+      <Filter>Manager&amp;System</Filter>
+    </ClCompile>
+    <ClCompile Include="drawing.cpp">
+      <Filter>ImGuiControl\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="widgets.cpp">
+      <Filter>ImGuiControl\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="FontManager.cpp">
+      <Filter>Manager&amp;System</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialLoader.cpp">
+      <Filter>Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="PXDebugSystem.cpp">
+      <Filter>Manager&amp;System</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Material.h">
@@ -85,9 +109,6 @@
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneRenderer.h">
-      <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="PSO.h">
       <Filter>PipelineStateObject</Filter>
@@ -154,6 +175,36 @@
     </ClInclude>
     <ClInclude Include="AnimationInfo.h">
       <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboards.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_DataSystem.h">
+      <Filter>Manager&amp;System</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancedBillboard.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="drawing.h">
+      <Filter>ImGuiControl\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="widgets.h">
+      <Filter>ImGuiControl\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="FontManager.h">
+      <Filter>Manager&amp;System</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialLoader.h">
+      <Filter>Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="PXDebugSystem.h">
+      <Filter>Manager&amp;System</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -8,17 +8,19 @@
 #include <d2d1_3.h>
 #include <d2d1effects_2.h>
 #include <DirectXColors.h>
+#include <dwrite.h>
 #include <dwrite_3.h>
 #include <d3dcompiler.h>
 #include <d3dcommon.h>
-#include <Directxtk/DDSTextureLoader.h>
-#include <Directxtk/WICTextureLoader.h>
+#include <directxtk/DDSTextureLoader.h>
+#include <directxtk/WICTextureLoader.h>
 #include <DirectXTex.h>
 #include <DirectXMath.h>
 #include <directxtk/simplemath.h>
 #include <windows.h>
 #include <wincodec.h>
 #include <wrl/client.h>
+#include <Xinput.h>
 using namespace Microsoft::WRL;
 //STL
 #include <array>
@@ -45,10 +47,12 @@ constexpr inline decltype(auto) foreach = std::ranges::for_each;
 #include "TypeDefinition.h"
 #include "DirectXHelper.h"
 #include "LinkedListLib.hpp"
+//#include "flatbuffers/flatbuffers.h"
 
 #ifndef _in
 #define _in
 #define _out
+#define _inout
 #define _in_out
 #define _in_opt
 #define _out_opt
@@ -56,11 +60,6 @@ constexpr inline decltype(auto) foreach = std::ranges::for_each;
 #define unsafe
 #endif // !_in
 
-#if defined(_DEBUG)
-#define WARN(x) std::cout << std::string("WARNING: ") + x << std::endl
-#define ERR(x) std::cout << std::string("ERROR: ") + x << std::endl
-#define INFO(x) std::cout << std::string("INFO: ") + x << std::endl
-#else
-#define WARN(x)
-#define INFO(x)
-#endif
+#undef min
+#undef max
+#undef GetObject

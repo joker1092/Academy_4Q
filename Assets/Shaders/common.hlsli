@@ -30,12 +30,16 @@ float GetDirectionalLightAttenuation()
 float3 GammaDecode(float3 color)
 {
     return color * (color * (color * 0.305306011f + 0.682171111f) + 0.012522878f);
+    
+    //return pow(color, 2.2f);
 }
 
 float3 GammaEncode(float3 color)
 {
     color = saturate(color);
     return max(1.055f * pow(color, 0.416666667f) - 0.055f, 0.0f);
+    
+    //return pow(color, 1.0f / 2.2f);
 }
 
 #endif // COMMON

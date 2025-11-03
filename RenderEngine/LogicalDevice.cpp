@@ -154,7 +154,7 @@ void LogicalDevice::CreateRasterizerStates()
     }
 
     {
-        // Create No Cull Rasterizer
+        // Create Front Cull Rasterizer
         CD3D11_RASTERIZER_DESC2 rasterDesc{ CD3D11_DEFAULT() };
         rasterDesc.CullMode = D3D11_CULL_FRONT;
         rasterDesc.FrontCounterClockwise = TRUE;

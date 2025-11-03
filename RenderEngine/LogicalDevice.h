@@ -47,6 +47,7 @@ private:
 	ComPtr<ID3D11RasterizerState2>		_rasterizerStateSolid;
 	ComPtr<ID3D11RasterizerState2>		_rasterizerStateSolidNoCull;
 	ComPtr<ID3D11RasterizerState2>		_rasterizerStateSolidFrontCull;
+	ComPtr<ID3D11RasterizerState2>		_rasterizerStateSolidBackCull;
 	ComPtr<ID3D11RasterizerState2>		_rasterizerStateWireframe;
 	ComPtr<ID3D11RasterizerState2>		_rasterizerStateConservative;
     std::shared_ptr<DirectX11::DeviceResources> deviceResources;

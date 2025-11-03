@@ -58,6 +58,15 @@
     <Filter Include="Interface">
       <UniqueIdentifier>{c673a744-35c9-4d79-88f8-78a26f4c00b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core.Logger">
+      <UniqueIdentifier>{680961e0-282d-49b5-b66c-942eed35b315}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSVLoader">
+      <UniqueIdentifier>{471bdf77-bd33-4ff1-a11b-d26228ed2f45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="INILoader">
+      <UniqueIdentifier>{10a74b62-715e-498d-8216-efd46b990009}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassProperty.h">
@@ -132,6 +141,24 @@
     <ClInclude Include="IComponent.h">
       <Filter>Interface</Filter>
     </ClInclude>
+    <ClInclude Include="sqlite_modern_cpp.h">
+      <Filter>Core.Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Core.Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="LogIOWriter.h">
+      <Filter>Core.Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="LogMessage.h">
+      <Filter>Core.Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="CSVLoader.h">
+      <Filter>CSVLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleIniFile.h">
+      <Filter>INILoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CoreWindow.cpp">
@@ -145,6 +172,15 @@
     </ClCompile>
     <ClCompile Include="HLSLCompiler.cpp">
       <Filter>DirectX11Common\HLSLCompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Core.Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="LogIOWriter.cpp">
+      <Filter>Core.Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="LogMessage.cpp">
+      <Filter>Core.Logger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

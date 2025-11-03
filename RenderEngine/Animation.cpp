@@ -7,7 +7,7 @@ Animation::Animation(const std::string& animationPath, AnimModel* model)
 	_scene = importer.ReadFile(animationPath, aiProcess_FlipUVs);
 	if (!_scene || _scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !_scene->mRootNode)
 	{
-		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		Log::Error("ERROR::ASSIMP::" + std::string(importer.GetErrorString()));
 		return;
 	}
 
@@ -26,18 +26,19 @@ Animation::Animation(const aiScene* _scene, AnimModel* model, uint32 index)
     _boneInfoMap = model->_boneInfoMap;
 	_globalInverseTransform = DirectX::XMMatrixIdentity();
 	_rootNode = new AnimationNode();
+	_clipName = _scene->mAnimations[index]->mName.C_Str();
 	_duration = static_cast<float>(_scene->mAnimations[index]->mDuration);
 	_ticksPerSecond = _scene->mAnimations[index]->mTicksPerSecond;
 
-	ReadHierarchyData(_rootNode, _scene->mRootNode);
 	ReadAnimationData(_scene->mAnimations[index], model);
+	ReadHierarchyData(_rootNode, _scene->mRootNode);
 }
+
 void Animation::ReadHierarchyData(AnimationNode* dest, const aiNode* src)
 {
 	if (_boneInfoMap.find(src->mName.C_Str()) != _boneInfoMap.end())
 	{
 		dest->name = src->mName.C_Str();
-		//dest->transform = XMMATRIX(&src->mTransformation.a1);
         dest->transform = Mathf::aiToXMMATRIX(src->mTransformation);
 		dest->numChildren = src->mNumChildren;
 

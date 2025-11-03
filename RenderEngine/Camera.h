@@ -17,8 +17,13 @@ public:
 	Mathf::xVector GetRight();
 	Mathf::xVector GetPosition() const;
 	Mathf::xVector GetViewPosition() const;
+	Mathf::xVector GetUp() const;
 	void SetPosition(DirectX::XMFLOAT3 pos);
 	void SetPosition(float x, float y, float z);
+	void SetRotation(float yaw, float pitch, float roll);
+
+	Mathf::xMatrix GetInvViewMatrix() const;
+	Mathf::xMatrix GetInvProjMatrix() const;
 
 	float yaw;
 	float pitch;
@@ -28,13 +33,13 @@ public:
 	float fnear;
 	float ffar;
 
+	float			_fov{};
+	float			_speed{};
+	float			_mouseSensitivity{};
 private:
 	std::shared_ptr<DirectX11::DeviceResources>	deviceResources{};
 	Mathf::xVector	_position{};
 	Mathf::xVector	_front{};
 	Mathf::xVector	_up{};
-	float			_fov{};
-	float			_speed{};
-	float			_mouseSensitivity{};
 
 };

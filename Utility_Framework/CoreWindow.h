@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <functional>
 #include <unordered_map>
+#include <directxtk/Keyboard.h>
+#include <imgui_internal.h>
 #include "DumpHandler.h"
 
 #include "imgui.h"
@@ -82,7 +84,7 @@ public:
 
         if (msgResult == IDYES)
         {
-            CreateDump(pExceptionPointers, DUMP_TYPE_FULL);
+            CreateDump(pExceptionPointers, g_dumpType);
         }
 
         return msgResult;
@@ -128,15 +130,23 @@ private:
         int x = (rect.right - rect.left - m_width) / 2;
         int y = (rect.bottom - rect.top - m_height) / 2;
 
-        AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+        // 제목 표시줄 높이 가져오기
+        int titleBarHeight = GetSystemMetrics(SM_CYCAPTION); // 제목 표시줄 높이
+        int borderHeight = GetSystemMetrics(SM_CYFRAME);     // 상단 프레임 높이
+        int borderWidth = GetSystemMetrics(SM_CXFRAME);      // 좌우 프레임 너비
+
+        // 클라이언트 영역 조정
+        rect = { 0, 0, m_width, m_height };
+        AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
         m_hWnd = CreateWindowEx(
             0,
             L"CoreWindowApp",
             title,
             WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT,
-            m_width, m_height,
+            x, y,
+            rect.right - rect.left,
+            rect.bottom - rect.top + titleBarHeight + borderHeight,
             nullptr,
             nullptr,
             m_hInstance,
@@ -180,6 +190,11 @@ private:
 
     LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        {
+            return true;
+        }
+
         auto it = m_handlers.find(message);
         if (it != m_handlers.end())
         {

@@ -1,9 +1,10 @@
 #include "Camera.h"
+#include "ImGuiRegister.h"
 
 Camera::Camera(const std::shared_ptr<DirectX11::DeviceResources>& deviceResources, float fov) :
 	_fov(fov), 
 	deviceResources(deviceResources), 
-	_speed(2.0f), 
+	_speed(50.0f), 
 	_position{ Mathf::xVectorZero },
 	_front{ 0.0f, 0.0f, -1.0f, 0.0f },
 	_up{ Mathf::xVectorZero },
@@ -13,8 +14,29 @@ Camera::Camera(const std::shared_ptr<DirectX11::DeviceResources>& deviceResource
 	roll(0.0f), 
 	exposure(1.0f), 
 	fnear(0.1f), 
-	ffar(100.0f)
+	ffar(1000.0f)
 {
+	ImGui::ContextRegister("Camera", [&]()
+	{
+		ImGui::DragFloat("Speed", &_speed, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("Mouse Sensitivity", &_mouseSensitivity, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("Exposure", &exposure, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("Near", &fnear, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("Far", &ffar, 0.1f, 0.0f, 1000.0f);
+		ImGui::DragFloat("Fov", &_fov, 0.1f, 0.0f, 100.0f);
+		ImGui::Separator();
+		float rot[3] = { yaw, pitch, roll };
+		ImGui::DragFloat3("Rotation", rot, 0.1f);
+		yaw = rot[0];
+		pitch = rot[1];
+		roll = rot[2];
+
+		ImGui::Separator();
+		Mathf::Vector3 pos = _position;
+		ImGui::DragFloat3("Position", &pos.x, 0.1f);
+		_position = pos;
+	});
+
 }
 
 Mathf::xMatrix Camera::GetViewMatrix() const
@@ -37,7 +59,7 @@ void Camera::Update(float deltaSeconds)
 {
 	float speed = _speed * deltaSeconds;
 
-	if (InputManagement->IsKeyDown('W'))
+	if (InputManagement->IsKeyPressed('W'))
 	{
 		_position = DirectX::XMVectorMultiplyAdd(
 			Mathf::xVector{ speed, speed, speed, speed },
@@ -45,7 +67,7 @@ void Camera::Update(float deltaSeconds)
 			_position
 		);
 	}
-	if (InputManagement->IsKeyDown('S'))
+	if (InputManagement->IsKeyPressed('S'))
 	{
 		_position = DirectX::XMVectorMultiplyAdd(
 			Mathf::xVector{ -speed, -speed, -speed, -speed },
@@ -53,7 +75,7 @@ void Camera::Update(float deltaSeconds)
 			_position
 		);
 	}
-	if (InputManagement->IsKeyDown('A'))
+	if (InputManagement->IsKeyPressed('A'))
 	{
 		_position = DirectX::XMVectorMultiplyAdd(
 			Mathf::xVector{ -speed, -speed, -speed, -speed },
@@ -61,11 +83,27 @@ void Camera::Update(float deltaSeconds)
 			_position
 		);
 	}
-	if (InputManagement->IsKeyDown('D'))
+	if (InputManagement->IsKeyPressed('D'))
 	{
 		_position = DirectX::XMVectorMultiplyAdd(
 			Mathf::xVector{ speed, speed, speed, speed },
 			GetRight(),
+			_position
+		);
+	}
+	if (InputManagement->IsKeyPressed('E'))
+	{
+		_position = DirectX::XMVectorMultiplyAdd(
+			Mathf::xVector{ speed, speed, speed, speed },
+			GetUp(),
+			_position
+		);
+	}
+	if (InputManagement->IsKeyPressed('Q'))
+	{
+		_position = DirectX::XMVectorMultiplyAdd(
+			Mathf::xVector{ -speed, -speed, -speed, -speed },
+			GetUp(),
 			_position
 		);
 	}
@@ -110,6 +148,11 @@ Mathf::xVector Camera::GetViewPosition() const
 	return _front;
 }
 
+Mathf::xVector Camera::GetUp() const
+{
+	return _up;
+}
+
 void Camera::SetPosition(DirectX::XMFLOAT3 pos)
 {
 	_position = DirectX::XMLoadFloat3(&pos);
@@ -118,4 +161,39 @@ void Camera::SetPosition(DirectX::XMFLOAT3 pos)
 void Camera::SetPosition(float x, float y, float z)
 {
 	_position = Mathf::xVector{ x, y, z, 0.0f };
+}
+
+void Camera::SetRotation(float yaw, float pitch, float roll)
+{
+	this->yaw = yaw;
+	this->pitch = pitch;
+	this->roll = roll;
+}
+
+Mathf::xMatrix Camera::GetInvViewMatrix() const
+{
+	XMVECTOR determinant;
+	Mathf::xMatrix view = GetViewMatrix();
+	Mathf::xMatrix invView = DirectX::XMMatrixInverse(&determinant, view);
+
+	if (XMVectorGetX(determinant) == 0) {
+		// 역행렬이 존재하지 않음 -> 로그 출력 또는 예외 처리
+		throw std::runtime_error("View matrix is singular, cannot invert.");
+	}
+
+	return invView;
+}
+
+Mathf::xMatrix Camera::GetInvProjMatrix() const
+{
+	XMVECTOR determinant;
+	Mathf::xMatrix proj = GetProjectionMatrix();
+	Mathf::xMatrix invProj = DirectX::XMMatrixInverse(&determinant, proj);
+
+	if (XMVectorGetX(determinant) == 0) {
+		// 역행렬이 존재하지 않음
+		throw std::runtime_error("Projection matrix is singular, cannot invert.");
+	}
+
+	return invProj;
 }

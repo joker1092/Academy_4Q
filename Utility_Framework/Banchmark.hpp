@@ -15,6 +15,12 @@ public:
 		printf("Banchmark Elapsed time: %f ms\n", elapsed.count());
 	}
 
+	double GetElapsedTime()
+	{
+		_duration elapsed = _clock::now() - _start;
+		return elapsed.count();
+	}
+
 private:
 	_timePoint _start;
 };

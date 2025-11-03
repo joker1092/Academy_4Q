@@ -30,6 +30,7 @@
     <ClInclude Include="Core.Random.h" />
     <ClInclude Include="Core.Thread.h" />
     <ClInclude Include="CoreWindow.h" />
+    <ClInclude Include="CSVLoader.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="DumpHandler.h" />
@@ -38,9 +39,14 @@
     <ClInclude Include="IObject.h" />
     <ClInclude Include="IWorld.h" />
     <ClInclude Include="LinkedListLib.hpp" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LogIOWriter.h" />
+    <ClInclude Include="LogMessage.h" />
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="PathFinder.h" />
+    <ClInclude Include="SimpleIniFile.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="sqlite_modern_cpp.h" />
     <ClInclude Include="TimeSystem.h" />
     <ClInclude Include="TypeDefinition.h" />
   </ItemGroup>
@@ -49,6 +55,9 @@
     <ClCompile Include="CoreWindow.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="HLSLCompiler.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="LogIOWriter.cpp" />
+    <ClCompile Include="LogMessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MemoryPool.inl" />

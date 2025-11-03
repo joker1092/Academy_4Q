@@ -22,7 +22,7 @@ namespace DirectX11
 	{
 	public:
 		DeviceResources();
-
+		~DeviceResources();
 		void SetWindow(CoreWindow& window);
 		void SetLogicalSize(Sizef logicalSize);
 		void SetDpi(float dpi);
@@ -45,15 +45,16 @@ namespace DirectX11
 		D3D_FEATURE_LEVEL GetDeviceFeatureLevel() const { return m_d3dFeatureLevel; }
 		ID3D11RenderTargetView1* GetBackBufferRenderTargetView() const { return m_d3dRenderTargetView.Get(); }
 		ID3D11Texture2D1* GetBackBuffer() const { return m_backBuffer.Get(); }
+		ID3D11ShaderResourceView* GetBackBufferSRV() const { return m_backBufferSRV.Get(); }
 		ID3D11DepthStencilView* GetDepthStencilView() const { return m_d3dDepthStencilView.Get(); }
 		D3D11_VIEWPORT GetScreenViewport() const { return m_screenViewport; }
 
 		ID2D1Factory3* GetD2DFactory() const { return m_d2dFactory.Get(); }
 		ID2D1Device2* GetD2DDevice() const { return m_d2dDevice.Get(); }
 		ID2D1DeviceContext2* GetD2DDeviceContext() const { return m_d2dContext.Get(); }
-		ID2D1Bitmap1* GetD2DTargetBitmap() const { return m_d2dTargetBitmap.Get(); }
+		ID2D1RenderTarget* GetD2DTarget() const { return m_d2dTarget.Get(); }
 		IDWriteFactory3* GetDWriteFactory() const { return m_dwriteFactory.Get(); }
-		IWICImagingFactory2* GetWicImagingFactory() const { return m_wicFactory.Get(); }
+		IWICImagingFactory2* GetWicImagingFactory() const { return m_wicFactory; }
 
         void BeginEvent(const std::wstring_view& name);
         void EndEvent();
@@ -75,16 +76,18 @@ namespace DirectX11
 
 		ComPtr<ID3D11RenderTargetView1> m_d3dRenderTargetView;
 		ComPtr<ID3D11Texture2D1> m_backBuffer;
+		ComPtr<ID3D11ShaderResourceView> m_backBufferSRV;
 		ComPtr<ID3D11DepthStencilView> m_d3dDepthStencilView;
 		D3D11_VIEWPORT m_screenViewport;
 
 		ComPtr<ID2D1Factory3> m_d2dFactory;
 		ComPtr<ID2D1Device2> m_d2dDevice;
 		ComPtr<ID2D1DeviceContext2> m_d2dContext;
-		ComPtr<ID2D1Bitmap1> m_d2dTargetBitmap;
+		ComPtr<ID2D1RenderTarget> m_d2dTarget;
+		ComPtr<IDXGISurface2> dxgiBackBuffer;
 
 		ComPtr<IDWriteFactory3> m_dwriteFactory;
-		ComPtr<IWICImagingFactory2> m_wicFactory;
+		IWICImagingFactory2* m_wicFactory;
 
 		CoreWindow* m_window;
 

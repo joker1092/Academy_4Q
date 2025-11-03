@@ -40,7 +40,7 @@ public:
             file.read(pData, size);
             file.close();
 
-            *pBytes = size;
+            *pBytes = static_cast<UINT>(size);
             *ppData = pData;
 
             hr = S_OK;
@@ -70,4 +70,6 @@ public:
 private:
     static bool CheckResult(HRESULT hResult, ID3DBlob* shader, ID3DBlob* errorBlob);
     static bool CheckExtension(const std::string_view& shaderExtension);
+
+	static std::unordered_map<std::string, ComPtr<ID3DBlob>> m_shaderCache;
 };

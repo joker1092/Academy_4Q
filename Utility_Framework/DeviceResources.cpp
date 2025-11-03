@@ -35,6 +35,10 @@ DirectX11::DeviceResources::DeviceResources() :
     CreateDeviceResources();
 }
 
+DirectX11::DeviceResources::~DeviceResources()
+{
+}
+
 void DirectX11::DeviceResources::SetWindow(CoreWindow& window)
 {
     m_window = &window;
@@ -230,14 +234,14 @@ void DirectX11::DeviceResources::CreateDeviceIndependentResources()
     );
 
     // WIC(Windows Imaging Component) 팩터리를 초기화합니다. //이거 왜 터지냐? ㅋㅋㅋ
-    //DirectX11::ThrowIfFailed(
-    //	CoCreateInstance(
-    //		CLSID_WICImagingFactory2,
-    //		nullptr,
-    //		CLSCTX_INPROC_SERVER,
-    //		IID_PPV_ARGS(&m_wicFactory)
-    //	)
-    //);
+    DirectX11::ThrowIfFailed(
+    	CoCreateInstance(
+    		CLSID_WICImagingFactory2,
+    		nullptr,
+    		CLSCTX_INPROC_SERVER,
+    		IID_PPV_ARGS(&m_wicFactory)
+    	)
+    );
 }
 
 void DirectX11::DeviceResources::CreateDeviceResources()
@@ -493,20 +497,24 @@ void DirectX11::DeviceResources::CreateWindowSizeDependentResources()
                 m_dpi
             );
 
-        ComPtr<IDXGISurface2> dxgiBackBuffer;
         DirectX11::ThrowIfFailed(
             m_swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackBuffer))
         );
 
-        DirectX11::ThrowIfFailed(
-            m_d2dContext->CreateBitmapFromDxgiSurface(
-                dxgiBackBuffer.Get(),
-                &bitmapProperties,
-                &m_d2dTargetBitmap
-            )
-        );
+		D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+			D2D1_RENDER_TARGET_TYPE_DEFAULT,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+			0,
+			0,
+			D2D1_RENDER_TARGET_USAGE_NONE,
+			D2D1_FEATURE_LEVEL_DEFAULT
+		);
 
-        m_d2dContext->SetTarget(m_d2dTargetBitmap.Get());
+		m_d2dFactory->CreateDxgiSurfaceRenderTarget(
+			dxgiBackBuffer.Get(),
+            &props,
+			&m_d2dTarget
+		);
         m_d2dContext->SetDpi(m_effectiveDpi, m_effectiveDpi);
         m_d2dContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
     }
@@ -520,7 +528,7 @@ void DirectX11::DeviceResources::UpdateRenderTargetSize()
     {
         float width = DirectX11::ConvertDipsToPixels(m_logicalSize.width, m_dpi);
         float height = DirectX11::ConvertDipsToPixels(m_logicalSize.height, m_dpi);
-        if (max(width, height) > DisplayMetrics::WidthThreshold && min(width, height) > DisplayMetrics::HeightThreshold)
+        if (std::max(height, width) > DisplayMetrics::WidthThreshold && std::min(height, width) > DisplayMetrics::HeightThreshold)
         {
             m_effectiveDpi /= 2.0f;
         }
@@ -529,6 +537,6 @@ void DirectX11::DeviceResources::UpdateRenderTargetSize()
     m_outputSize.width = DirectX11::ConvertDipsToPixels(m_logicalSize.width, m_effectiveDpi);
     m_outputSize.height = DirectX11::ConvertDipsToPixels(m_logicalSize.height, m_effectiveDpi);
 
-    m_outputSize.width = max(m_outputSize.width, 1);
-    m_outputSize.height = max(m_outputSize.height, 1);
+    m_outputSize.width = std::max(1.f, m_outputSize.width);
+    m_outputSize.height = std::max(1.f, m_outputSize.height);
 }

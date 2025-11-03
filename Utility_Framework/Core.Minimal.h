@@ -5,3 +5,6 @@
 #include "Core.Memory.hpp"
 #include "Core.Console.hpp"
 #include "PathFinder.h"
+#include "LogIOWriter.h"
+#include "Logger.h"
+#include "CSVLoader.h"

@@ -12,5 +12,5 @@ void main(int3 DispatchID : SV_DispatchThreadID)
 {
 	float4 color = SourceA[DispatchID.xy] * SourceB[DispatchID.xy];
 
-	Output[DispatchID.xy] = color;
+    Output[DispatchID.xy] = pow(color, 1.0f / 2.2f);
 }

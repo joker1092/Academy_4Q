@@ -3,11 +3,15 @@
 
 cbuffer CameraBuffer                     : register(b0)
 {
-	matrix	            VP;
-	float3	            CameraPosition;
-	float	            Exposure;
-	float3	            ViewDir;
-	float 				_placeholder4;
+    matrix VP;
+    float3 CameraPosition;
+    float Exposure;
+    float3 ViewDir;
+    float _placeholder4;
+    float3 Up;
+    float _placeholder5;
+    float3 Right;
+    float _placeholder6;
 };
 //may_be_unused
 cbuffer ModelBuffer : register(b1)

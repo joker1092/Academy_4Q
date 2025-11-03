@@ -1,9 +1,14 @@
 ﻿#include "App.h"
 #include "InputManager.h"
 #include "Utility_Framework/PathFinder.h"
+#include "Utility_Framework/DumpHandler.h"
 #include "Utility_Framework/Core.Console.hpp"
+#include <imgui_impl_win32.h>
+#include <ppltasks.h>
+#include <ppl.h>
+#include "D2DLib/UIController.h"
 
-#ifdef _DEBUG
+#ifdef EDITOR
 #ifdef UNICODE
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 #else
@@ -14,7 +19,26 @@
 MAIN_ENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
 	PathFinder::Initialize();
+	Log::startLOG("logs.db");
+	Concurrency::SchedulerPolicy policy
+	{
+		3,
+		Concurrency::MinConcurrency,
+		6,
+		Concurrency::MaxConcurrency,
+		8,
+		Concurrency::ContextPriority,
+		THREAD_PRIORITY_HIGHEST
+	};
+	Concurrency::Scheduler::SetDefaultSchedulerPolicy(policy);
+	Concurrency::task init = concurrency::create_task([]()
+	{
+		return std::string("SUCCESS");
+	});
+	std::string initResult = init.get();
+	Console.WriteLine("Multithreaded initialization: {}", initResult);
 	//시작
+	UIController::GetInstance()->EventInitialize();
 	Core::App app;
 	app.Initialize(hInstance, L"4Q Editor", 1920, 1080);
 
@@ -24,7 +48,7 @@ MAIN_ENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 void Core::App::Initialize(HINSTANCE hInstance, const wchar_t* title, int width, int height)
 {
 	CoreWindow coreWindow(hInstance, title, width, height);
-
+	CoreWindow::SetDumpType(DUMP_TYPE::DUMP_TYPE_FULL);
 	m_deviceResources = std::make_shared<DirectX11::DeviceResources>();
 	SetWindow(coreWindow);
 	InputManagement->Initialize(coreWindow.GetHandle());
@@ -36,6 +60,7 @@ void Core::App::SetWindow(CoreWindow& coreWindow)
 {
 	m_deviceResources->SetWindow(coreWindow);
 	coreWindow.RegisterHandler(WM_INPUT, this, &App::ProcessRawInput);
+	coreWindow.RegisterHandler(WM_KEYDOWN, this, &App::HandleCharEvent);
 	coreWindow.RegisterHandler(WM_CLOSE, this, &App::Shutdown);
 }
 
@@ -74,5 +99,22 @@ LRESULT Core::App::Shutdown(HWND hWnd, WPARAM wParam, LPARAM lParam)
 LRESULT Core::App::ProcessRawInput(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
 	InputManagement->ProcessRawInput(lParam);
+
+	return 0;
+}
+
+LRESULT Core::App::HandleCharEvent(HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	ImGuiIO& io = ImGui::GetIO();
+
+	wchar_t wch = 0;
+	static BYTE KeyState[256];
+	GetKeyboardState(KeyState);
+	// Virtual Key를 Unicode 문자로 변환
+	if (ToUnicode((UINT)wParam, (UINT)lParam, KeyState, &wch, 1, 0) > 0)
+	{
+		io.AddInputCharacter(wch);
+	}
+
 	return 0;
 }

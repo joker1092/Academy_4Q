@@ -10,8 +10,7 @@ namespace InstancedModelID
 	{
 		if (2500u == globalID)
 		{
-			WARN("InstancedModelID::GetFreeID() : globalID reached MAX(2500)");
-			//std::terminate();
+			Log::Warning("InstancedModelID::GetFreeID() : globalID reached MAX(2500)");
 			if (freeIDs.empty())
 			{
 				return globalID++;
@@ -34,8 +33,12 @@ namespace InstancedModelID
 struct InstancedModel
 {
 	uint32 instancedID{};
-	std::shared_ptr<Model> model;
-	std::shared_ptr<AnimModel> animModel;
+	std::string instancedName{};
+	std::shared_ptr<Model>		model;
+	std::shared_ptr<AnimModel>	animModel;
+	OutlineProperties			outline;
+	
+	DirectX::XMMATRIX		ownerMatrix{ DirectX::XMMatrixIdentity() };
 
 	DirectX::XMVECTOR		position{ Mathf::xVectorZero };
 	DirectX::XMVECTOR		rotation{ DirectX::XMQuaternionIdentity() };
@@ -44,6 +47,9 @@ struct InstancedModel
 	float rotationX = 0.f;
 	float rotationY = 0.f;
 	float rotationZ = 0.f;
+
+	bool isVisiable{ true };
+	bool isDestroyMark{ false };
 
 	void SetRotation(float x, float y, float z)
 	{
@@ -55,10 +61,11 @@ struct InstancedModel
 
 	DirectX::XMMATRIX GetMatrix() const
 	{
+		DirectX::XMVECTOR convertPos = DirectX::XMVectorMultiply(position, { 10.f, 10.f, 10.f, 0.f });
 		DirectX::XMMATRIX trans = DirectX::XMMatrixScalingFromVector(scale);
 		trans *= DirectX::XMMatrixRotationQuaternion(rotation);
-		trans *= DirectX::XMMatrixTranslationFromVector(position);
-		return trans;
+		trans *= DirectX::XMMatrixTranslationFromVector(convertPos);
+		return trans * ownerMatrix;
 	}
 
 	inline InstancedModel() : 

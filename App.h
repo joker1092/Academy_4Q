@@ -2,7 +2,7 @@
 
 #include "resource.h"
 #include "Utility_Framework/CoreWindow.h"
-#include "Utility_Framework/Core.Definition.h"
+#include "Utility_Framework/Core.Minimal.h"
 #include "Dx11Main.h"
 #include <memory>
 
@@ -19,6 +19,7 @@ namespace Core
 		void Run();
 		LRESULT Shutdown(HWND hWnd, WPARAM wParam, LPARAM lParam);
 		LRESULT ProcessRawInput(HWND hWnd, WPARAM wParam, LPARAM lParam);
+		LRESULT HandleCharEvent(HWND hWnd, WPARAM wParam, LPARAM lParam);
 
 	private:
 		std::shared_ptr<DirectX11::DeviceResources> m_deviceResources;

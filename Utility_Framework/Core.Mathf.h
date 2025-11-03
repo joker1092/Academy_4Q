@@ -1,5 +1,6 @@
 #pragma once
 #include "Core.Definition.h"
+#include <nlohmann/json.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -39,7 +40,7 @@ namespace Mathf
 
     template<class T> void Clamp(T& val, const T lo, const T hi)
     {
-        val = max(lo, min(hi, val));
+        val = std::max(std::min(val, hi), lo);
     }
 
 	template<class T> void Wrap(T& val, const T lo, const T hi)
@@ -128,11 +129,7 @@ namespace Mathf
 
     inline DirectX::XMMATRIX aiToXMMATRIX(aiMatrix4x4 in)
     {
-        // aiMatrix is row major and so is directx
-        return DirectX::XMMATRIX(in.a1, in.a2, in.a3, in.a4,
-                                 in.b1, in.b2, in.b3, in.b4,
-                                 in.c1, in.c2, in.c3, in.c4,
-                                 in.d1, in.d2, in.d3, in.d4);
+        return XMMatrixTranspose(XMMATRIX(&in.a1));
     }
 
     inline float3 aiToFloat3(aiVector3D in)
@@ -145,5 +142,19 @@ namespace Mathf
         return float2(in.x, in.y);
     }
 
+	inline Mathf::Vector2 jsonToVector2(const nlohmann::json& j)
+	{
+		return Mathf::Vector2(j[0].get<float>(), j[1].get<float>());
+	}
+
+	inline Mathf::Vector3 jsonToVector3(const nlohmann::json& j)
+	{
+		return Mathf::Vector3(j[0].get<float>(), j[1].get<float>(), j[2].get<float>());
+	}
+
+	inline Mathf::Color4 jsonToColor4(const nlohmann::json& j)
+	{
+		return Mathf::Color4(j[0].get<float>(), j[1].get<float>(), j[2].get<float>(), j[3].get<float>());
+	}
 
 }

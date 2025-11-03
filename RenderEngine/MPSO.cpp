@@ -10,6 +10,7 @@ MPSO::MPSO(LogicalDevice* device) : _device(device)
 	CreateBuffers();
 	CreateTextures();
 	CreateSamplers();
+	InitializeBlendState();
 	CreateComputeResources();
 }
 
@@ -20,14 +21,16 @@ MPSO::~MPSO()
 
 void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 {
+	FinishBlendState();
+
 	_target->ClearView();
 	_shadowtarget->ClearView();
-
+	_meshEditTarget->ClearView();
 	_device->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	_cameraBuffer = cameraBuffer;
 	// Draw cubemap first
-	DrawCubemap(cameraBuffer);
-
+	//DrawCubemap(cameraBuffer);
 	// Change rasterizer and depth stencil for shadow map
 	_device->SetRasterizer(RasterizerType::SolidFrontCull);
 	_device->SetDepthStencil(DepthStencilType::Less);
@@ -56,13 +59,17 @@ void MPSO::Prepare(CameraBuffer* cameraBuffer, SceneBuffer* sceneBuffer)
 	DX::States::Context->VSSetShader(_shadowvs.Get(), nullptr, 0);
 	DX::States::Context->PSSetShader(_shadowps.Get(), nullptr, 0);
 
-
-	float near_plane = 5.f, far_plane = 100.0f;
-	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(24.f, 24.f, near_plane, far_plane);
+	float near_plane = 0.01f, far_plane = 1000.0f;
+	DirectX::XMMATRIX lightProjection = DirectX::XMMatrixOrthographicRH(
+		256.f, 
+		256.f,
+		near_plane, 
+		far_plane
+	);
 
 	DirectX::XMMATRIX lookdir = DirectX::XMMatrixLookAtRH(
 		DirectX::XMLoadFloat3(&sceneBuffer->sunpos),
-		DirectX::XMVECTOR{ 0.0f,0.0f,0.0f,0.0f },
+		DirectX::XMVECTOR{ 0.0f,-20.0f,0.0f,0.0f },
 		DirectX::XMVECTOR{ 0.0f,1.0f,0.0f,0.0f }
 	);
 
@@ -99,7 +106,6 @@ void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
 
 	DX::States::Context->VSSetConstantBuffers(0, 1, _mvpbuffer.GetAddressOf());
 
-
 	// Copy MVP to GPU
 	D3D11_MAPPED_SUBRESOURCE mat = _mvpbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
 	memcpy(mat.pData, static_cast<const void*>(&mvp), sizeof(MVPBuffer));
@@ -108,7 +114,6 @@ void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
 
 	DX::States::Context->PSSetSamplers(0, 1, _cubemapSampler.GetAddressOf());
 	DX::States::Context->PSSetShaderResources(0, 1, _skybox->material->textures.diffuse.GetAddressOf());
-
 
 	UINT stride = _skybox->bvertex.Stride();
 	const UINT offset = 0;
@@ -120,6 +125,15 @@ void MPSO::DrawCubemap(CameraBuffer* cameraBuffer)
 
 	// Draw
 	DX::States::Context->DrawIndexed(_skybox->bindex.Size(), 0, 0);
+}
+
+void MPSO::SetWireframeConstants(const ModelBuffer* modelbuffer)
+{
+	DX::States::Context->VSSetConstantBuffers(1, 1, _modelbuffer.GetAddressOf());
+	// Copy per model constants
+	D3D11_MAPPED_SUBRESOURCE mat = _modelbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(modelbuffer), sizeof(ModelBuffer));
+	_modelbuffer.Unmap();
 }
 
 void MPSO::SetAnimeConstants(const JointBuffer* modelbuffer)
@@ -139,6 +153,15 @@ void MPSO::SetModelConstants(const ModelBuffer* modelbuffer)
 	D3D11_MAPPED_SUBRESOURCE mat = _modelbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
 	memcpy(mat.pData, static_cast<const void*>(modelbuffer), sizeof(ModelBuffer));
 	_modelbuffer.Unmap();
+}
+
+void MPSO::SetAnimeOutlineConstants(const JointBuffer* outlinebuffer)
+{
+	DX::States::Context->VSSetConstantBuffers(1, 1, _jointbuffer.GetAddressOf());
+	// Copy per model constants
+	D3D11_MAPPED_SUBRESOURCE mat = _jointbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(outlinebuffer), sizeof(JointBuffer));
+	_jointbuffer.Unmap();
 }
 
 void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<Vertex>& vertices)
@@ -162,6 +185,51 @@ void MPSO::DrawMeshShadows(const Buffer<Index>& indices, const Buffer<AnimVertex
 	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
 }
 
+void MPSO::DrawBillboard(InstancedBillboard& billboard)
+{
+	UINT stride = billboard._billboard->bvertex.Stride();
+	const UINT offset = 0;
+	uint32& currentTextureIndex = billboard.currentTexture;
+
+	if (currentTextureIndex >= billboard._billboard->Textures.size())
+	{
+		currentTextureIndex = billboard._billboard->Textures.size() * 0.25;
+	}
+
+	ID3D11ShaderResourceView* views[]
+	{
+		billboard._billboard->Textures[currentTextureIndex].Get()
+	};
+
+	billboard._billboard->CenterVertex.Position = billboard.Center;
+
+	D3D11_MAPPED_SUBRESOURCE vertext = billboard._billboard->bvertex.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(vertext.pData, static_cast<const void*>(&billboard._billboard->CenterVertex), sizeof(BillboardVertex));
+	billboard._billboard->bvertex.Unmap();
+
+	DX::States::Context->PSSetShaderResources(0, 1, views);
+	DX::States::Context->IASetVertexBuffers(0, 1, billboard._billboard->bvertex.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	D3D11_MAPPED_SUBRESOURCE size = billboard._billboard->bsize.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(size.pData, static_cast<const void*>(&billboard.Size), sizeof(float));
+	billboard._billboard->bsize.Unmap();
+
+	DX::States::Context->GSSetConstantBuffers(1, 1, billboard._billboard->bsize.GetAddressOf());
+
+	DX::States::Context->Draw(billboard._billboard->bvertex.Size(), 0);
+}
+
+void MPSO::SetMeshEditorTarget()
+{
+	_device->SetRenderTarget(_meshEditTarget.get());
+}
+
+void MPSO::EndMeshEditorTarget()
+{
+	_device->SetRenderTargets(_target.get(), _shadowtarget.get());
+}
+
 void MPSO::FinishShadows()
 {
 	_device->SetRenderTargets(_target.get(), _shadowtarget.get());
@@ -172,7 +240,6 @@ void MPSO::FinishShadows()
 
 	DX::States::Context->PSSetShader(_ps.Get(), NULL, 0);
 	DX::States::Context->VSSetShader(_vs.Get(), NULL, 0);
-
 
 	ID3D11Buffer* psbuffers[]
 	{
@@ -190,14 +257,14 @@ void MPSO::FinishShadows()
 	DX::States::Context->VSSetConstantBuffers(0, 3, vsbuffers);
 	DX::States::Context->PSSetConstantBuffers(0, 2, psbuffers);
 
-
 	ID3D11SamplerState* samplers[4]{ _anisotropicSampler.Get(), _linearSampler.Get(), _clampSampler.Get(), _iblSampler.Get() };
 	DX::States::Context->PSSetSamplers(0, 4, samplers);
 
-	DX::States::Context->PSSetShaderResources(6, 1, _skybox->material->textures.diffuse.GetAddressOf());
-	DX::States::Context->PSSetShaderResources(7, 1, _shadowmap.GetAddressOf()); // Bind shadowmap
-	DX::States::Context->PSSetShaderResources(8, 1, IBLSpecular.GetAddressOf());
-	DX::States::Context->PSSetShaderResources(9, 1, IBLBrdf.GetAddressOf());
+	DX::States::Context->PSSetShaderResources(4, 1, _skybox->material->textures.diffuse.GetAddressOf());
+	DX::States::Context->PSSetShaderResources(5, 1, _shadowmap.GetAddressOf()); // Bind shadowmap
+	DX::States::Context->PSSetShaderResources(6, 1, IBLSpecular.GetAddressOf());
+	DX::States::Context->PSSetShaderResources(7, 1, IBLBrdf.GetAddressOf());
+
 }
 
 void MPSO::SetAnimeShader()
@@ -214,6 +281,68 @@ void MPSO::SetAnimeShadowsShader()
 	DX::States::Context->PSSetShader(_shadowps.Get(), nullptr, 0);
 }
 
+void MPSO::SetWireframeShader()
+{
+	_device->SetRasterizer(RasterizerType::Wireframe);
+	DX::States::Context->IASetInputLayout(_debugBoxInputLayout.Get());
+	DX::States::Context->VSSetShader(_wireframevs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_wireframeps.Get(), nullptr, 0);
+}
+
+void MPSO::SetOutlineShader()
+{
+	_device->SetRasterizer(RasterizerType::SolidFrontCull);
+	DX::States::Context->IASetInputLayout(_outlineInputLayout.Get());
+	DX::States::Context->VSSetShader(_outlinevs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_outlineps.Get(), nullptr, 0);
+}
+
+void MPSO::SetOutlineAnimShader()
+{
+	//TODO: vs and ps for anim outline
+	DX::States::Context->IASetInputLayout(_animInputLayout.Get());
+	DX::States::Context->VSSetShader(_outlineavs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_outlineps.Get(), nullptr, 0);
+}
+
+void MPSO::SetBillboardShader(CameraBuffer* cameraBuffer)
+{
+	SetBlendState();
+	_device->SetRasterizer(RasterizerType::Solid);
+
+	ID3D11SamplerState* samplers[4]{ _anisotropicSampler.Get(), _linearSampler.Get(), _clampSampler.Get(), _iblSampler.Get() };
+	DX::States::Context->PSSetSamplers(0, 4, samplers);
+
+	DX::States::Context->IASetInputLayout(_billboardInputLayout.Get());
+	DX::States::Context->VSSetShader(_billboardvs.Get(), nullptr, 0);
+	DX::States::Context->GSSetShader(_billboardgs.Get(), nullptr, 0);
+	DX::States::Context->PSSetShader(_billboardps.Get(), nullptr, 0);
+
+	D3D11_MAPPED_SUBRESOURCE mat = _camerabuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(cameraBuffer), sizeof(CameraBuffer));
+	_camerabuffer.Unmap();
+
+	DX::States::Context->GSSetConstantBuffers(0, 1, _camerabuffer.GetAddressOf());
+}
+
+void MPSO::FinishBillboardsShader()
+{
+	DX::States::Context->GSSetShader(nullptr, nullptr, 0);
+	DX::States::Context->GSGetConstantBuffers(0, 0, nullptr);
+}
+
+void MPSO::SetBlendState()
+{
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f }; // 블렌드 팩터 (사용되지 않음)
+	UINT sampleMask = 0xffffffff; // 샘플 마스크 (모든 샘플 활성화)
+	DX::States::Context->OMSetBlendState(_blendState.Get(), blendFactor, sampleMask);
+}
+
+void MPSO::FinishBlendState()
+{
+	DX::States::Context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+}
+
 void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices, const std::shared_ptr<Material>& material)
 {
 	DX::States::Context->PSSetConstantBuffers(2, 1, _materialbuffer.GetAddressOf());
@@ -228,9 +357,7 @@ void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<Vertex>& vertices
 	ID3D11ShaderResourceView* views[]
     {
 		material->textures.diffuse.Get(),
-		material->textures.metallic.Get(),
-		material->textures.roughness.Get(),
-		material->textures.occlusion.Get(),
+		material->textures.occlusionMetallicRoughness.Get(),
 		material->textures.emissive.Get(),
 		material->textures.normal.Get(),
 	};
@@ -256,13 +383,69 @@ void MPSO::DrawMesh(const Buffer<Index>& indices, const Buffer<AnimVertex>& vert
 	ID3D11ShaderResourceView* views[]
 	{
 		material->textures.diffuse.Get(),
-		material->textures.metallic.Get(),
-		material->textures.roughness.Get(),
-		material->textures.occlusion.Get(),
+		material->textures.occlusionMetallicRoughness.Get(),
 		material->textures.emissive.Get(),
 		material->textures.normal.Get(),
 	};
 
+	DX::States::Context->PSSetShaderResources(0, ARRAYSIZE(views), views);
+	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
+}
+
+void MPSO::DrawOutline(const Buffer<Index>& indices, const Buffer<Vertex>& vertices, const OutlineProperties& _outline)
+{
+	DX::States::Context->PSSetConstantBuffers(1, 1, _materialbuffer.GetAddressOf());
+	DX::States::Context->VSSetConstantBuffers(3, 1, _outlinebuffer.GetAddressOf());
+	DX::States::Context->PSSetConstantBuffers(3, 1, _outlinebuffer.GetAddressOf());
+
+	OutlineProperties mapping_outline = _outline;
+	D3D11_MAPPED_SUBRESOURCE outline = _outlinebuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(outline.pData, static_cast<const void*>(&mapping_outline), sizeof(OutlineProperties));
+	_outlinebuffer.Unmap();
+
+	UINT stride = vertices.Stride();
+	const UINT offset = 0;
+
+	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
+}
+
+void MPSO::DrawOutline(const Buffer<Index>& indices, const Buffer<AnimVertex>& vertices, const OutlineProperties& _outline)
+{
+	DX::States::Context->VSSetConstantBuffers(3, 1, _outlinebuffer.GetAddressOf());
+	DX::States::Context->PSSetConstantBuffers(3, 1, _outlinebuffer.GetAddressOf());
+
+	OutlineProperties mapping_outline = _outline;
+	D3D11_MAPPED_SUBRESOURCE outline = _outlinebuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(outline.pData, static_cast<const void*>(&mapping_outline), sizeof(OutlineProperties));
+	_outlinebuffer.Unmap();
+
+	UINT stride = vertices.Stride();
+	const UINT offset = 0;
+
+	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
+	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
+	DX::States::Context->DrawIndexed(indices.Size(), 0, 0);
+}
+
+void MPSO::DrawDebugBox(const Buffer<UINT16>& indices, const Buffer<DirectX::VertexPositionNormalTexture>& vertices, const std::shared_ptr<Material>& material)
+{
+	DX::States::Context->PSSetConstantBuffers(2, 1, _materialbuffer.GetAddressOf());
+	D3D11_MAPPED_SUBRESOURCE mat = _materialbuffer.Map(D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0);
+	memcpy(mat.pData, static_cast<const void*>(&material->properties), sizeof(MaterialProperties));
+	_materialbuffer.Unmap();
+	UINT stride = vertices.Stride();
+	const UINT offset = 0;
+	ID3D11ShaderResourceView* views[]
+	{
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+	};
 	DX::States::Context->PSSetShaderResources(0, ARRAYSIZE(views), views);
 	DX::States::Context->IASetVertexBuffers(0, 1, vertices.GetAddressOf(), &stride, &offset);
 	DX::States::Context->IASetIndexBuffer(indices.Get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
@@ -280,17 +463,18 @@ void MPSO::Finish(BOOL blurShadows, FxaaBuffer* fxaabuffer)
 
 	// Combine shadows and rendered mesh
 	Blend(blurShadows);
-	//DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _blendOutput.Get());
 
 	// Do simplistic fxaa
 	if (fxaabuffer != nullptr)
 	{
 		FXAA(fxaabuffer);
-		DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _fxaaOutput.Get());
+		DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(),
+			_fxaaOutput.Get());
 	}
 	else
 	{
-		DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(), _blendOutput.Get());
+		DX::States::Context->CopyResource(_device->GetDeviceResources()->GetBackBuffer(),
+			_blendOutput.Get());
 	}
 }
 
@@ -346,6 +530,26 @@ void MPSO::CreateInputLayout()
 	}
 
 	{
+		const D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT",   1, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
+			&layout[0],
+			ARRAYSIZE(layout),
+			_outlinevs.GetBufferPointer(),
+			_outlinevs.GetBufferSize(),
+			&_outlineInputLayout));
+
+		DirectX::SetName(_outlineInputLayout.Get(), "Outline IA layout");
+	}
+
+	{
 		// Cubemap
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
@@ -364,6 +568,37 @@ void MPSO::CreateInputLayout()
 		DirectX::SetName(_cubemapInputLayout.Get(), "Cubemap IA layout");
 	}
 
+	{
+		// Billboard
+		const D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
+			&layout[0],
+			ARRAYSIZE(layout),
+			_billboardvs.GetBufferPointer(),
+			_billboardvs.GetBufferSize(),
+			&_billboardInputLayout));
+		DirectX::SetName(_billboardInputLayout.Get(), "Billboard IA layout");
+	}
+
+	//debug box wireframe
+	{
+		const D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT,  0, AUTO_ALIGNED,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT,	0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,     0, AUTO_ALIGNED, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateInputLayout(
+			&layout[0],
+			ARRAYSIZE(layout),
+			_wireframevs.GetBufferPointer(),
+			_wireframevs.GetBufferSize(),
+			&_debugBoxInputLayout));
+		DirectX::SetName(_debugBoxInputLayout.Get(), "Debug Box IA layout");
+	}
 }
 
 void MPSO::InitializeShaders()
@@ -373,7 +608,7 @@ void MPSO::InitializeShaders()
 
 	if (_vs.Get() == nullptr || _ps.Get() == nullptr)
 	{
-		ERR("Unable to load mesh shaders in MPSO");
+		Log::Error("Unable to load mesh shaders in MPSO");
 	}
 
 	_animvs = AssetsSystem->VertexShaders["mesh-anime"];
@@ -381,7 +616,7 @@ void MPSO::InitializeShaders()
 
 	if (_animvs.Get() == nullptr || _shadowmapvs.Get() == nullptr)
 	{
-		ERR("Unable to load animated mesh shaders in MPSO");
+		Log::Error("Unable to load animated mesh shaders in MPSO");
 	}
 
 	_cubemapvs = AssetsSystem->VertexShaders["cubemap"];
@@ -389,7 +624,7 @@ void MPSO::InitializeShaders()
 
 	if (_cubemapvs.Get() == nullptr || _cubemapps.Get() == nullptr)
 	{
-		ERR("Unable to load cubemap shaders in MPSO");
+		Log::Error("Unable to load cubemap shaders in MPSO");
 	}
 
 	_shadowvs = AssetsSystem->VertexShaders["shadow"];
@@ -397,7 +632,7 @@ void MPSO::InitializeShaders()
 
 	if (_shadowvs.Get() == nullptr || _shadowps.Get() == nullptr)
 	{
-		ERR("Unable to load shadow shaders in MPSO");
+		Log::Error("Unable to load shadow shaders in MPSO");
 	}
 
 	_shadowblurcsX = AssetsSystem->ComputeShaders["shadowblur-x"];
@@ -407,8 +642,60 @@ void MPSO::InitializeShaders()
 
 	if (_shadowblurcsX.Get() == nullptr || _shadowblurcsY.Get() == nullptr || _blendcs.Get() == nullptr || _fxaacs.Get() == nullptr)
 	{
-		ERR("Unable to load compute shaders in MPSO");
+		Log::Error("Unable to load compute shaders in MPSO");
 	}
+
+	_laplacianCS = AssetsSystem->ComputeShaders["lapacian-filter"];
+	if (_laplacianCS.Get() == nullptr)
+	{
+		Log::Error("Unable to load laplacian filter compute shader in MPSO");
+	}
+
+	_outlinevs = AssetsSystem->VertexShaders["outline"];
+	_outlineps = AssetsSystem->PixelShaders["outline"];
+	_outlineavs = AssetsSystem->VertexShaders["outline-anime"];
+
+	if (_outlinevs.Get() == nullptr || _outlineps.Get() == nullptr || _outlineavs.Get() == nullptr)
+	{
+		Log::Error("Unable to load outline shaders in MPSO");
+	}
+
+	_billboardvs = AssetsSystem->VertexShaders["billboard"];
+	_billboardgs = AssetsSystem->GeometryShaders["billboard"];
+	_billboardps = AssetsSystem->PixelShaders["billboard-basic"];
+
+	if (_billboardvs.Get() == nullptr || _billboardgs.Get() == nullptr || _billboardps.Get() == nullptr)
+	{
+		Log::Error("Unable to load billboard shaders in MPSO");
+	}
+
+	_wireframevs = AssetsSystem->VertexShaders["wireframe"];
+	_wireframeps = AssetsSystem->PixelShaders["wireframe"];
+
+	if (_wireframevs.Get() == nullptr || _wireframeps.Get() == nullptr)
+	{
+		Log::Error("Unable to load wireframe shaders in MPSO");
+	}
+
+}
+
+void MPSO::InitializeBlendState()
+{
+	D3D11_BLEND_DESC blendDesc = {};
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE::D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	DirectX11::ThrowIfFailed(DX::States::Device->CreateBlendState(&blendDesc, _blendState.ReleaseAndGetAddressOf()));
+	// 어차피 포워드 렌더링만 하고 있어서 문제 없음.
+	// 컨텍스트에서 블렌드 상태 설정
 }
 
 void MPSO::CreateBuffers()
@@ -462,6 +749,12 @@ void MPSO::CreateBuffers()
 
 	// Updated irregulary, could be non-dynamic resource
 	_scenebuffer = Buffer<SceneBuffer>(
+		D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
+		D3D11_CPU_ACCESS_WRITE
+	);
+
+	_outlinebuffer = Buffer<OutlineProperties>(
 		D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 		D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 		D3D11_CPU_ACCESS_WRITE
@@ -571,13 +864,23 @@ void MPSO::CreateTextures()
             _device->GetDeviceResources()->GetLogicalSize().height
 		);
 
-		// Create ImGui texture
-		ImGui::ContextRegister("Shadow Map", [&]()
-		{
-			ImGui::Image((ImTextureID)_shadowtarget->GetSRV(), ImVec2(300, 300));
-		});
-
 		_shadowtarget->color = DirectX::XMVECTORF32{ 1.0f, 1.0f, 1.0f, 1.0f };
+	}
+
+	{
+		_outlineTarget = std::make_unique<RenderTarget>(
+			DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT,
+			_device->GetDeviceResources()->GetLogicalSize().width,
+			_device->GetDeviceResources()->GetLogicalSize().height
+		);
+	}
+
+	{
+		_meshEditTarget = std::make_unique<RenderTarget>(
+			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+			_device->GetDeviceResources()->GetLogicalSize().width,
+			_device->GetDeviceResources()->GetLogicalSize().height
+		);
 	}
 
 }
@@ -627,8 +930,8 @@ void MPSO::CreateComputeResources()
 	{
 
 		D3D11_TEXTURE2D_DESC blendDesc = {};
-		blendDesc.Width = _device->GetDeviceResources()->GetLogicalSize().width;
-		blendDesc.Height = _device->GetDeviceResources()->GetLogicalSize().height;
+		blendDesc.Width = static_cast<UINT>(_device->GetDeviceResources()->GetLogicalSize().width);
+		blendDesc.Height = static_cast<UINT>(_device->GetDeviceResources()->GetLogicalSize().height);
 		blendDesc.MipLevels = 1;
 		blendDesc.ArraySize = 1;
 		blendDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_FLOAT;
@@ -734,10 +1037,100 @@ void MPSO::CreateComputeResources()
 		);
 	}
 
+	// lapacian output(정확히는 소벨니다. 이름변경 요망)
+	{
+		D3D11_TEXTURE2D_DESC laplacianDesc = {};
+		laplacianDesc.Width = _device->GetDeviceResources()->GetLogicalSize().width;
+		laplacianDesc.Height = _device->GetDeviceResources()->GetLogicalSize().height;
+		laplacianDesc.MipLevels = 1;
+		laplacianDesc.ArraySize = 1;
+		laplacianDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		laplacianDesc.Usage = D3D11_USAGE_DEFAULT;
+		laplacianDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE;
+		laplacianDesc.CPUAccessFlags = 0;
+		laplacianDesc.MiscFlags = 0;
+		laplacianDesc.SampleDesc.Count = 1;
+		laplacianDesc.SampleDesc.Quality = 0;
+
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateTexture2D(&laplacianDesc, nullptr, _laplacianOutput.ReleaseAndGetAddressOf()));
+
+		CD3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc(
+			D3D11_UAV_DIMENSION::D3D11_UAV_DIMENSION_TEXTURE2D,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			1
+		);
+		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(
+			D3D11_SRV_DIMENSION::D3D11_SRV_DIMENSION_TEXTURE2D,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			1
+		);
+
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateUnorderedAccessView(_laplacianOutput.Get(), &uavDesc, _laplacianOutputUAV.ReleaseAndGetAddressOf()));
+		DirectX11::ThrowIfFailed(DX::States::Device->CreateShaderResourceView(_laplacianOutput.Get(), &srvDesc, _laplacianOutputSRV.ReleaseAndGetAddressOf()));
+	}
+
+	if (_laplacianBuffer.Get() == nullptr)
+	{
+		_laplacianBuffer = Buffer<lapacianFilterProperties>(
+			D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			D3D11_USAGE::D3D11_USAGE_DEFAULT,
+			NULL
+		);
+	}
+
 	BlurParameters params = {};
 	params.textureSize = DirectX::XMINT2{ static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().width), static_cast<int>(_device->GetDeviceResources()->GetLogicalSize().height) };
 
 	DX::States::Context->UpdateSubresource(_blurbuffer.Get(), 0, NULL, &params, NULL, NULL);
+}
+
+void MPSO::GenerateNeutralLUT()
+{
+	constexpr uint32 LUT_SIZE = 16;
+
+	// Generate a neutral LUT
+	D3D11_TEXTURE3D_DESC desc = {};
+	desc.Width = LUT_SIZE;
+	desc.Height = LUT_SIZE;
+	desc.Depth = LUT_SIZE;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	uint8* data = new uint8[LUT_SIZE * LUT_SIZE * LUT_SIZE * 4];
+
+	for (uint32 z = 0; z < LUT_SIZE; z++)
+	{
+		for (uint32 y = 0; y < LUT_SIZE; y++)
+		{
+			for (uint32 x = 0; x < LUT_SIZE; x++)
+			{
+				uint32 index = (z * LUT_SIZE * LUT_SIZE + y * LUT_SIZE + x) * 4;
+				data[index + 0] = static_cast<uint8>((x * (LUT_SIZE - 1)) * 255);
+				data[index + 1] = static_cast<uint8>((y / (LUT_SIZE - 1)) * 255);
+				data[index + 2] = static_cast<uint8>((z / (LUT_SIZE - 1)) * 255);
+				data[index + 3] = 255;
+			}
+		}
+	}
+
+	D3D11_SUBRESOURCE_DATA initData = {};
+	initData.pSysMem = data;
+	initData.SysMemPitch = LUT_SIZE * 4;
+	initData.SysMemSlicePitch = LUT_SIZE * LUT_SIZE * 4;
+
+	delete[] data;
+
+	DirectX11::ThrowIfFailed(
+		DX::States::Device->CreateTexture3D(
+			&desc, 
+			&initData, 
+			_neutralLUT.ReleaseAndGetAddressOf()
+		)
+	);
 }
 
 void MPSO::Blend(BOOL blurShadows)
@@ -789,18 +1182,46 @@ void MPSO::Blend(BOOL blurShadows)
 		}
 	}
 
+	//{
+	//	// Blend in sobel
+	//	DX::States::Context->CSSetShader(_laplacianCS.Get(), nullptr, NULL); // 소벨 Compute Shader 설정
+
+	//	ID3D11ShaderResourceView* views[] = { _target->GetSRV() };
+	//	DX::States::Context->CSSetShaderResources(0, 1, views);
+
+	//	ID3D11UnorderedAccessView* uavs[] = { _laplacianOutputUAV.Get() };
+	//	DX::States::Context->CSSetUnorderedAccessViews(0, 1, uavs, offsets);
+
+	//	// Constant Buffer: 소벨 필터링에 필요한 파라미터
+	//	lapacianFilterProperties params = {};
+	//	params.width = static_cast<uint32>(_device->GetDeviceResources()->GetLogicalSize().width);
+	//	params.height = static_cast<uint32>(_device->GetDeviceResources()->GetLogicalSize().height);
+	//	DX::States::Context->UpdateSubresource(_laplacianBuffer.Get(), 0, NULL, &params, NULL, NULL);
+	//	// Constant Buffer 설정
+	//	DX::States::Context->CSSetConstantBuffers(0, 1, _laplacianBuffer.GetAddressOf());
+
+	//	uint32 threadsX = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().width / 16.0f);
+	//	uint32 threadsY = (uint32)std::ceilf(_device->GetDeviceResources()->GetLogicalSize().height / 16.0f);
+
+	//	// 16x16 스레드 그룹으로 Dispatch
+	//	DX::States::Context->Dispatch(threadsX, threadsY, 1);
+
+	//	// 자원 해제
+	//	ID3D11ShaderResourceView* blanksrvs[] = { nullptr };
+	//	DX::States::Context->CSSetShaderResources(0, 1, blanksrvs);
+
+	//}
 
 	// Blend in shadows
 	DX::States::Context->CSSetShader(_blendcs.Get(), nullptr, NULL);
 
 	ID3D11UnorderedAccessView* uavs[]{ _blendOutputUAV.Get() };
-	//ID3D11UnorderedAccessView* blankuavs[]{ nullptr };
 
 	DX::States::Context->CSSetUnorderedAccessViews(0, 1, uavs, offsets);
 
 	if (blurShadows)
 	{
-		ID3D11ShaderResourceView* srvs[] = { _target->GetSRV(), _filterOutputBSRV.Get() };
+		ID3D11ShaderResourceView* srvs[] = { _target->GetSRV(), _filterOutputBSRV.Get()};
 		DX::States::Context->CSSetShaderResources(0, 2, srvs);
 	}
 	else
@@ -851,9 +1272,13 @@ void MPSO::FXAA(FxaaBuffer* fxaabuffer)
 	DX::States::Context->CSSetShaderResources(0, 1, blankviews);
 }
 
+void MPSO::ColorGrading()
+{
+}
+
 void MPSO::CreateCubeMap(const Texture2D& texture)
 {
-	_skybox = std::make_unique<Cube>( 30);
+	_skybox = std::make_unique<Cube>(30);
 	_skybox->material->textures.diffuse = texture;
 }
 

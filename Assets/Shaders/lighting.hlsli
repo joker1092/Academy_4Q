@@ -1,3 +1,13 @@
+#define MAXLIGHT 25
+
+struct PointLight
+{
+    float3 Position;
+    float Range; // 최대 거리
+    float3 Color;
+    float Intensity; // 밝기
+};
+
 float3 ComputeColorSun(float3 diffuse, float3 specular, float reflectivity, float3 N, float3 V, float3 P, float3 L, float3 suncolor)
 {
 	float3 reflectiondir = reflect(-L,N);

@@ -1,8 +1,16 @@
 #include "HLSLCompiler.h"
 
+std::unordered_map<std::string, ComPtr<ID3DBlob>> HLSLCompiler::m_shaderCache;
+
 ComPtr<ID3DBlob> HLSLCompiler::LoadFormFile(const std::string_view& filepath)
 {
     file::path filePath{ filepath };
+
+	if (m_shaderCache.find(filePath.string()) != m_shaderCache.end())
+	{
+		return m_shaderCache[filePath.string()];
+	}
+
     ComPtr<ID3DBlob> shaderBlob;
     ComPtr<ID3DBlob> errorBlob;
 

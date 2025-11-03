@@ -3,6 +3,9 @@
 #include <combaseapi.h>
 #include <iostream>
 #include <DirectXMath.h>
+#include <typeindex>
+#include <nlohmann/json.hpp>
+#pragma warning(disable: 26819)
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
@@ -34,6 +37,7 @@ using flag = uint32;
 using mask = uint32;
 using constant = uint32;
 using bool32 = uint32;
+using json = nlohmann::json;
 
 enum class MouseKey : int
 {
@@ -43,9 +47,38 @@ enum class MouseKey : int
 	MAX = 3
 };
 
+enum class ControllerButton : int
+{
+    A = 0,
+	B,
+	X,
+	Y,
+	DPAD_UP,
+	DPAD_DOWN,
+	DPAD_LEFT,
+	DPAD_RIGHT,
+	START_BUTTON,
+	BACK_BUTTON,
+	LEFT_SHOULDER,
+	RIGHT_SHOULDER,
+	MAX = 12
+};
+
 struct BitFlag
 {
 public:
+	BitFlag() = default;
+	BitFlag(flag flag) noexcept
+		: m_flag(flag)
+	{
+	}
+
+	BitFlag& operator= (flag flag) noexcept
+	{
+		m_flag = flag;
+		return *this;
+	}
+
     operator flag() const
     {
         return m_flag;

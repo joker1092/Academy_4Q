@@ -1,6 +1,29 @@
 #include "DataSystem.h"
-#include "ImGuiRegister.h"
+#include "../MeshEditor.h"
+#include "MaterialLoader.h"
 #include "Model.h"	
+#include <ppltasks.h>
+#include <ppl.h>
+#include "Banchmark.hpp"
+#include <future>
+
+ImGuiTextFilter DataSystem::filter;
+
+bool HasImageFile(const file::path& directory)
+{
+	for (const auto& entry : file::directory_iterator(directory))
+	{
+		if (entry.is_regular_file()) // ÆÄÀÏÀÎÁö È®ÀÎ
+		{
+			std::string ext = entry.path().extension().string();
+			if (ext == ".png" || ext == ".jpg")
+			{
+				return true; // ÇÏ³ª¶óµµ ÀÖÀ¸¸é ¹Ù·Î true ¹ÝÈ¯
+			}
+		}
+	}
+	return false; // ÀÌ¹ÌÁö ÆÄÀÏ ¾øÀ½
+}
 
 DataSystem::~DataSystem()
 {
@@ -12,35 +35,49 @@ void DataSystem::Initialize()
 	m_DataThread = std::thread(&DataSystem::MonitorFiles, this);
 	m_DataThread.detach();
 	RenderForEditer();
-	AddModel(PathFinder::Relative("Models\\plane\\plane.fbx"), PathFinder::Relative("Models\\plane"));
+	AddModel(PathFinder::Relative("Models\\plane\\plane.fbx"), 
+		PathFinder::Relative("Models\\plane"));
 }
 
 void DataSystem::RenderForEditer()
 {
 	static std::string selectedModel{};
 
-
-	ImGui::ContextRegister("Models", [&]()
+	ImGui::ContextRegister("Contents Browser", [&]()
 	{
-		constexpr float tileSize = 64.0f;
+		ImGuiID dockspace_id = ImGui::GetID("Contents Browser Space");
+
+		filter.Draw("Search", 180.0f);
+		// DockSpace ¿µ¿ª »ý¼º (0.0f, 0.0f´Â ÇöÀç Ã¢ÀÇ °¡¿ë ¿µ¿ª ÀüÃ¼ »ç¿ë)
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+
+	}, ImGuiWindowFlags_None);
+
+	ImGui::ContextRegister("3D Models", [&]()
+	{
+		constexpr float tileSize = 128.0f;
 		constexpr float padding = 10.0f;
 		constexpr int tilesPerRow = 4;
 		int count = 0;
 
+
 		for (const auto& [key, model] : Models)
 		{
+			if (!filter.PassFilter(key.c_str()))
+				continue;
+
 			ImGui::BeginGroup();
 
 			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
 			{
-				std::cout << "Selected Model: " << key << std::endl;
 				selectedModel = key;
+				MeshEditorSystem->selectedModel = key;
 			}
 
-			// È£ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 			if (ImGui::IsItemHovered()) 
 			{
 				selectedModel = key;
+				MeshEditorSystem->selectedModel = key;
 			}
 
 			if (selectedModel == key)
@@ -64,39 +101,109 @@ void DataSystem::RenderForEditer()
 				if (Models[selectedModel] != dragDropModel)
 				{
 					dragDropModel = Models[selectedModel];
-					std::cout << "Dragged Model : " << selectedModel << std::endl;
+					ImGui::SetDragDropPayload("Model", &dragDropModel, sizeof(dragDropModel));
 				}
 
 				if (AnimatedModels[selectedModel] != dragDropAnimModel)
 				{
 					dragDropAnimModel = AnimatedModels[selectedModel];
-					std::cout << "Dragged Model : " << selectedModel << std::endl;
+					//ImGui::SetDragDropPayload("AnimModel", &dragDropAnimModel, sizeof(dragDropAnimModel));
+				}
+				ImGui::EndDragDropSource();
+			}
+
+		}
+
+	});
+
+	ImGui::ContextRegister("Billboards", [&]() 
+	{
+		constexpr float tileSize = 64.0f;
+		constexpr float padding = 10.0f;
+		constexpr int tilesPerRow = 4;
+		int count = 0;
+
+		for (const auto& [key, billboard] : Billboards)
+		{
+			if (!filter.PassFilter(key.c_str()))
+				continue;
+
+			ImGui::BeginGroup();
+			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
+			{
+				selectedModel = key;
+			}
+			if (ImGui::IsItemHovered())
+			{
+				selectedModel = key;
+			}
+			if (selectedModel == key)
+			{
+				ImGui::TextWrapped("[Selected]");
+			}
+			ImGui::TextWrapped("%s", key.c_str());
+			ImGui::EndGroup();
+			count++;
+			if (count % tilesPerRow != 0)
+			{
+				ImGui::SameLine(0.0f, padding);
+			}
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
+				if (Billboards[selectedModel] != dragDropBillboard)
+				{
+					dragDropBillboard = Billboards[selectedModel];
+					ImGui::SetDragDropPayload("Billboard", &dragDropBillboard, sizeof(dragDropBillboard));
 				}
 				ImGui::EndDragDropSource();
 			}
 		}
+	});
 
-
-	}, ImGuiWindowFlags_NoMove);
-
-	ImGui::ContextRegister("Models Material properties", [&]()
+	ImGui::ContextRegister("Materials", [&]()
 	{
-		for (const auto& [key, model] : Models)
+		constexpr float tileSize = 128.0f;
+		constexpr float padding = 10.0f;
+		constexpr int tilesPerRow = 4;
+		int count = 0;
+
+		for (const auto& [key, material] : Materials)
 		{
-			if(!model)
+			if (!filter.PassFilter(key.c_str()))
 				continue;
 
+			ImGui::BeginGroup();
+			if (ImGui::ImageButton(key.c_str(), (ImTextureID)icon.Get(), ImVec2(tileSize, tileSize)))
+			{
+				selectedModel = key;
+			}
+			if (ImGui::IsItemHovered())
+			{
+				selectedModel = key;
+			}
 			if (selectedModel == key)
 			{
-				float* diffuse[3]
-				{ 
-					&model->meshes[0].material->properties.diffuse.x, 
-					&model->meshes[0].material->properties.diffuse.y, 
-					&model->meshes[0].material->properties.diffuse.z 
-				};
-				ImGui::ColorEdit3("Diffuse", diffuse[0]);
-				ImGui::SliderFloat("Roughness", &model->meshes[0].material->properties.roughness, 0.3f, 1.0f);
-				ImGui::SliderFloat("Metalness", &model->meshes[0].material->properties.metalness, 0.3f, 1.0f);
+				ImGui::TextWrapped("[Selected]");
+			}
+			ImGui::TextWrapped("%s", key.c_str());
+			ImGui::EndGroup();
+
+			count++;
+			if (count % tilesPerRow != 0)
+			{
+				ImGui::SameLine(0.0f, padding);
+			}
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				ImGui::Text("Drag to Scene : %s", selectedModel.c_str());
+				if (Materials[selectedModel] != dragDropMaterial)
+				{
+					dragDropMaterial = Materials[selectedModel];
+					ImGui::SetDragDropPayload("Material", &dragDropMaterial, sizeof(dragDropMaterial));
+				}
+				ImGui::EndDragDropSource();
 			}
 		}
 	});
@@ -104,64 +211,206 @@ void DataSystem::RenderForEditer()
 
 void DataSystem::MonitorFiles()
 {
+	std::array<std::future<void>, 4> futures;
+
 	while (true)
 	{
 		uint32 modelcount = 0;
 		uint32 shadercount = 0;
+		uint32 texturecount = 0;
+		uint32 materialcount = 0;
+		uint32 billboardcount = 0;
+		auto shaderfunc = [&]() 
+		{
+			try
+			{
+				file::path shaderpath = PathFinder::Relative("Shaders\\");
+				for (auto& dir : file::recursive_directory_iterator(shaderpath))
+				{
+					if (dir.is_directory())
+						continue;
+
+					if (dir.path().extension() == ".hlsl")
+					{
+						shadercount++;
+					}
+				}
+			}
+			catch (const file::filesystem_error& e)
+			{
+				Log::Warning("Could not load shaders" + std::string(e.what()));
+			}
+			catch (const std::exception& e)
+			{
+				Log::Warning("Error" + std::string(e.what()));
+			}
+		};
+
+		auto modelfunc = [&]()
+		{
+			try
+			{
+				file::path modelpath = PathFinder::Relative("Models\\");
+				for (auto& dir : file::recursive_directory_iterator(modelpath))
+				{
+					if (dir.is_directory())
+						continue;
+					if (dir.path().extension() == ".glb" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
+					{
+						modelcount++;
+					}
+				}
+			}
+			catch (const file::filesystem_error& e)
+			{
+				Log::Warning("Could not load models" + std::string(e.what()));
+			}
+			catch (const std::exception& e)
+			{
+				Log::Warning("Error" + std::string(e.what()));
+			}
+		};
+
+		auto texturefunc = [&]()
+		{
+			try
+			{
+				file::path texturepath = PathFinder::Relative("Textures\\");
+				for (auto& dir : file::recursive_directory_iterator(texturepath))
+				{
+					if (dir.is_directory())
+						continue;
+					if (dir.path().extension() == ".png" || dir.path().extension() == ".jpg")
+					{
+						texturecount++;
+					}
+				}
+
+				file::path materialpath = PathFinder::Relative("Material\\");
+				for (auto& dir : file::recursive_directory_iterator(materialpath))
+				{
+					if (dir.is_directory())
+						continue;
+					if (dir.path().extension() == ".png" || dir.path().extension() == ".jpg")
+					{
+						materialcount++;
+					}
+				}
+			}
+			catch (const file::filesystem_error& e)
+			{
+				Log::Warning("Could not load textures" + std::string(e.what()));
+			}
+			catch (const std::exception& e)
+			{
+				Log::Warning("Error" + std::string(e.what()));
+			}
+		};
+
+		auto billboardfunc = [&]()
+		{
+			try
+			{
+				file::path billboardpath = PathFinder::Relative("Billboards\\");
+				for (auto& dir : file::recursive_directory_iterator(billboardpath))
+				{
+					if (dir.is_directory())
+						continue;
+					if (dir.path().extension() == ".png" || dir.path().extension() == ".jpg")
+					{
+						billboardcount++;
+					}
+				}
+			}
+			catch (const file::filesystem_error& e)
+			{
+				Log::Warning("Could not load billboards" + std::string(e.what()));
+			}
+			catch (const std::exception& e)
+			{
+				Log::Warning("Error" + std::string(e.what()));
+			}
+		};
+
+		//Concurrency::parallel_invoke(shaderfunc, modelfunc, texturefunc, billboardfunc);
+		futures[0] = std::async(std::launch::deferred, shaderfunc);
+		futures[1] = std::async(std::launch::deferred, modelfunc);
+		futures[2] = std::async(std::launch::deferred, texturefunc);
+		futures[3] = std::async(std::launch::deferred, billboardfunc);
+		//futures[4] = std::async(std::launch::deferred, materialfunc);
+
+		for (auto& future : futures)
+		{
+			if (!future.valid())
+				continue;
+
+			future.get();
+		}
+
+
+		auto loadTexture = [&]()
+		{
+			if (texturecount != currTextureFileCount)
+			{
+				LoadTextures();
+				currTextureFileCount = texturecount;
+			}
+		};
+
+		auto billboard = [&]()
+		{
+			if (billboardcount != currBillboardFileCount)
+			{
+				LoadBillboards();
+				currBillboardFileCount = billboardcount;
+			}
+		};
+
+		auto loadMaterial = [&]()
+		{
+			if (materialcount != currMaterialFileCount)
+			{
+				LoadMaterials();
+				currMaterialFileCount = materialcount;
+			}
+		};
+
+		auto loadShader = [&]()
+		{
+			if (shadercount != currShaderFileCount)
+			{
+				std::cout << "Shader count changed" << std::endl;
+				LoadShaders();
+				currShaderFileCount = shadercount;
+			}
+		};
+
+		futures[0] = std::async(std::launch::deferred, loadTexture);
+		futures[1] = std::async(std::launch::deferred, billboard);
+		futures[2] = std::async(std::launch::deferred, loadMaterial);
+		futures[3] = std::async(std::launch::deferred, loadShader);
+
 		try
 		{
-			file::path shaderpath = PathFinder::Relative("Shaders\\");
-			for (auto& dir : file::recursive_directory_iterator(shaderpath))
+
+			for (auto& future : futures)
 			{
-				if (dir.is_directory())
+				if (!future.valid())
 					continue;
 
-				if (dir.path().extension() == ".hlsl")
-				{
-					shadercount++;
-				}
+				future.get();
 			}
-		}
-		catch (const file::filesystem_error& e)
-		{
-			WARN("Could not load shaders" + e.what());
 		}
 		catch (const std::exception& e)
 		{
-			WARN("Error" + e.what());
+			Log::Warning("Error" + std::string(e.what()));
 		}
-		try
-		{
-			file::path modelpath = PathFinder::Relative("Models\\");
-			for (auto& dir : file::recursive_directory_iterator(modelpath))
-			{
-				if (dir.is_directory())
-					continue;
-				if (dir.path().extension() == ".dae" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
-				{
-					modelcount++;
-				}
-			}
-		}
-		catch (const file::filesystem_error& e)
-		{
-			WARN("Could not load models" + e.what());
-		}
-		catch (const std::exception& e)
-		{
-			WARN("Error" + e.what());
-		}
+
+
 		if (modelcount != currModelFileCount)
 		{
-			std::cout << "Model count changed" << std::endl;
 			LoadModels();
 			currModelFileCount = modelcount;
-		}
-		if (shadercount != currShaderFileCount)
-		{
-			std::cout << "Shader count changed" << std::endl;
-			LoadShaders();
-			currShaderFileCount = shadercount;
 		}
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -170,7 +419,7 @@ void DataSystem::MonitorFiles()
 
 void DataSystem::LoadShaders()
 {
-	icon = TextureLoader::LoadFromFile(PathFinder::Relative("Icon\\Model.png"));
+	icon = TextureLoader::LoadFromFile(PathFinder::Relative("Icon\\Model.png"), sRGBSettings::FORCE_SRGB);
 
 	try
 	{
@@ -183,32 +432,107 @@ void DataSystem::LoadShaders()
 			if (dir.path().extension() == ".hlsl")
 			{
 				AddShaderFromPath(dir.path());
-				currShaderFileCount++;
 			}
 		}
 	}
 	catch (const file::filesystem_error& e)
 	{
-		WARN("Could not load shaders" + e.what());
+		Log::Warning("Could not load shaders" + std::string(e.what()));
 	}
 	catch (const std::exception& e)
 	{
-		WARN("Error" + e.what());
+		Log::Warning("Error" + std::string(e.what()));
 	}
 }
 
 void DataSystem::LoadModels()
 {
 	file::path shaderpath = PathFinder::Relative("Models\\");
+	//¸ðµ¨ÀÇ µð·ºÅä¸®º°·Î std::async¸¦ »ç¿ëÇÏ¿© º´·Ä·Î ·Îµå
+	std::vector<std::future<void>> futures;
+
 	for (auto& dir : file::recursive_directory_iterator(shaderpath))
 	{
 		if (dir.is_directory())
 			continue;
-
-		if (dir.path().extension() == ".dae" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
+		if (dir.path().extension() == ".glb" || dir.path().extension() == ".gltf" || dir.path().extension() == ".fbx")
 		{
-			AddModel(dir.path(), dir.path().parent_path());
+			futures.push_back(std::async(std::launch::async, &DataSystem::AddModel, this, dir.path(), dir.path().parent_path()));
+		}
+	}
+
+	for (auto& future : futures)
+	{
+		if (future.valid())
+		{
+			future.get();
 			currModelFileCount++;
+		}
+	}
+}
+
+void DataSystem::LoadTextures()
+{
+	file::path texturepath = PathFinder::Relative("Textures\\");
+	for (auto& dir : file::recursive_directory_iterator(texturepath))
+	{
+		if (dir.is_directory())
+			continue;
+		if (dir.path().extension() == ".png" || 
+			dir.path().extension() == ".jpg" || 
+			dir.path().extension() == ".jpeg"||
+			dir.path().extension() == ".dds" ||
+			dir.path().extension() == ".tga"
+			)
+		{
+			//textureLoader caching texture2D form file
+			TextureLoader::LoadFromFile(dir.path(), sRGBSettings::FORCE_SRGB);
+		}
+	}
+}
+
+void DataSystem::LoadMaterials()
+{
+	//TODO: Load materials from file
+	std::string key{};
+	file::path materialpath = PathFinder::Relative("Material\\");
+	for (auto& dir : file::recursive_directory_iterator(materialpath))
+	{
+		if (dir.is_directory() && HasImageFile(dir))
+		{
+			key = dir.path().filename().string();
+			Materials[key] = std::make_shared<Material>();
+			Materials[key]->name = key;
+			MaterialLoader::LoadFromPath(Materials[key], key, dir.path());
+		}
+	}
+}
+
+void DataSystem::LoadBillboards()
+{
+	std::string key{};
+	file::path billboardpath = PathFinder::Relative("Billboards\\");
+	for (auto& dir : file::recursive_directory_iterator(billboardpath))
+	{
+		if (dir.is_directory())
+		{
+			key = dir.path().filename().string();
+			continue;
+		}
+		if (dir.path().extension() == ".png" ||
+			dir.path().extension() == ".jpg" ||
+			dir.path().extension() == ".jpeg"||
+			dir.path().extension() == ".dds" ||
+			dir.path().extension() == ".tga"
+			)
+		{
+			if (!Billboards[key])
+			{
+				Billboards[key] = std::make_shared<Billboard>();
+				Billboards[key]->name = key;
+				Billboards[key]->CreateBuffers();
+			}
+			Billboards[key]->AddTexture(TextureLoader::LoadFromFile(dir.path(), sRGBSettings::FORCE_SRGB).Get());
 		}
 	}
 }
@@ -227,9 +551,9 @@ void DataSystem::AddShaderFromPath(const file::path& filepath)
 void DataSystem::AddModel(const file::path& filepath, const file::path& dir)
 {
 	std::string name = file::path(filepath.filename()).replace_extension().string();
+
 	if(Models[name])
 	{
-		WARN("Model \"" + name + "\" already exists");
 		return;
 	}
 
@@ -287,7 +611,7 @@ void DataSystem::AddShader(const std::string& name, const std::string& ext, cons
 	}
 	else
 	{
-		WARN("Unrecognized shader extension \"" + ext + "\" for shader \"" + name + "\"");
+		throw std::runtime_error("Unknown shader type");
 	}
 }
 

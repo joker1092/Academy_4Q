@@ -28,37 +28,51 @@
     <ClCompile Include="AnimationInfo.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DataSystem.cpp" />
+    <ClCompile Include="drawing.cpp" />
     <ClCompile Include="DXStates.cpp" />
+    <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="ImGuiRenderer.cpp" />
     <ClCompile Include="LogicalDevice.cpp" />
+    <ClCompile Include="MaterialLoader.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="MPSO.cpp" />
+    <ClCompile Include="PXDebugSystem.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneRenderer.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
+    <ClCompile Include="UI_DataSystem.cpp" />
+    <ClCompile Include="widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationInfo.h" />
+    <ClInclude Include="Billboards.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DataSystem.h" />
+    <ClInclude Include="drawing.h" />
     <ClInclude Include="DXStates.h" />
+    <ClInclude Include="FontManager.h" />
     <ClInclude Include="ImGuiContext.h" />
     <ClInclude Include="ImGuiRegister.h" />
     <ClInclude Include="ImGUiRegisterClass.h" />
     <ClInclude Include="ImGuiRenderer.h" />
+    <ClInclude Include="InstancedBillboard.h" />
     <ClInclude Include="InstancedModel.h" />
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialLoader.h" />
     <ClInclude Include="MaterialTextures.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="MPSO.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="PSO.h" />
+    <ClInclude Include="PXDebugSystem.h" />
     <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Sampler.h" />
@@ -66,6 +80,8 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="UI_DataSystem.h" />
+    <ClInclude Include="widgets.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

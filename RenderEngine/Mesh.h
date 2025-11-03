@@ -48,6 +48,7 @@ public:
 	Buffer<Vertex>				bvertex;
 
 	std::shared_ptr<Material>	material;
+	std::string					materialKey;
 	std::string					name;
 };
 
@@ -61,22 +62,35 @@ public:
 	Buffer<AnimVertex>			bvertex;
 
 	std::shared_ptr<Material>	material;
-	std::shared_ptr<Animator>	animator;
+	std::string					materialKey;
 	std::string				    name;
 
 	AnimMesh() = default;
-	AnimMesh(const std::string _name, const std::vector<Index>& _indices, const std::vector<AnimVertex>& _vertices)
+	AnimMesh(
+		const std::string _name, 
+		const std::vector<Index>& _indices, 
+		const std::vector<AnimVertex>& _vertices
+	)
 		: name(_name), indices(_indices), vertices(_vertices)
 	{
 	};
-	AnimMesh(const std::string _name, const std::vector<Index>& _indices, const std::vector<AnimVertex>& _vertices, const std::shared_ptr<Material>& _material, const std::shared_ptr<Animator>& animator)
+	AnimMesh(
+		const std::string _name, 
+		const std::vector<Index>& _indices, 
+		const std::vector<AnimVertex>& _vertices, 
+		const std::shared_ptr<Material>& _material
+	)
 		: name(_name), indices(_indices), vertices(_vertices), material(_material)
 	{
 	};
 
 	// Move constructor
-	AnimMesh(AnimMesh&& mesh) noexcept
-		: name(mesh.name), indices(std::move(mesh.indices)), vertices(std::move(mesh.vertices)), material(mesh.material) {
+	AnimMesh(AnimMesh&& mesh) noexcept : 
+		name(mesh.name), 
+		indices(std::move(mesh.indices)), 
+		vertices(std::move(mesh.vertices)), 
+		material(mesh.material) 
+	{
 	};
 	AnimMesh& operator=(AnimMesh&& mesh) = default;
 	AnimMesh& operator=(const AnimMesh&) = delete;

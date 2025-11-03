@@ -20,20 +20,18 @@ namespace Memory
 		memcpy(pDst, pSrc, size);
 	}
   //메모리 해제 : IUnknown을 상속받은 클래스의 경우 Release() 호출 -> 그 외 delete 호출
-    void SafeDelete(Pointer auto& ptr)
+    inline void SafeDelete(Pointer auto& ptr)
     {
-        if constexpr (std::is_pointer_v<decltype(ptr)>)
-        {
-            if constexpr (std::derived_from<decltype(ptr), IUnknown>)
-            {
-                ptr->Release();
-            }
-            else
-            {
-                delete ptr;
-                ptr = nullptr;
-            }
-        }
+		using PtrType = std::remove_pointer_t<std::remove_reference_t<decltype(ptr)>>;  // 참조 제거한 타입
+		if constexpr (std::derived_from<PtrType, IUnknown>)
+		{
+			ptr->Release();
+		}
+		else
+		{
+			delete ptr;
+			ptr = nullptr;
+		}
     }
 }
 //지연 삭제자 : 연속 컨테이너에 저장된 요소(포인터)들을 스코프가 벗어나면 삭제하는 클래스 -> function 객체를 사용하여 삭제 조건을 지정할 수 있음

@@ -6,7 +6,7 @@
 #include <assimp/scene.h> 
 #include <assimp/material.h>
 
-constexpr uint32 MAX_JOINTS = 128;
+constexpr uint32 MAX_JOINTS = 512;
 constexpr int MAX_BONE_WEIGHTS = 4;
 
 struct JointBuffer

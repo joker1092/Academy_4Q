@@ -1,23 +1,23 @@
 #include "TextureLoader.h"
 #include "LogicalDevice.h"
 
-Texture2D TextureLoader::LoadFromFile(const file::path& filepath)
+Texture2D TextureLoader::LoadFromFile(const file::path& filepath, sRGBSettings settings)
 {
 	if (filepath.extension() == ".dds")
 	{
-		return LoadDDSFromFile(filepath);
+		return LoadDDSFromFile(filepath, settings);
 	}
 	else if (filepath.extension() == ".png" || filepath.extension() == ".jpg" || filepath.extension() == ".jpeg")
 	{
-		return LoadPNGFromFile(filepath);
+		return LoadPNGFromFile(filepath, settings);
 	}
 	else if (filepath.extension() == ".tga")
 	{
-		return LoadTGAFromFile(filepath);
+		return LoadTGAFromFile(filepath, settings);
 	}
 	else 
 	{
-		WARN(std::string("Unrecognized extension \"") + filepath.extension().string() + "\" for Texture2D");
+		Log::Warning(std::string("Unrecognized extension \"") + filepath.extension().string() + "\" for Texture2D");
 		return Texture2D();
 	}
 }
@@ -30,17 +30,17 @@ Texture2D TextureLoader::LoadCubemapFromFile(const file::path& filepath)
 	}
 	else
 	{
-		WARN(std::string("Unrecognized Cubemap extension \"") + filepath.extension().string() + "\" for Texture2D");
+		Log::Warning(std::string("Unrecognized Cubemap extension \"") + filepath.extension().string() + "\" for Texture2D");
 		return Texture2D();
 	}
 }
 
 // Expects that mips are already in dds, so thread safe
-Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
+Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath, sRGBSettings settings)
 {
 	if (!file::exists(filepath))
 	{
-		WARN("File does not exist \"" + filepath.string() + "\"");
+		Log::Warning("File does not exist \"" + filepath.string() + "\"");
 		return Texture2D();
 	}
 
@@ -54,6 +54,11 @@ Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
 
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
+	DDS_LOADER_FLAGS flags = DDS_LOADER_FORCE_SRGB;
+	if(settings == sRGBSettings::NO_SRGB)
+	{
+		flags = DDS_LOADER_IGNORE_SRGB;
+	}
 
 	DirectX11::ThrowIfFailed(DirectX::CreateDDSTextureFromFileEx(
 		DX::States::Device,
@@ -63,7 +68,7 @@ Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
 		D3D11_BIND_SHADER_RESOURCE,
 		0,
 		0,
-        DDS_LOADER_FORCE_SRGB,
+		flags,
 		res.ReleaseAndGetAddressOf(),
 		srv.ReleaseAndGetAddressOf(),
 		nullptr
@@ -75,11 +80,11 @@ Texture2D TextureLoader::LoadDDSFromFile(const file::path& filepath)
 	return texture;
 }
 
-Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
+Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath, sRGBSettings settings)
 {
 	if (!file::exists(filepath))
 	{
-		WARN("File does not exist \"" + filepath.string() + "\"");
+		Log::Warning("File does not exist \"" + filepath.string() + "\"");
 		return Texture2D();
 	}
 
@@ -93,6 +98,11 @@ Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
 
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
+	WIC_LOADER_FLAGS flags = WIC_LOADER_FORCE_SRGB;
+	if (settings == sRGBSettings::NO_SRGB)
+	{
+		flags = WIC_LOADER_IGNORE_SRGB;
+	}
 
 	DirectX11::ThrowIfFailed(DirectX::CreateWICTextureFromFileEx(
 		DX::States::Device,
@@ -103,7 +113,7 @@ Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
 		D3D11_BIND_SHADER_RESOURCE,
 		0,
 		0,
-        WIC_LOADER_FORCE_SRGB,	// WIC_LOADER_FORCE_SRGB No actual conversion takes, just renames to correct format
+		flags,	// WIC_LOADER_FORCE_SRGB No actual conversion takes, just renames to correct format
 		res.ReleaseAndGetAddressOf(),
 		srv.ReleaseAndGetAddressOf()
 	));
@@ -114,11 +124,11 @@ Texture2D TextureLoader::LoadPNGFromFile(const file::path& filepath)
 	return texture;
 }
 
-Texture2D TextureLoader::LoadTGAFromFile(const file::path& filepath)
+Texture2D TextureLoader::LoadTGAFromFile(const file::path& filepath, sRGBSettings settings)
 {
 	if (!file::exists(filepath))
 	{
-		WARN("File does not exist \"" + filepath.string() + "\"");
+		Log::Warning("File does not exist \"" + filepath.string() + "\"");
 		return Texture2D();
 	}
 	file::path file = filepath.filename();
@@ -129,6 +139,12 @@ Texture2D TextureLoader::LoadTGAFromFile(const file::path& filepath)
 	}
 	ComPtr<ID3D11Resource> res;
 	ComPtr<ID3D11ShaderResourceView> srv;
+	CREATETEX_FLAGS flags = CREATETEX_FORCE_SRGB;
+	if (settings == sRGBSettings::NO_SRGB)
+	{
+		flags = CREATETEX_IGNORE_SRGB;
+	}
+
 	DirectX11::ThrowIfFailed(DirectX::CreateTGATextureFormFileEx(
 		DX::States::Device,
 		filepath.wstring().c_str(),
@@ -137,7 +153,7 @@ Texture2D TextureLoader::LoadTGAFromFile(const file::path& filepath)
 		D3D11_BIND_SHADER_RESOURCE,
 		0,
 		0,
-		CREATETEX_FORCE_SRGB,
+		flags,
 		res.ReleaseAndGetAddressOf(),
 		srv.ReleaseAndGetAddressOf()
 	));
@@ -150,7 +166,7 @@ Texture2D TextureLoader::LoadCubemapDDSFromFile(const file::path& filepath)
 {
 	if (!file::exists(filepath))
 	{
-		WARN("File does not exist \"" + filepath.string() + "\"");
+		Log::Warning("File does not exist \"" + filepath.string() + "\"");
 		return Texture2D();
 	}
 
@@ -173,7 +189,7 @@ Texture2D TextureLoader::LoadCubemapDDSFromFile(const file::path& filepath)
 		D3D11_BIND_SHADER_RESOURCE,
 		0,
 		D3D11_RESOURCE_MISC_TEXTURECUBE,
-        DDS_LOADER_DEFAULT,
+		DDS_LOADER_IGNORE_SRGB,
 		res.ReleaseAndGetAddressOf(),
 		srv.ReleaseAndGetAddressOf(),
 		nullptr
@@ -202,7 +218,7 @@ Texture2D TextureLoader::CreateTexture(const std::string& name, const ComPtr<ID3
 	}
 	default:
 	{
-		WARN("Unknown texuture dimension, expected 2D \"" + name + "\"");
+		Log::Warning("Unknown texuture dimension, expected 2D \"" + name + "\"");
 	}
 	}
 

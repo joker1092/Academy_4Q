@@ -74,7 +74,7 @@ ImGuiRenderer::ImGuiRenderer(const std::shared_ptr<DirectX11::DeviceResources>& 
     // Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(m_deviceResources->GetWindow()->GetHandle());
 	ImGui_ImplWin32_EnableDpiAwareness();
-	ImGui::GetMainViewport()->Pos = ImVec2(0.0f, 0.0f);
+	//ImGui::GetMainViewport()->Pos = ImVec2(0.0f, 0.0f);
     ID3D11Device* device = m_deviceResources->GetD3DDevice();
     ID3D11DeviceContext* deviceContext = m_deviceResources->GetD3DDeviceContext();
     ImGui_ImplDX11_Init(device, deviceContext);
@@ -85,26 +85,33 @@ ImGuiRenderer::~ImGuiRenderer()
     Shutdown();
 }
 
+void ImGuiRenderer::BeginRender()
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.WantCaptureKeyboard = io.WantCaptureMouse = io.WantTextInput = true;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+
+	ImGui::NewFrame();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+}
+
 void ImGuiRenderer::Render()
 {
-    ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-
-    ImGui::NewFrame();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
     auto& container = ImGuiRegister::GetInstance()->m_contexts;
 
     for (auto& [name, context] : container)
     {
         context.Render();
     }
+}
 
-    ImGui::Render();
-    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+void ImGuiRenderer::EndRender()
+{
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ImGuiRenderer::Shutdown()
