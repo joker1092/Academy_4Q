@@ -78,7 +78,7 @@
 ---
 
 ### 주요 변경 이력
-2024.12.09 유틸리티 라이브러리 추가(외부 라이브러리 fmt추가 및 여러 Helper 기능 추가) 및 이에 따른 doc 작성
+2024.12.09 유틸리티 라이브러리 추가(외부 라이브러리 fmt추가 및 여러 Helper 기능 추가) 및 이에 따른 doc 작성<br>
 이후 SVN 로그는 CHANGELOG.md 참조  
 [ [CHANGELOG.md](CHANGELOG.md) ] 
 
