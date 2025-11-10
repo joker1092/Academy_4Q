@@ -84,6 +84,3 @@
 
 ### doc 목차(아래 링크 클릭시 상세 설명 문서로 이동)
 [ [Utility_Framework](Utility_Framework/Doc/Docs_Index.md) ] 유틸리티 프레임 워크에 대한 Docs입니다.
-
-
-[![IU(아이유) _ Into the I-LAND](http://img.youtube.com/vi/QYNwbZHmh8g/0.jpg)](https://youtu.be/QYNwbZHmh8g?t=0s)
